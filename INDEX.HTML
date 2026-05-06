@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Group Intake Form</title>
+<style>
+    :root {
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #d7dde6;
+      --paper: #ffffff;
+      --cream: #f8fafc;
+      --navy: #16233f;
+      --gold: #d6a23f;
+      --gold-soft: #fff5dd;
+      --danger: #b91c1c;
+      --success: #0f766e;
+      --radius: 18px;
+      --shadow: 0 18px 45px rgba(22, 35, 63, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(214, 162, 63, 0.18), transparent 34rem),
+        linear-gradient(135deg, #eef2f8 0%, #f8fafc 48%, #f3f4f6 100%);
+      min-height: 100vh;
+      padding: 28px 14px;
+    }
+
+    .shell {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: var(--navy);
+      color: white;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 999px;
+      border: 36px solid rgba(214, 162, 63, 0.22);
+      right: -90px;
+      top: -110px;
+    }
+
+
+    .hero > * { position: relative; z-index: 1; }
+
+
+    .brand-logo-wrap {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      max-width: 560px;
+      width: 100%;
+      margin-bottom: 18px;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      border: none;
+    }
+
+    .brand-logo {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 120px;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.11);
+      color: #fdecc0;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      max-width: 690px;
+      color: #dbe4f3;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .form-card {
+      margin-top: -22px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(215, 221, 230, 0.85);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    .progress-wrap {
+      padding: 24px 24px 0;
+      background: linear-gradient(180deg, #fff, #fbfcff);
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      height: 10px;
+      width: 100%;
+      background: #e7ebf1;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 20%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--gold), #f0c46d);
+      transition: width 220ms ease;
+    }
+
+    form { padding: 24px; }
+
+    .step { display: none; }
+    .step.active { display: block; animation: rise 180ms ease; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .step-header h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.025em;
+      color: var(--navy);
+    }
+
+    .step-header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .pill {
+      white-space: nowrap;
+      background: var(--gold-soft);
+      color: #8a5a00;
+      border: 1px solid #f4d391;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .field {
+      grid-column: span 6;
+      background: var(--paper);
+      border: 1px solid #e1e6ee;
+      border-radius: var(--radius);
+      padding: 14px;
+      transition: border 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .field:focus-within {
+      border-color: rgba(214, 162, 63, 0.8);
+      box-shadow: 0 0 0 4px rgba(214, 162, 63, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .field.full { grid-column: 1 / -1; }
+    .field.third { grid-column: span 4; }
+    .field.quarter { grid-column: span 3; }
+
+    label, legend {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      color: #374151;
+      margin-bottom: 9px;
+    }
+
+    .required::after { content: " *"; color: var(--danger); }
+
+    .conditional-hidden, .js-hidden { display: none !important; }
+    .field.optional-note::before { content: "Optional"; float: right; font-size: 11px; font-weight: 800; color: #53627a; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 999px; padding: 4px 8px; margin-left: 8px; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #cfd7e3;
+      border-radius: 13px;
+      padding: 12px 13px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    textarea { min-height: 108px; resize: vertical; }
+
+    input[type="file"] {
+      background: #f9fafb;
+      border-style: dashed;
+      padding: 18px;
+    }
+
+    .name-row, .inline-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .inline-row.three { grid-template-columns: repeat(3, 1fr); }
+
+    .choice-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .choice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #d7dde6;
+      border-radius: 999px;
+      padding: 10px 12px;
+      background: #fbfcff;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .choice input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--navy);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .error-text {
+      display: none;
+      color: var(--danger);
+      font-size: 12px;
+      margin-top: 8px;
+      font-weight: 700;
+    }
+
+    .field.error {
+      border-color: rgba(185, 28, 28, 0.55);
+      box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.08);
+    }
+
+    .field.error .error-text { display: block; }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
+      margin-top: 24px;
+    }
+
+    .left-actions, .right-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+      background: var(--navy);
+      color: white;
+      box-shadow: 0 10px 24px rgba(22, 35, 63, 0.22);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: #1d1302;
+      box-shadow: 0 10px 24px rgba(214, 162, 63, 0.24);
+    }
+
+    .btn-secondary {
+      background: #eef2f7;
+      color: var(--navy);
+    }
+
+    .success-box {
+      display: none;
+      margin: 20px 24px 24px;
+      padding: 18px;
+      border: 1px solid rgba(15, 118, 110, 0.25);
+      background: #ecfdf5;
+      color: #064e3b;
+      border-radius: 18px;
+      line-height: 1.55;
+    }
+
+    .success-box strong { display: block; margin-bottom: 5px; }
+
+    .honeypot {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 14px 8px; }
+      .hero { padding: 22px; border-radius: 22px; }
+      .brand-logo-wrap { max-width: 100%; padding: 0; margin-bottom: 14px; }
+      .form-card { border-radius: 22px; }
+      form { padding: 18px; }
+      .progress-wrap { padding: 18px 18px 0; }
+      .field, .field.third, .field.quarter { grid-column: 1 / -1; }
+      .step-header { flex-direction: column; }
+      .name-row, .inline-row, .inline-row.three { grid-template-columns: 1fr; }
+      .actions { flex-direction: column-reverse; align-items: stretch; }
+      .left-actions, .right-actions, button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<main class="shell">
+<header class="hero">
+<div class="brand-logo-wrap">
+<img alt="Upper Room Solutions, LLC logo" class="brand-logo" src="data:image/png;base64,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"/>
+</div>
+<div class="eyebrow">Group Intake Form</div>
+<h1>Group Intake Form</h1>
+<p>Complete this intake to prepare the enrollment team with account details, contacts, eligibility rules, plan information, and supporting documents.</p>
+</header>
+<section aria-label="Group Intake Form" class="form-card">
+<div class="progress-wrap">
+<div class="progress-meta">
+<span id="stepLabel">Step 1 of 5</span>
+<span id="stepName">Account &amp; Contacts</span>
+</div>
+<div aria-hidden="true" class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+<form action="https://script.google.com/macros/s/AKfycbwTld5NT6sh8YOaI2ro8NNL54FFdIHA3VWGsDsSlTgsVASP12AqIp3nqNBuiB8j-M1mIA/exec" id="intakeForm" method="POST" novalidate="">
+<input aria-hidden="true" autocomplete="off" class="honeypot" name="_honey" tabindex="-1" type="text"/>
+<input name="_subject" type="hidden" value="New Group Intake Form Submission"/>
+<input name="_template" type="hidden" value="table"/>
+<section class="step active" data-name="Account &amp; Contacts">
+<div class="step-header">
+<div>
+<h2>Account &amp; Contacts</h2>
+<p>Start with the account, opener, HR contact, and broker information.</p>
+</div>
+<span class="pill">Required basics</span>
+</div>
+<div class="grid">
+<div class="field full" data-required="true">
+<label class="required" for="account_name">Account Name</label>
+<input autocomplete="organization" id="account_name" name="account_name" type="text"/>
+<div class="error-text">Account name is required.</div>
+</div>
+<div class="field third" data-required="true">
+<label class="required" for="employee_count"># of Employees</label>
+<input id="employee_count" inputmode="numeric" min="1" name="employee_count" type="number"/>
+<div class="error-text">Employee count is required.</div>
+</div>
+<div class="field third" data-required="true">
+<label class="required" for="opener_agent_code">Opener Agent Code</label>
+<input id="opener_agent_code" name="opener_agent_code" type="text"/>
+<div class="error-text">Opener agent code is required.</div>
+</div>
+<div class="field third" data-required="true">
+<label class="required" for="opener_email">Opener Email</label>
+<input autocomplete="email" id="opener_email" name="opener_email" placeholder="example@example.com" type="email"/>
+<div class="error-text">Enter a valid opener email.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required">Opener</label>
+<div class="name-row">
+<input autocomplete="given-name" name="opener_first_name" placeholder="First Name" type="text"/>
+<input autocomplete="family-name" name="opener_last_name" placeholder="Last Name" type="text"/>
+</div>
+<div class="error-text">Opener first and last name are required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required">Account Point of Contact (HR)</label>
+<div class="inline-row">
+<input name="hr_contact_name" placeholder="First/Last Name" type="text"/>
+<input name="hr_contact_email" placeholder="Email" type="email"/>
+</div>
+<div class="error-text">HR contact name and email are required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required" for="broker_name">Broker Name/Agency</label>
+<input id="broker_name" name="broker_name" type="text"/>
+<div class="error-text">Broker name or agency is required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required" for="broker_email">Broker Email</label>
+<input id="broker_email" name="broker_email" type="email"/>
+<div class="error-text">Enter a valid broker email.</div>
+</div>
+<div class="field full optional-note" id="broker_info_field">
+<label>Broker Info</label>
+<div class="inline-row three">
+<input name="broker_code" placeholder="Broker Code" type="text"/>
+<select id="broker_comp" name="broker_comp">
+<option value="">Broker Comp - Please Select</option>
+<option>PIN LEVEL</option>
+<option>PIN HEAPED</option>
+<option>PEAK LEVEL</option>
+<option>PEAK HEAPED</option>
+<option>OTHER (TEXT BOX)</option>
+</select>
+<input class="js-hidden" id="broker_comp_other" name="broker_comp_other" placeholder="If other, describe broker comp" type="text"/>
+</div>
+</div>
+</div>
+</section>
+<section class="step" data-name="Enrollment Setup">
+<div class="step-header">
+<div>
+<h2>Enrollment Setup</h2>
+<p>Enter enrollment timing, payroll details, domestic partner rules, and enrollment type.</p>
+</div>
+<span class="pill">Dates &amp; payroll</span>
+</div>
+<div class="grid">
+<div class="field quarter" data-required="true">
+<label class="required" for="bcn">BCN</label>
+<input id="bcn" name="bcn" type="text"/>
+<div class="error-text">BCN is required.</div>
+</div>
+<div class="field quarter" data-required="true">
+<label class="required" for="can">CAN</label>
+<input id="can" name="can" type="text"/>
+<div class="error-text">CAN is required.</div>
+</div>
+<div class="field quarter" data-required="true">
+<label class="required" for="pay_periods"># of Pay Periods</label>
+<input id="pay_periods" inputmode="numeric" min="1" name="pay_periods" type="number"/>
+<div class="error-text">Pay periods are required.</div>
+</div>
+<div class="field quarter" data-required="true">
+<label class="required" for="deductions"># of Deductions</label>
+<input id="deductions" inputmode="numeric" min="0" name="deductions" type="number"/>
+<div class="error-text">Deductions are required.</div>
+</div>
+<fieldset class="field full" data-required="true">
+<legend class="required">Does the group recognize domestic partners?</legend>
+<div class="choice-group">
+<label class="choice"><input name="domestic_partners" type="radio" value="Yes - Same &amp; Opposite"/> Yes - Same &amp; Opposite</label>
+<label class="choice"><input name="domestic_partners" type="radio" value="No"/> No</label>
+<label class="choice"><input name="domestic_partners" type="radio" value="Yes - Same only"/> Yes - Same only</label>
+</div>
+<div class="error-text">Select a domestic partner option.</div>
+</fieldset>
+<div class="field quarter" data-required="true">
+<label class="required" for="enrollment_start_date">Enrollment Start Date</label>
+<input id="enrollment_start_date" name="enrollment_start_date" type="date"/>
+<div class="error-text">Enrollment start date is required.</div>
+</div>
+<div class="field quarter" data-required="true">
+<label class="required" for="enrollment_end_date">Enrollment End Date</label>
+<input id="enrollment_end_date" name="enrollment_end_date" type="date"/>
+<div class="error-text">Enrollment end date is required.</div>
+</div>
+<div class="field quarter" data-required="true">
+<label class="required" for="ced">CED - Coverage Effective Date</label>
+<input id="ced" name="ced" type="date"/>
+<div class="error-text">Coverage Effective Date is required.</div>
+</div>
+<div class="field quarter" data-required="true">
+<label class="required" for="ped">PED - Payroll Effective Date</label>
+<input id="ped" name="ped" type="date"/>
+<div class="error-text">Payroll Effective Date is required.</div>
+</div>
+<fieldset class="field full" data-required="true">
+<legend class="required">Enrollment Type (select all that apply)</legend>
+<div class="choice-group">
+<label class="choice"><input name="enrollment_type" type="checkbox" value="Colonial Life"/> Colonial Life</label>
+<label class="choice"><input name="enrollment_type" type="checkbox" value="Core Communication"/> Core Communication</label>
+<label class="choice"><input name="enrollment_type" type="checkbox" value="Core Enrollment"/> Core Enrollment</label>
+<label class="choice"><input name="enrollment_type" type="checkbox" value="Mandatory 1-1"/> Mandatory 1-1</label>
+<label class="choice"><input name="enrollment_type" type="checkbox" value="Voluntary 1-1"/> Voluntary 1-1</label>
+<label class="choice"><input name="enrollment_type" type="checkbox" value="Other"/> Other</label>
+</div>
+<div class="error-text">Select at least one enrollment type.</div>
+</fieldset>
+<div class="field" data-required="true">
+<label class="required" for="enrollment_platform">Enrollment Platform</label>
+<select id="enrollment_platform" name="enrollment_platform">
+<option value="">Please Select</option>
+<option>Gathr</option>
+<option>Harmony only</option>
+<option>Employee Navigator</option>
+</select>
+<div class="error-text">Enrollment platform is required.</div>
+</div>
+<div class="field optional-note">
+<label for="employer_contributions">Is there any Employer Contributions? If yes, provide more details</label>
+<textarea id="employer_contributions" name="employer_contributions"></textarea>
+<div class="error-text">Please provide employer contribution details or enter N/A.</div>
+</div>
+</div>
+</section>
+<section class="step" data-name="Eligibility &amp; Benefits">
+<div class="step-header">
+<div>
+<h2>Eligibility &amp; Benefits</h2>
+<p>Add eligibility rules, plan offerings, required documents, and enrollment goals.</p>
+</div>
+<span class="pill">Plans &amp; files</span>
+</div>
+<div class="grid">
+<div class="field" data-required="true">
+<label class="required" for="aif_gmapp_flex">Attach AIF, GMAPP, &amp; FLEX Here</label>
+<input data-file-key="attachAif" id="aif_gmapp_flex" multiple="" name="aif_gmapp_flex" type="file"/>
+<div class="hint">Attach all applicable AIF, GMAPP, and FLEX files.</div>
+<div class="error-text">AIF, GMAPP, and FLEX attachment is required.</div>
+</div>
+<div class="field optional-note">
+<label for="census">Attach Census Here</label>
+<input data-file-key="attachCensus" id="census" multiple="" name="census" type="file"/>
+<div class="hint">Upload census file(s).</div>
+<div class="error-text">Census attachment is required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required" for="colonial_days">How is benefit eligibility defined for Colonial (days required)?</label>
+<select id="colonial_days" name="colonial_days">
+<option value="">Please Select</option>
+<option>FOMF DOH</option>
+<option>FOMF 30 DAYS</option>
+<option>FOMF 60 DAYS</option>
+<option>FOMF 90 DAYS</option>
+</select>
+<div class="error-text">Colonial eligibility days are required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required" for="core_days">How is benefit eligibility defined for CORE (days required)?</label>
+<select id="core_days" name="core_days">
+<option value="">Please Select</option>
+<option>FOMF DOH</option>
+<option>FOMF 30 DAYS</option>
+<option>FOMF 60 DAYS</option>
+<option>FOMF 90 DAYS</option>
+</select>
+<div class="error-text">Core eligibility days are required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required" for="colonial_hours">How is benefit eligibility defined for Colonial (hours required)?</label>
+<input id="colonial_hours" name="colonial_hours" placeholder="Example: 30 hours/week" type="text"/>
+<div class="error-text">Colonial eligibility hours are required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required" for="core_hours">How is benefit eligibility defined for CORE (hours required)?</label>
+<input id="core_hours" name="core_hours" placeholder="Example: 30 hours/week" type="text"/>
+<div class="error-text">Core eligibility hours are required.</div>
+</div>
+<div class="field" data-required="true">
+<label class="required" for="uw_offer">UW Offer</label>
+<textarea id="uw_offer" name="uw_offer"></textarea>
+<div class="error-text">UW offer is required.</div>
+</div>
+<div class="field optional-note">
+<label for="pops_programs">POPS Programs? <span class="hint">Reminder: if yes, fill out POPS Request.</span></label>
+<textarea id="pops_programs" name="pops_programs" placeholder="Yes/No and details"></textarea>
+<div class="error-text">POPS program details can be added if applicable.</div>
+</div>
+<div class="field full optional-note" data-required="false">
+<label for="value_added_benefits">Value Added (Complimentary to ER) benefits we will be offering</label>
+<textarea id="value_added_benefits" name="value_added_benefits"></textarea>
+<div class="error-text">Value added benefits can be added if applicable.</div>
+</div>
+<div class="field optional-note">
+<label for="enrollable_core_products">Enrollable Core Products</label>
+<textarea id="enrollable_core_products" name="enrollable_core_products"></textarea>
+<div class="error-text">Core products can be added if applicable.</div>
+</div>
+<div class="field optional-note">
+<label for="core_sbc_rates">All Core SBC's/Rates/Plan Info</label>
+<input data-file-key="allCore" id="core_sbc_rates" multiple="" name="core_sbc_rates" type="file"/>
+<div class="error-text">Core plan documents can be added if applicable.</div>
+</div>
+<div class="field optional-note">
+<label for="core_benefits_overview">Core Benefits Overview</label>
+<textarea id="core_benefits_overview" name="core_benefits_overview"></textarea>
+<div class="error-text">Core benefits overview can be added if applicable.</div>
+</div>
+<div class="field optional-note">
+<label for="enrollable_unum_products">Enrollable UNUM Products</label>
+<textarea id="enrollable_unum_products" name="enrollable_unum_products"></textarea>
+<div class="error-text">UNUM products can be added if applicable.</div>
+</div>
+<div class="field optional-note">
+<label for="unum_sbc_rates">All UNUM SBC's/Rates/RFP/Plan Info</label>
+<input data-file-key="allUnum" id="unum_sbc_rates" multiple="" name="unum_sbc_rates" type="file"/>
+<div class="error-text">UNUM plan documents can be added if applicable.</div>
+</div>
+<div class="field optional-note">
+<label for="enrollment_goals">Please describe any goals/commitments for the enrollment</label>
+<textarea id="enrollment_goals" name="enrollment_goals"></textarea>
+<div class="error-text">Enrollment goals can be added if applicable.</div>
+</div>
+</div>
+</section>
+<section class="step" data-name="Colonial Products">
+<div class="step-header">
+<div>
+<h2>Colonial Products</h2>
+<p>Select the Colonial product categories and complete the plan options/riders that apply.</p>
+</div>
+<span class="pill">Product detail</span>
+</div>
+<div class="grid">
+<div class="field optional-note">
+<label for="colonial_dental">Colonial Individual Dental</label>
+<select id="colonial_dental" name="colonial_dental">
+<option value="">Please Select</option>
+<option>Individual Dental 8100</option>
+<option>None Offered</option>
+</select>
+<div class="error-text">Select dental option.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="individual_dental_field" data-summary-target="individual_dental" data-required="false">
+<label>Individual Dental</label>
+<input type="hidden" id="individual_dental" name="individual_dental" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_dental__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_dental__tax_status" value="Post"/> Post</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_dental__tax_status" value="EE Chooses"/> EE Chooses</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Select Min 1 Plan Option (Max of 2 + Retiree)</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__select_min_1_plan_option_max_of_2_retiree" value="Preventive (MAC 100/50/0) $750 MAX"/> Preventive (MAC 100/50/0) $750 MAX</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__select_min_1_plan_option_max_of_2_retiree" value="Standard (MAC 100/80/50) $1000 MAX"/> Standard (MAC 100/80/50) $1000 MAX</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__select_min_1_plan_option_max_of_2_retiree" value="Enhanced (MAC 100/80/50) $3000 MAX"/> Enhanced (MAC 100/80/50) $3000 MAX</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__select_min_1_plan_option_max_of_2_retiree" value="Premier (MAC 100/90/60) $5000 MAX"/> Premier (MAC 100/90/60) $5000 MAX</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__select_min_1_plan_option_max_of_2_retiree" value="Freedom (UCR 100/80/50) $1000 MAX"/> Freedom (UCR 100/80/50) $1000 MAX</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__select_min_1_plan_option_max_of_2_retiree" value="Freedom Premier (UCR 100/80/50) $2000 MAX"/> Freedom Premier (UCR 100/80/50) $2000 MAX</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__select_min_1_plan_option_max_of_2_retiree" value="Retiree Plan (MAC 100/80/50) $1500 MAX"/> Retiree Plan (MAC 100/80/50) $1500 MAX</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Waiting Period    - (Class C Services)</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_dental__waiting_period_class_c_services" value="Yes"/> Yes</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_dental__waiting_period_class_c_services" value="No"/> No</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__riders" value="Without"/> Without</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__riders" value="Ortho (ER)"/> Ortho (ER)</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_dental__riders" value="Vision (EE)"/> Vision (EE)</label>
+</div>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note">
+<label for="colonial_accident">Colonial Accident</label>
+<select id="colonial_accident" name="colonial_accident">
+<option value="">Please Select</option>
+<option>Individual Accident (IAC4000)</option>
+<option>Group Accident (GAC4100)</option>
+<option>None Offered</option>
+</select>
+<div class="error-text">Select accident option.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="individual_accident_field" data-summary-target="individual_accident" data-required="false">
+<label>Individual Accident</label>
+<input type="hidden" id="individual_accident" name="individual_accident" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__tax_status" value="Post"/> Post</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__tax_status" value="EE Chooses"/> EE Chooses</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Select Benefit Levels</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__select_benefit_levels" value="Basic"/> Basic</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__select_benefit_levels" value="Preferred"/> Preferred</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__select_benefit_levels" value="Premier"/> Premier</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Select Plan Option</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__select_plan_option" value="On/Off-Job Accident Coverage"/> On/Off-Job Accident Coverage</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__select_plan_option" value="Off-Job Accident Coverage"/> Off-Job Accident Coverage</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__riders" value="Without"/> Without</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__riders" value="Active Lifestyles"/> Active Lifestyles</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__riders" value="Gunshot $1K"/> Gunshot $1K</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__riders" value="Gunshot $5K"/> Gunshot $5K</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__riders" value="Critical Illness Rider"/> Critical Illness Rider</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_accident__riders" value="Sickness Hospital Confinement Rider"/> Sickness Hospital Confinement Rider</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Wellbeing Assistance</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__wellbeing_assistance" value="Without"/> Without</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__wellbeing_assistance" value="Standard - $50"/> Standard - $50</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__wellbeing_assistance" value="Standard - $100"/> Standard - $100</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__wellbeing_assistance" value="Basic - $50"/> Basic - $50</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_accident__wellbeing_assistance" value="Basic - $100"/> Basic - $100</label>
+</div>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="group_accident_field" data-summary-target="group_accident" data-required="false">
+<label>Group Accident</label>
+<input type="hidden" id="group_accident" name="group_accident" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_accident__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__tax_status" value="Post"/> Post</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__tax_status" value="EE Chooses"/> EE Chooses</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Select Plan Option</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_accident__select_plan_option" value="On/Off-Job Accident Coverage"/> On/Off-Job Accident Coverage</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__select_plan_option" value="Off-Job Accident Coverage"/> Off-Job Accident Coverage</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Select Benefit Levels</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__select_benefit_levels" value="Basic"/> Basic</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__select_benefit_levels" value="Preferred"/> Preferred</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__select_benefit_levels" value="Premier"/> Premier</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Accidental Death &amp; Dismemberment (AD&amp;D)</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accidental_death_dismemberment_ad_d" value="Without"/> Without</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accidental_death_dismemberment_ad_d" value="Economy"/> Economy</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accidental_death_dismemberment_ad_d" value="Basic"/> Basic</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accidental_death_dismemberment_ad_d" value="Preferred"/> Preferred</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accidental_death_dismemberment_ad_d" value="Premier"/> Premier</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Accident Hospital Benefit</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accident_hospital_benefit" value="Without"/> Without</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accident_hospital_benefit" value="Economy"/> Economy</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accident_hospital_benefit" value="Basic"/> Basic</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accident_hospital_benefit" value="Preferred"/> Preferred</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__accident_hospital_benefit" value="Premier"/> Premier</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Wellbeing Assistance</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_accident__wellbeing_assistance" value="Without"/> Without</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__wellbeing_assistance" value="Standard - $50"/> Standard - $50</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__wellbeing_assistance" value="Standard - $75"/> Standard - $75</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__wellbeing_assistance" value="Standard - $100"/> Standard - $100</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__wellbeing_assistance" value="Max - $50"/> Max - $50</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__wellbeing_assistance" value="Max- $75"/> Max- $75</label>
+<label class="choice"><input class="product-control" type="radio" name="group_accident__wellbeing_assistance" value="Max- $100"/> Max- $100</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Without"/> Without</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Recovery Plus Package"/> Recovery Plus Package</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Active Lifestyles"/> Active Lifestyles</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Personal Safety Benefit"/> Personal Safety Benefit</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Gunshot $1K"/> Gunshot $1K</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Gunshot $5K"/> Gunshot $5K</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Healthcare Employee Benefi"/> Healthcare Employee Benefi</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Sickness Hospital Confinement Rider"/> Sickness Hospital Confinement Rider</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_accident__riders" value="Building Benefit"/> Building Benefit</label>
+</div>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note">
+<label for="colonial_disability">Colonial Disability</label>
+<select id="colonial_disability" name="colonial_disability">
+<option value="">Please Select</option>
+<option>Individual Disability</option>
+<option>Group Disability</option>
+<option>None Offered</option>
+</select>
+<div class="error-text">Select disability option.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="individual_disability_field" data-summary-target="individual_disability" data-required="false">
+<label>Individual Disability</label>
+<input type="hidden" id="individual_disability" name="individual_disability" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_disability__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_disability__tax_status" value="Post"/> Post</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_disability__tax_status" value="EE Chooses"/> EE Chooses</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Select Plan Option</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_disability__select_plan_option" value="On/Off-Job Coverage"/> On/Off-Job Coverage</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_disability__select_plan_option" value="Off-Job Coverage"/> Off-Job Coverage</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Risk Level</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_disability__risk_level" value="A"/> A</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_disability__risk_level" value="AA"/> AA</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_disability__risk_level" value="AAA"/> AAA</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_disability__risk_level" value="B"/> B</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Capped at %</span>
+<input class="product-control" name="individual_disability__capped_at" placeholder="" type="text"/>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Comments &amp; Notes</span>
+<textarea class="product-control" name="individual_disability__comments_notes" placeholder="Type your paragraph here"></textarea>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="group_disability_field" data-summary-target="group_disability" data-required="false">
+<label>Group Disability</label>
+<input type="hidden" id="group_disability" name="group_disability" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_disability__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="group_disability__tax_status" value="Post"/> Post</label>
+<label class="choice"><input class="product-control" type="radio" name="group_disability__tax_status" value="EE Chooses"/> EE Chooses</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Pysch Condition</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_disability__pysch_condition" value="YES"/> YES</label>
+<label class="choice"><input class="product-control" type="radio" name="group_disability__pysch_condition" value="NO"/> NO</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Max Amount</span>
+<input class="product-control" name="group_disability__max_amount" placeholder="" type="text"/>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Hospital</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_disability__hospital" value="Yes"/> Yes</label>
+<label class="choice"><input class="product-control" type="radio" name="group_disability__hospital" value="No"/> No</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Max %</span>
+<textarea class="product-control" name="group_disability__max" placeholder="Type your paragraph here"></textarea>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Table Rate #</span>
+<input class="product-control" name="group_disability__table_rate" placeholder="" type="text"/>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="elimination_periods_field" data-summary-target="elimination_periods" data-required="false">
+<label>Elimination Periods (14/14 Required for 4k+)</label>
+<input type="hidden" id="elimination_periods" name="elimination_periods" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">3 Months</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__3_months" value="0/7"/> 0/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__3_months" value="7/7"/> 7/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__3_months" value="7/14"/> 7/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__3_months" value="0/14"/> 0/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__3_months" value="14/14"/> 14/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__3_months" value="0/30"/> 0/30</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__3_months" value="30/30"/> 30/30</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">6 Months</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__6_months" value="0/7"/> 0/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__6_months" value="7/7"/> 7/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__6_months" value="7/14"/> 7/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__6_months" value="0/14"/> 0/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__6_months" value="14/14"/> 14/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__6_months" value="0/30"/> 0/30</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__6_months" value="30/30"/> 30/30</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">12 Months</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="0/7"/> 0/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="7/7"/> 7/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="7/14"/> 7/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="0/14"/> 0/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="14/14"/> 14/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="0/30"/> 0/30</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="30/30"/> 30/30</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="60/60"/> 60/60</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__12_months" value="90/90"/> 90/90</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">24 Months</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="0/7"/> 0/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="7/7"/> 7/7</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="7/14"/> 7/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="0/14"/> 0/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="14/14"/> 14/14</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="0/30"/> 0/30</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="30/30"/> 30/30</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="60/60"/> 60/60</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="90/90"/> 90/90</label>
+<label class="choice"><input class="product-control" type="checkbox" name="elimination_periods__24_months" value="180/180"/> 180/180</label>
+</div>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note">
+<label for="colonial_cancer_critical">Colonial Cancer/Critical</label>
+<select id="colonial_cancer_critical" name="colonial_cancer_critical">
+<option value="">Please Select</option>
+<option>Cancer Assist</option>
+<option>Group Critical Illness (GCI6000)</option>
+<option>Critical Illness (ICI6000)</option>
+<option>None Offered</option>
+</select>
+<div class="error-text">Select cancer/critical option.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="cancer_assist_field" data-summary-target="cancer_assist" data-required="false">
+<label>Cancer Assist</label>
+<input type="hidden" id="cancer_assist" name="cancer_assist" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__tax_status" value="Post"/> Post</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Level</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__plan_level" value="1"/> 1</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__plan_level" value="2"/> 2</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__plan_level" value="3"/> 3</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__plan_level" value="4"/> 4</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Progressive"/> Progressive</label>
+<label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Specified Disease"/> Specified Disease</label>
+<label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Initial Diagnosis"/> Initial Diagnosis</label>
+<label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Health Screening"/> Health Screening</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Health Screening</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__health_screening" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__health_screening" value="$25"/> $25</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__health_screening" value="$50"/> $50</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__health_screening" value="$75"/> $75</label>
+<label class="choice"><input class="product-control" type="radio" name="cancer_assist__health_screening" value="$100"/> $100</label>
+</div>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="individual_critical_field" data-summary-target="individual_critical" data-required="false">
+<label>Individual Critical</label>
+<input type="hidden" id="individual_critical" name="individual_critical" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__tax_status" value="Post"/> Post</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Level</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__plan_level" value="With Cancer"/> With Cancer</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__plan_level" value="Without Cancer"/> Without Cancer</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="Progressive"/> Progressive</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="Specified Disease"/> Specified Disease</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="Initial Diagnosis"/> Initial Diagnosis</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="Health Screening"/> Health Screening</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Health Screening</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__health_screening" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__health_screening" value="Standard $50"/> Standard $50</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__health_screening" value="Standard $75"/> Standard $75</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__health_screening" value="Standard $100"/> Standard $100</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__health_screening" value="Max $50"/> Max $50</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__health_screening" value="Max $75"/> Max $75</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_critical__health_screening" value="Max $100"/> Max $100</label>
+</div>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="group_critical_illness_field" data-summary-target="group_critical_illness" data-required="false">
+<label>Group Critical Illness</label>
+<input type="hidden" id="group_critical_illness" name="group_critical_illness" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__tax_status" value="Post"/> Post</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Level</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__plan_level" value="Critical Illness"/> Critical Illness</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__plan_level" value="CI w/cancer"/> CI w/cancer</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__plan_level" value="Cancer"/> Cancer</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__riders" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__riders" value="Progressive"/> Progressive</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__riders" value="Infectious Disease"/> Infectious Disease</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__riders" value="Initial Diagnosis"/> Initial Diagnosis</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__riders" value="Heart Benefit (NOT GI)"/> Heart Benefit (NOT GI)</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Health Screening</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__health_screening" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__health_screening" value="$50"/> $50</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__health_screening" value="$75"/> $75</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__health_screening" value="$100"/> $100</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Age/Tobacco</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__age_tobacco" value="Issue Age"/> Issue Age</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__age_tobacco" value="Attained Age"/> Attained Age</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__age_tobacco" value="Uni-Tobacco"/> Uni-Tobacco</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__age_tobacco" value="Tobacco Distinct"/> Tobacco Distinct</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Increments</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__increments" value="$1000"/> $1000</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__increments" value="$5000"/> $5000</label>
+<label class="choice"><input class="product-control" type="radio" name="group_critical_illness__increments" value="$10000"/> $10000</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Max Face Amount</span>
+<textarea class="product-control" name="group_critical_illness__max_face_amount" placeholder=""></textarea>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note">
+<label for="colonial_hospital_med_bridge">Colonial Hospital/Med Bridge</label>
+<select id="colonial_hospital_med_bridge" name="colonial_hospital_med_bridge">
+<option value="">Please Select</option>
+<option>INDIVIDUAL MED BRIDGE</option>
+<option>GROUP MED BRIDGE</option>
+<option>None Offered</option>
+</select>
+<div class="error-text">Select hospital/med bridge option.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="individual_med_bridge_field" data-summary-target="individual_med_bridge" data-required="false">
+<label>Individual Med Bridge</label>
+<input type="hidden" id="individual_med_bridge" name="individual_med_bridge" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_med_bridge__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_med_bridge__tax_status" value="Post"/> Post</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Type</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__plan_type" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__plan_type" value="Plan 1 HSA Compliant"/> Plan 1 HSA Compliant</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__plan_type" value="Plan 2 with Outpatient Surgical benefit"/> Plan 2 with Outpatient Surgical benefit</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__plan_type" value="Plan 3 with Diagnostic Procedure benefit"/> Plan 3 with Diagnostic Procedure benefit</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__plan_type" value="Plan 1 with Daily Hospital Confinement - NJ Only"/> Plan 1 with Daily Hospital Confinement - NJ Only</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__riders" value="None"/> None</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__riders" value="Daily Hospital Confinement benefit"/> Daily Hospital Confinement benefit</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_med_bridge__riders" value="Enhanced Intensive Care Unit Confinement benefit"/> Enhanced Intensive Care Unit Confinement benefit</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Employer Contribution?</span>
+<textarea class="product-control" name="individual_med_bridge__employer_contribution" placeholder=""></textarea>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<div class="field optional-note full product-widget conditional-hidden" id="group_medical_bridge_field" data-summary-target="group_medical_bridge" data-required="false">
+<label>Group Medical Bridge</label>
+<input type="hidden" id="group_medical_bridge" name="group_medical_bridge" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_medical_bridge__tax_status" value="Pre"/> Pre</label>
+<label class="choice"><input class="product-control" type="radio" name="group_medical_bridge__tax_status" value="Post"/> Post</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Name</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_medical_bridge__plan_name" value="Plan 1 - HSA"/> Plan 1 - HSA</label>
+<label class="choice"><input class="product-control" type="radio" name="group_medical_bridge__plan_name" value="Plan 2 - NON HSA"/> Plan 2 - NON HSA</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Type</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__plan_type" value="Composite (Plan2)"/> Composite (Plan2)</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__plan_type" value="Age Banded (Plan2)"/> Age Banded (Plan2)</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__plan_type" value="Attained Age (Plan1)"/> Attained Age (Plan1)</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__plan_type" value="Issue Age (Plan1)"/> Issue Age (Plan1)</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Levels</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$500"/> $500</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$1000"/> $1000</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$1500"/> $1500</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$2000"/> $2000</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$2500"/> $2500</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$3000"/> $3000</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$4000"/> $4000</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__levels" value="$5000"/> $5000</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders/Additions</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__riders_additions" value="Observation Room"/> Observation Room</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__riders_additions" value="Rehab Unit Confinement"/> Rehab Unit Confinement</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__riders_additions" value="Wellbeing $100 Standard"/> Wellbeing $100 Standard</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__riders_additions" value="Daily Hosp Confinement"/> Daily Hosp Confinement</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__riders_additions" value="Inpatient Mental/Nervous"/> Inpatient Mental/Nervous</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_medical_bridge__riders_additions" value="Med Treatment Package"/> Med Treatment Package</label>
+</div>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+<fieldset class="field optional-note">
+<legend>Individual Life Plans Being Offered</legend>
+<div class="choice-group">
+<label class="choice"><input name="individual_life_plans" type="checkbox" value="Term Life"/> Term Life</label>
+<label class="choice"><input name="individual_life_plans" type="checkbox" value="Whole Life"/> Whole Life</label>
+</div>
+</fieldset>
+<div class="field optional-note full product-widget conditional-hidden" id="group_term_life_field" data-summary-target="group_term_life" data-required="false">
+<label>Group Term Life</label>
+<input type="hidden" id="group_term_life" name="group_term_life" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Type</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_type" value="Group Term Life Only"/> Group Term Life Only</label>
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_type" value="Group Term Life with AD&amp;D"/> Group Term Life with AD&amp;D</label>
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_type" value="Group Term Life with WOP"/> Group Term Life with WOP</label>
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_type" value="Group Term Life with WOP &amp; AD&amp;D"/> Group Term Life with WOP &amp; AD&amp;D</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Level</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_level" value="Enable Spouse Coverage"/> Enable Spouse Coverage</label>
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_level" value="Enable Dependent Coverage"/> Enable Dependent Coverage</label>
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_level" value="Both"/> Both</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Face Amount Determined By</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__face_amount_determined_by" value="Even increments"/> Even increments</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__face_amount_determined_by" value="Multiple of Salary"/> Multiple of Salary</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Tobacco Rating</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__tobacco_rating" value="Distinct"/> Distinct</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__tobacco_rating" value="Uni-Tobacco"/> Uni-Tobacco</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">EOI Employee</span>
+<input class="product-control" name="group_term_life__eoi_employee" placeholder="" type="text"/>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">EOI Spouse</span>
+<input class="product-control" name="group_term_life__eoi_spouse" placeholder="" type="text"/>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Max Face Amount</span>
+<input class="product-control" name="group_term_life__max_face_amount" placeholder="" type="text"/>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Rate Table # (Quick Quote)</span>
+<input class="product-control" name="group_term_life__rate_table_quick_quote" placeholder="" type="text"/>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when required.</div>
+</div>
+</div>
+</section>
+<section class="step" data-name="Joseph Enhancements">
+<div class="step-header">
+<div>
+<h2>Accountability &amp; Enrollment Logistics</h2>
+<p>Additional checkpoints and enrollment details requested from Joseph's feedback.</p>
+</div>
+<span class="pill">Joseph feedback</span>
+</div>
+<div class="grid">
+<fieldset class="field full optional-note">
+<legend>Accountability Checklist</legend>
+<div class="choice-group">
+<label class="choice"><input name="accountability_checklist" type="checkbox" value="Program request completed"/> Program request completed</label>
+<label class="choice"><input name="accountability_checklist" type="checkbox" value="Employer contribution request completed"/> Employer contribution request completed</label>
+<label class="choice"><input name="accountability_checklist" type="checkbox" value="CASSHM done"/> CASSHM done</label>
+<label class="choice"><input name="accountability_checklist" type="checkbox" value="NASC email received"/> NASC email received</label>
+<label class="choice"><input name="accountability_checklist" type="checkbox" value="Agent Assist controls completed"/> Agent Assist controls completed</label>
+</div>
+<div class="hint">Optional checklist to track internal process readiness.</div>
+</fieldset>
+<fieldset class="field full optional-note">
+<legend>Pre-enrollment Communication Methods</legend>
+<div class="choice-group">
+<label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Email"/> Email</label>
+<label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Text"/> Text</label>
+<label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Flyers"/> Flyers</label>
+<label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Payroll stuffer"/> Payroll stuffer</label>
+<label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Employer meeting"/> Employer meeting</label>
+<label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Other"/> Other</label>
+</div>
+<input id="pre_enrollment_communication_other" name="pre_enrollment_communication_other" placeholder="Other communication method details" style="margin-top:10px;" type="text"/>
+<div class="hint">Select all planned communication methods.</div>
+</fieldset>
+<div class="field optional-note">
+<label for="multilingual_needs">Multilingual Needs</label>
+<select id="multilingual_needs" name="multilingual_needs">
+<option value="">Please Select</option>
+<option>Yes</option>
+<option>No</option>
+<option>Unknown</option>
+</select>
+<textarea name="multilingual_details" placeholder="Languages needed or details" style="margin-top:10px;"></textarea>
+</div>
+<div class="field optional-note">
+<label for="special_shifts">Special Shifts</label>
+<select id="special_shifts" name="special_shifts">
+<option value="">Please Select</option>
+<option>Yes</option>
+<option>No</option>
+<option>Unknown</option>
+</select>
+<textarea name="special_shift_details" placeholder="Shift times, overnight shifts, or special scheduling needs" style="margin-top:10px;"></textarea>
+</div>
+<div class="field optional-note">
+<label for="multiple_locations">Locations</label>
+<select id="multiple_locations" name="multiple_locations">
+<option value="">Please Select</option>
+<option>Single Location</option>
+<option>Multiple Locations</option>
+<option>Virtual / Remote</option>
+<option>Hybrid</option>
+</select>
+<textarea name="location_details" placeholder="Location names, addresses, or virtual details" style="margin-top:10px;"></textarea>
+</div>
+<div class="field optional-note">
+<label for="weekend_enrollment_needed">Weekend Enrollment Needed?</label>
+<select id="weekend_enrollment_needed" name="weekend_enrollment_needed">
+<option value="">Please Select</option>
+<option>Yes</option>
+<option>No</option>
+<option>Unknown</option>
+</select>
+<textarea name="weekend_enrollment_details" placeholder="Weekend dates/times or details" style="margin-top:10px;"></textarea>
+</div>
+<div class="field optional-note">
+<label for="packets_needed">Packets Needed?</label>
+<select id="packets_needed" name="packets_needed">
+<option value="">Please Select</option>
+<option>Yes</option>
+<option>No</option>
+<option>Digital Only</option>
+<option>Unknown</option>
+</select>
+<textarea name="packet_details" placeholder="Packet counts, delivery details, or special packet notes" style="margin-top:10px;"></textarea>
+</div>
+</div>
+</section>
+<section class="step" data-name="Final Details">
+<div class="step-header">
+<div>
+<h2>Final Details</h2>
+<p>Attach any remaining documents, choose whether to receive a copy, then submit.</p>
+</div>
+<span class="pill">Review &amp; submit</span>
+</div>
+<div class="grid">
+<div class="field optional-note full">
+<label for="additional_documents">Additional Documents</label>
+<input data-file-key="additionalDocuments" id="additional_documents" multiple="" name="additional_documents" type="file"/>
+<div class="hint">Upload any supporting documents that were not attached earlier.</div>
+<div class="error-text">Upload additional documents if applicable.</div>
+</div>
+<fieldset class="field full optional-note" id="copy_request_field" data-required="false">
+<legend>Would you like a copy of the submitted intake?</legend>
+<div class="choice-group">
+<label class="choice"><input id="send_copy" name="send_copy" type="checkbox" value="Yes"/> Yes, send me a copy</label>
+</div>
+<div class="inline-row" style="margin-top:10px;">
+<input id="copy_email" name="copy_email" placeholder="Where should we send the copy?" type="email"/>
+</div>
+<div class="error-text">Enter the email address where the copy should be sent.</div>
+</fieldset>
+<div class="field optional-note full">
+<label for="my_email">Internal Notification Email / My Email</label>
+<input id="my_email" name="my_email" placeholder="example@example.com" type="email"/>
+<div class="error-text">Enter a valid email.</div>
+</div>
+</div>
+</section>
+<div class="actions">
+<div class="left-actions">
+<button class="btn-secondary" id="backBtn" type="button">Back</button>
+<button class="btn-secondary" id="saveBtn" type="button">Save Progress</button>
+</div>
+<div class="right-actions">
+<button class="btn-primary" id="nextBtn" type="button">Next</button>
+<button class="btn-gold" id="submitBtn" style="display:none;" type="submit">Submit</button>
+</div>
+</div>
+</form>
+<div class="success-box" id="successBox">
+<strong>Thank you. Your submission has been processed.</strong>
+<span id="successMessage">Your form has been submitted or progress has been saved.</span>
+</div>
+</section>
+</main>
+<script>
+    const SUBMISSION_ENDPOINT = "https://script.google.com/macros/s/AKfycbwTld5NT6sh8YOaI2ro8NNL54FFdIHA3VWGsDsSlTgsVASP12AqIp3nqNBuiB8j-M1mIA/exec"; // Google Apps Script endpoint used by the form action.
+
+    const form = document.getElementById("intakeForm");
+    const steps = Array.from(document.querySelectorAll(".step"));
+    const progressFill = document.getElementById("progressFill");
+    const stepLabel = document.getElementById("stepLabel");
+    const stepName = document.getElementById("stepName");
+    const backBtn = document.getElementById("backBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const successBox = document.getElementById("successBox");
+    const successMessage = document.getElementById("successMessage");
+    let currentStep = 0;
+
+    function showStep(index) {
+      applyConditionalRules();
+      currentStep = index;
+      steps.forEach((step, stepIndex) => step.classList.toggle("active", stepIndex === index));
+      const percent = ((index + 1) / steps.length) * 100;
+      progressFill.style.width = `${percent}%`;
+      stepLabel.textContent = `Step ${index + 1} of ${steps.length}`;
+      stepName.textContent = steps[index].dataset.name;
+      backBtn.disabled = index === 0;
+      nextBtn.style.display = index === steps.length - 1 ? "none" : "inline-flex";
+      submitBtn.style.display = index === steps.length - 1 ? "inline-flex" : "none";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function isFieldGroupValid(field) {
+      const controls = Array.from(field.querySelectorAll("input, select, textarea")).filter(control => !control.disabled);
+      if (field.classList.contains("conditional-hidden")) return true;
+      if (field.dataset.required !== "true") return true;
+
+      if (field.classList.contains("product-widget")) {
+        return controls.some(control => {
+          if (control.type === "hidden") return false;
+          if (control.type === "checkbox" || control.type === "radio") return control.checked;
+          return String(control.value || "").trim().length > 0;
+        });
+      }
+
+      if (field.id === "copy_request_field" && document.getElementById("send_copy")?.checked) {
+        const email = document.getElementById("copy_email");
+        return !!email?.value && email.checkValidity();
+      }
+
+      const checkboxes = controls.filter(control => control.type === "checkbox");
+      const radios = controls.filter(control => control.type === "radio");
+      const files = controls.filter(control => control.type === "file");
+      const emails = controls.filter(control => control.type === "email");
+      const textLike = controls.filter(control => !["checkbox", "radio", "file", "hidden"].includes(control.type));
+
+      if (checkboxes.length) return checkboxes.some(control => control.checked);
+      if (radios.length) return radios.some(control => control.checked);
+      if (files.length) return files.some(control => control.files && control.files.length > 0);
+
+      const textValid = textLike.every(control => String(control.value || "").trim().length > 0);
+      const emailValid = emails.every(control => !control.value || control.checkValidity());
+      return textValid && emailValid;
+    }
+
+
+    function setFieldRequiredById(id, required) {
+      const control = document.getElementById(id);
+      const field = control?.closest(".field");
+      if (!field) return;
+      field.dataset.required = required ? "true" : "false";
+      const label = field.querySelector("label, legend");
+      if (label) label.classList.toggle("required", required);
+      field.classList.toggle("optional-note", !required);
+    }
+
+    function setFieldVisibilityById(id, visible, requiredWhenVisible = false) {
+      const control = document.getElementById(id);
+      const field = control?.closest(".field");
+      if (!field) return;
+      field.classList.toggle("conditional-hidden", !visible);
+      field.querySelectorAll("input, select, textarea").forEach(control => {
+        control.disabled = !visible;
+        if (!visible && control.type !== "file") {
+          if (control.type === "checkbox" || control.type === "radio") control.checked = false;
+          else control.value = "";
+        }
+      });
+      setFieldRequiredById(id, visible && requiredWhenVisible);
+      if (!visible) field.classList.remove("error");
+    }
+
+    function setPanelVisibility(panelId, visible, requiredWhenVisible = false) {
+      const field = document.getElementById(panelId);
+      if (!field) return;
+      field.classList.toggle("conditional-hidden", !visible);
+      field.querySelectorAll("input, select, textarea").forEach(control => {
+        control.disabled = !visible;
+        if (!visible) {
+          if (control.type === "checkbox" || control.type === "radio") control.checked = false;
+          else control.value = "";
+        }
+      });
+      field.dataset.required = visible && requiredWhenVisible ? "true" : "false";
+      const label = field.querySelector("label, legend");
+      if (label) label.classList.toggle("required", visible && requiredWhenVisible);
+      field.classList.toggle("optional-note", !(visible && requiredWhenVisible));
+      if (!visible) field.classList.remove("error");
+    }
+
+    function updateProductSummaries() {
+      document.querySelectorAll(".product-widget").forEach(widget => {
+        const targetId = widget.dataset.summaryTarget;
+        const target = targetId ? document.getElementById(targetId) : null;
+        if (!target) return;
+        if (widget.classList.contains("conditional-hidden")) {
+          target.value = "";
+          return;
+        }
+        const lines = [];
+        widget.querySelectorAll(".product-subfield").forEach(sub => {
+          const label = sub.querySelector(".product-subfield-label")?.textContent?.trim() || "Detail";
+          const controls = Array.from(sub.querySelectorAll("input, select, textarea")).filter(control => !control.disabled && control.type !== "hidden");
+          const values = [];
+          controls.forEach(control => {
+            if ((control.type === "checkbox" || control.type === "radio") && control.checked) values.push(control.value);
+            else if (!["checkbox", "radio"].includes(control.type) && String(control.value || "").trim()) values.push(control.value.trim());
+          });
+          if (values.length) lines.push(`${label}: ${values.join(", ")}`);
+        });
+        target.value = lines.join("
+");
+      });
+    }
+
+    function applyConditionalRules() {
+      const brokerComp = document.getElementById("broker_comp")?.value || "";
+      const brokerOther = document.getElementById("broker_comp_other");
+      if (brokerOther) {
+        brokerOther.classList.toggle("js-hidden", brokerComp !== "OTHER (TEXT BOX)");
+        if (brokerComp !== "OTHER (TEXT BOX)") brokerOther.value = "";
+      }
+
+      const sendCopy = document.getElementById("send_copy")?.checked;
+      const copyField = document.getElementById("copy_request_field");
+      const copyEmail = document.getElementById("copy_email");
+      if (copyField && copyEmail) {
+        copyField.dataset.required = sendCopy ? "true" : "false";
+        copyEmail.required = !!sendCopy;
+        if (!sendCopy) copyField.classList.remove("error");
+      }
+
+      const dental = document.getElementById("colonial_dental")?.value || "";
+      setPanelVisibility("individual_dental_field", dental === "Individual Dental 8100", true);
+
+      const accident = document.getElementById("colonial_accident")?.value || "";
+      setPanelVisibility("individual_accident_field", accident === "Individual Accident (IAC4000)", true);
+      setPanelVisibility("group_accident_field", accident === "Group Accident (GAC4100)", true);
+
+      const disability = document.getElementById("colonial_disability")?.value || "";
+      setPanelVisibility("individual_disability_field", disability === "Individual Disability", true);
+      setPanelVisibility("group_disability_field", disability === "Group Disability", true);
+
+      const cancer = document.getElementById("colonial_cancer_critical")?.value || "";
+      setPanelVisibility("cancer_assist_field", cancer === "Cancer Assist", false);
+      setPanelVisibility("individual_critical_field", cancer === "Critical Illness (ICI6000)", false);
+      setPanelVisibility("group_critical_illness_field", cancer === "Group Critical Illness (GCI6000)", false);
+
+      const bridge = document.getElementById("colonial_hospital_med_bridge")?.value || "";
+      const hasMedBridge = bridge === "INDIVIDUAL MED BRIDGE" || bridge === "GROUP MED BRIDGE";
+      const hasDisability = disability === "Individual Disability" || disability === "Group Disability";
+      setPanelVisibility("elimination_periods_field", hasMedBridge || hasDisability, hasMedBridge);
+      setPanelVisibility("individual_med_bridge_field", bridge === "INDIVIDUAL MED BRIDGE", true);
+      setPanelVisibility("group_medical_bridge_field", bridge === "GROUP MED BRIDGE", true);
+
+      setPanelVisibility("group_term_life_field", true, false);
+      updateProductSummaries();
+    }
+
+    function validateStep(index) {
+      const fields = Array.from(steps[index].querySelectorAll(".field"));
+      let valid = true;
+      fields.forEach(field => {
+        const fieldValid = isFieldGroupValid(field);
+        field.classList.toggle("error", !fieldValid);
+        if (!fieldValid) valid = false;
+      });
+      if (!valid) {
+        const firstError = steps[index].querySelector(".field.error");
+        firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return valid;
+    }
+
+    function validateAllSteps() {
+      for (let i = 0; i < steps.length; i++) {
+        if (!validateStep(i)) {
+          showStep(i);
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function collectFormObject() {
+      updateProductSummaries();
+      const data = new FormData(form);
+      const output = {};
+
+      for (const [key, value] of data.entries()) {
+        const normalized = value instanceof File
+          ? (value.name ? { fileName: value.name, size: value.size, type: value.type } : "")
+          : value;
+
+        if (!normalized || key.startsWith("_")) continue;
+
+        if (output[key]) {
+          output[key] = Array.isArray(output[key]) ? output[key] : [output[key]];
+          output[key].push(normalized);
+        } else {
+          output[key] = normalized;
+        }
+      }
+      return output;
+    }
+
+    function saveProgress() {
+      const payload = collectFormObject();
+      Object.keys(payload).forEach(key => {
+        if (Array.isArray(payload[key]) && payload[key].some(item => typeof item === "object")) delete payload[key];
+        if (typeof payload[key] === "object" && payload[key]?.fileName) delete payload[key];
+      });
+      localStorage.setItem("upper_room_solutions_intake_progress", JSON.stringify(payload));
+      successBox.style.display = "block";
+      successMessage.textContent = "Progress saved on this browser. File uploads cannot be saved until final submission.";
+    }
+
+    function loadProgress() {
+      const saved = localStorage.getItem("upper_room_solutions_intake_progress");
+      if (!saved) return;
+      const payload = JSON.parse(saved);
+
+      Object.entries(payload).forEach(([key, value]) => {
+        const controls = Array.from(form.querySelectorAll(`[name="${CSS.escape(key)}"]`));
+        if (!controls.length) return;
+
+        controls.forEach(control => {
+          if (control.type === "checkbox" || control.type === "radio") {
+            const values = Array.isArray(value) ? value : [value];
+            control.checked = values.includes(control.value);
+          } else if (control.type !== "file") {
+            control.value = value;
+          }
+        });
+      });
+    }
+
+    function downloadJSON(payload) {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "upper-room-solutions-intake-submission.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    nextBtn.addEventListener("click", () => {
+      applyConditionalRules();
+      if (!validateStep(currentStep)) return;
+      showStep(Math.min(currentStep + 1, steps.length - 1));
+    });
+
+    backBtn.addEventListener("click", () => showStep(Math.max(currentStep - 1, 0)));
+    saveBtn.addEventListener("click", saveProgress);
+
+    form.addEventListener("input", event => {
+      const field = event.target.closest(".field");
+      if (field) field.classList.remove("error");
+    });
+
+    form.addEventListener("change", event => {
+      const field = event.target.closest(".field");
+      if (field) field.classList.remove("error");
+      applyConditionalRules();
+    });
+
+
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function prepareFilePayloads() {
+      document.querySelectorAll(".generated-file-payload").forEach(el => el.remove());
+      const fileInputs = Array.from(form.querySelectorAll('input[type="file"]'));
+      for (const input of fileInputs) {
+        const fieldKey = input.dataset.fileKey || input.name;
+        const files = Array.from(input.files || []);
+        for (let index = 0; index < files.length; index++) {
+          const file = files[index];
+          const base64 = await readFileAsBase64(file);
+          const payloads = {
+            [`file__${fieldKey}__${index}__name`]: file.name,
+            [`file__${fieldKey}__${index}__type`]: file.type || "application/octet-stream",
+            [`file__${fieldKey}__${index}__data`]: base64
+          };
+          Object.entries(payloads).forEach(([name, value]) => {
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = name;
+            hidden.value = value;
+            hidden.className = "generated-file-payload";
+            form.appendChild(hidden);
+          });
+        }
+        input.disabled = true;
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      successBox.style.display = "none";
+
+      const honey = form.querySelector('input[name="_honey"]');
+      if (honey?.value) {
+        event.preventDefault();
+        return;
+      }
+
+      applyConditionalRules();
+      updateProductSummaries();
+      if (!validateAllSteps()) {
+        event.preventDefault();
+        return;
+      }
+
+      event.preventDefault();
+      localStorage.removeItem("upper_room_solutions_intake_progress");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Preparing files...";
+      try {
+        await prepareFilePayloads();
+        submitBtn.textContent = "Submitting...";
+        HTMLFormElement.prototype.submit.call(form);
+      } catch (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+        successBox.style.display = "block";
+        successMessage.textContent = "One or more files could not be prepared. Please try again or remove large files.";
+      }
+    });
+
+    loadProgress();
+    applyConditionalRules();
+    showStep(0);
+  </script>
+</body>
+</html>
