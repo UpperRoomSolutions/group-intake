@@ -737,21 +737,21 @@
 <span class="pill">Plans &amp; files</span>
 </div>
 <div class="grid">
-<div class="field optional-note" data-required="false">
-<label for="aif_gmapp_flex">Attach AIF, GMAPP, &amp; FLEX Here</label>
+<div class="field" data-required="true">
+<label class="required" for="aif_gmapp_flex">Attach AIF, GMAPP, &amp; FLEX Here</label>
 <input data-file-key="attachAif" id="aif_gmapp_flex" multiple="" name="aif_gmapp_flex" type="file"/>
-<div class="hint">Required when Colonial Life is selected in Enrollment Type.</div>
-<div class="error-text">AIF, GMAPP, and FLEX attachment is required when Colonial Life is selected.</div>
+<div class="hint">Required. Attach all applicable AIF, GMAPP, and FLEX files.</div>
+<div class="error-text">AIF, GMAPP, and FLEX attachment is required.</div>
 </div>
 <div class="field optional-note">
 <label for="census">Attach Census Here</label>
 <input data-file-key="attachCensus" id="census" multiple="" name="census" type="file"/>
 <label class="choice not-needed-choice"><input name="census_not_needed" type="checkbox" value="Not Needed"/> Not needed / not applicable</label>
-<div class="hint">Upload census file(s), or mark not needed if not applicable.</div>
+<div class="hint">Optional. Upload census file(s) if available, or mark not needed if not applicable.</div>
 <div class="error-text">Census can be uploaded if applicable.</div>
 </div>
-<div class="field" data-required="true">
-<label class="required" for="colonial_days">How is benefit eligibility defined for Colonial (days required)?</label>
+<div class="field optional-note" data-required="false">
+<label for="colonial_days">How is benefit eligibility defined for Colonial (days required)?</label>
 <select id="colonial_days" name="colonial_days">
 <option value="">Please Select</option>
 <option>FOMF DOH</option>
@@ -761,8 +761,8 @@
 </select>
 <div class="error-text">Colonial eligibility days are required.</div>
 </div>
-<div class="field" data-required="true">
-<label class="required" for="core_days">How is benefit eligibility defined for CORE (days required)?</label>
+<div class="field optional-note" data-required="false">
+<label for="core_days">How is benefit eligibility defined for CORE (days required)?</label>
 <select id="core_days" name="core_days">
 <option value="">Please Select</option>
 <option>FOMF DOH</option>
@@ -772,13 +772,13 @@
 </select>
 <div class="error-text">Core eligibility days are required.</div>
 </div>
-<div class="field" data-required="true">
-<label class="required" for="colonial_hours">How is benefit eligibility defined for Colonial (hours required)?</label>
+<div class="field optional-note" data-required="false">
+<label for="colonial_hours">How is benefit eligibility defined for Colonial (hours required)?</label>
 <input id="colonial_hours" name="colonial_hours" placeholder="Example: 30 hours/week" type="text"/>
 <div class="error-text">Colonial eligibility hours are required.</div>
 </div>
-<div class="field" data-required="true">
-<label class="required" for="core_hours">How is benefit eligibility defined for CORE (hours required)?</label>
+<div class="field optional-note" data-required="false">
+<label for="core_hours">How is benefit eligibility defined for CORE (hours required)?</label>
 <input id="core_hours" name="core_hours" placeholder="Example: 30 hours/week" type="text"/>
 <div class="error-text">Core eligibility hours are required.</div>
 </div>
@@ -806,7 +806,7 @@
 <label for="core_sbc_rates">All Core SBC's/Rates/Plan Info</label>
 <input data-file-key="allCore" id="core_sbc_rates" multiple="" name="core_sbc_rates" type="file"/>
 <label class="choice not-needed-choice"><input name="core_sbc_rates_not_needed" type="checkbox" value="Not Needed"/> Not needed / not applicable</label>
-<div class="hint">Upload Core SBCs, rates, or plan info if applicable.</div>
+<div class="hint">Optional. Upload Core SBCs, rates, or plan info if applicable.</div>
 <div class="error-text">Core plan documents can be added if applicable.</div>
 </div>
 <div class="field optional-note">
@@ -823,7 +823,7 @@
 <label for="unum_sbc_rates">All UNUM SBC's/Rates/RFP/Plan Info</label>
 <input data-file-key="allUnum" id="unum_sbc_rates" multiple="" name="unum_sbc_rates" type="file"/>
 <label class="choice not-needed-choice"><input name="unum_sbc_rates_not_needed" type="checkbox" value="Not Needed"/> Not needed / not applicable</label>
-<div class="hint">Upload UNUM SBCs, rates, RFP, or plan info if applicable.</div>
+<div class="hint">Optional. Upload UNUM SBCs, rates, RFP, or plan info if applicable.</div>
 <div class="error-text">UNUM plan documents can be added if applicable.</div>
 </div>
 <div class="field optional-note">
@@ -1121,7 +1121,7 @@
 <div class="error-text">Complete at least one option/detail in this product section when required.</div>
 </div>
 <div class="field optional-note full product-widget conditional-hidden" id="elimination_periods_field" data-summary-target="elimination_periods" data-required="false">
-<label>Elimination Periods (14/14 Required for 4k+)</label>
+<label>Elimination Periods (14/14 Required for 3k+)</label>
 <input type="hidden" id="elimination_periods" name="elimination_periods" value=""/>
 <div class="product-grid">
 <div class="product-subfield">
@@ -1809,7 +1809,14 @@
       }
 
       const enrollmentTypes = Array.from(document.querySelectorAll('input[name="enrollment_type"]:checked')).map(input => input.value);
-      setFieldRequiredById("aif_gmapp_flex", enrollmentTypes.includes("Colonial Life"));
+      const hasColonialEnrollment = enrollmentTypes.includes("Colonial Life");
+      const hasCoreEnrollment = enrollmentTypes.includes("Core Communication") || enrollmentTypes.includes("Core Enrollment");
+
+      setFieldRequiredById("aif_gmapp_flex", true);
+      setFieldVisibilityById("colonial_days", hasColonialEnrollment, hasColonialEnrollment);
+      setFieldVisibilityById("colonial_hours", hasColonialEnrollment, hasColonialEnrollment);
+      setFieldVisibilityById("core_days", hasCoreEnrollment, hasCoreEnrollment);
+      setFieldVisibilityById("core_hours", hasCoreEnrollment, hasCoreEnrollment);
 
       const dental = document.getElementById("colonial_dental")?.value || "";
       setPanelVisibility("individual_dental_field", dental === "Individual Dental 8100", true);
