@@ -1474,11 +1474,6 @@
 </div>
 <div class="error-text">Enter the email address where the copy should be sent.</div>
 </fieldset>
-<div class="field optional-note full">
-<label for="my_email">Internal Notification Email / My Email</label>
-<input id="my_email" name="my_email" placeholder="example@example.com" type="email"/>
-<div class="error-text">Enter a valid email.</div>
-</div>
 </div>
 </section>
 <div class="actions">
@@ -1847,12 +1842,28 @@
       try {
         await prepareFilePayloads();
         submitBtn.textContent = "Submitting...";
-        HTMLFormElement.prototype.submit.call(form);
+
+        const formData = new FormData(form);
+        await fetch(SUBMISSION_ENDPOINT, {
+          method: "POST",
+          mode: "no-cors",
+          body: formData
+        });
+
+        successBox.style.display = "block";
+        successMessage.textContent = "Your Group Intake Form has been submitted successfully. You may now close this page.";
+        submitBtn.textContent = "Submitted";
+        submitBtn.disabled = true;
+        saveBtn.disabled = true;
+        nextBtn.style.display = "none";
+        backBtn.style.display = "none";
+        successBox.scrollIntoView({ behavior: "smooth", block: "center" });
       } catch (error) {
+        form.querySelectorAll('input[type="file"]').forEach(input => { input.disabled = false; });
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit";
         successBox.style.display = "block";
-        successMessage.textContent = "One or more files could not be prepared. Please try again or remove large files.";
+        successMessage.textContent = "One or more files could not be prepared or submitted. Please try again or remove large files.";
       }
     });
 
