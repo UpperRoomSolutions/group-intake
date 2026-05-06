@@ -369,6 +369,66 @@
       color: var(--navy);
     }
 
+
+    .review-panel {
+      grid-column: 1 / -1;
+      background: #fbfcff;
+      border: 1px solid #d7dde6;
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .review-panel h3 {
+      margin: 0 0 8px;
+      color: var(--navy);
+      font-size: 18px;
+    }
+
+    .review-panel p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .review-item {
+      border: 1px solid #e1e6ee;
+      background: white;
+      border-radius: 14px;
+      padding: 10px 12px;
+      min-height: 58px;
+    }
+
+    .review-item strong {
+      display: block;
+      color: #374151;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .review-item span {
+      display: block;
+      color: var(--ink);
+      white-space: pre-wrap;
+      line-height: 1.35;
+    }
+
+    .test-banner {
+      display: none;
+      margin: 14px 0 0;
+      border: 1px solid #f4d391;
+      background: var(--gold-soft);
+      color: #7a4d00;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-weight: 700;
+    }
+
     .success-box {
       display: none;
       margin: 20px 24px 24px;
@@ -403,6 +463,7 @@
       .name-row, .inline-row, .inline-row.three { grid-template-columns: 1fr; }
       .actions { flex-direction: column-reverse; align-items: stretch; }
       .left-actions, .right-actions, button { width: 100%; }
+      .review-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -415,6 +476,7 @@
 <div class="eyebrow">Group Intake Form</div>
 <h1>Group Intake Form</h1>
 <p>Complete this intake to prepare the enrollment team with account details, contacts, eligibility rules, plan information, and supporting documents.</p>
+<div class="test-banner" id="testBanner">Test mode is on. Safe fake data has been filled for testing only. Attach a small AIF/GMAPP/FLEX test file before submitting.</div>
 </header>
 <section aria-label="Group Intake Form" class="form-card">
 <div class="progress-wrap">
@@ -428,6 +490,8 @@
 <input aria-hidden="true" autocomplete="off" class="honeypot" name="_honey" tabindex="-1" type="text"/>
 <input name="_subject" type="hidden" value="New Group Intake Form Submission"/>
 <input name="_template" type="hidden" value="table"/>
+<input id="confirmation_id" name="confirmation_id" type="hidden" value=""/>
+<input id="test_mode" name="test_mode" type="hidden" value=""/>
 <section class="step active" data-name="Account &amp; Contacts">
 <div class="step-header">
 <div>
@@ -1502,13 +1566,13 @@
 </div>
 </div>
 </section>
-<section class="step" data-name="Joseph Enhancements">
+<section class="step" data-name="Logistics">
 <div class="step-header">
 <div>
 <h2>Accountability &amp; Enrollment Logistics</h2>
-<p>Additional checkpoints and enrollment details requested from Joseph's feedback.</p>
+<p>Internal checkpoints and enrollment details to support a clean enrollment build.</p>
 </div>
-<span class="pill">Joseph feedback</span>
+<span class="pill">Internal controls</span>
 </div>
 <div class="grid">
 <fieldset class="field full optional-note">
@@ -1598,6 +1662,11 @@
 <span class="pill">Review &amp; submit</span>
 </div>
 <div class="grid">
+<div class="review-panel" id="reviewPanel" aria-live="polite">
+<h3>Final Review</h3>
+<p>Review the key details below before submitting. Use Back to make changes.</p>
+<div class="review-grid" id="reviewGrid"></div>
+</div>
 <div class="field optional-note full">
 <label for="additional_documents">Additional Documents</label>
 <input data-file-key="additionalDocuments" id="additional_documents" multiple="" name="additional_documents" type="file"/>
@@ -1648,6 +1717,10 @@
     const saveBtn = document.getElementById("saveBtn");
     const successBox = document.getElementById("successBox");
     const successMessage = document.getElementById("successMessage");
+    const confirmationInput = document.getElementById("confirmation_id");
+    const testModeInput = document.getElementById("test_mode");
+    const reviewGrid = document.getElementById("reviewGrid");
+    const testBanner = document.getElementById("testBanner");
     let currentStep = 0;
 
     function showStep(index) {
@@ -1791,6 +1864,7 @@
 
     function applyConditionalRules() {
       applyPayPeriodRules();
+      applyUploadNotNeededRules();
 
       const brokerComp = document.getElementById("broker_comp")?.value || "";
       const brokerOther = document.getElementById("broker_comp_other");
@@ -1892,6 +1966,219 @@
       return output;
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function cleanAccountForConfirmation(value) {
+      return String(value || "ACCOUNT")
+        .replace(/[^A-Za-z0-9]/g, "")
+        .slice(0, 10)
+        .toUpperCase() || "ACCOUNT";
+    }
+
+    function ensureConfirmationId() {
+      if (confirmationInput?.value) return confirmationInput.value;
+      const account = form.querySelector('[name="account_name"]')?.value || "ACCOUNT";
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, "0");
+      const d = String(today.getDate()).padStart(2, "0");
+      const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+      const id = `URS-${y}${m}${d}-${cleanAccountForConfirmation(account)}-${rand}`;
+      if (confirmationInput) confirmationInput.value = id;
+      return id;
+    }
+
+    function selectedValues(name) {
+      return Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`))
+        .filter(control => (control.type === "checkbox" || control.type === "radio") ? control.checked : String(control.value || "").trim())
+        .map(control => {
+          if (control.tagName === "SELECT") return control.options[control.selectedIndex]?.text || control.value;
+          return control.value;
+        })
+        .filter(Boolean);
+    }
+
+    function fieldValue(name) {
+      const controls = Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));
+      if (!controls.length) return "";
+      const first = controls[0];
+      if (first.type === "checkbox" || first.type === "radio") return selectedValues(name).join(", ");
+      if (first.tagName === "SELECT") return first.options[first.selectedIndex]?.text || first.value || "";
+      if (first.type === "file") return Array.from(first.files || []).map(file => file.name).join(", ");
+      return first.value || "";
+    }
+
+    function joinFilled(parts, separator = " | ") {
+      return parts.map(part => String(part || "").trim()).filter(Boolean).join(separator);
+    }
+
+    function uploadReview(fileName, notNeededName) {
+      const names = fieldValue(fileName);
+      const notNeeded = form.querySelector(`[name="${CSS.escape(notNeededName)}"]`)?.checked;
+      if (names) return names;
+      if (notNeeded) return "Not needed / not applicable";
+      return "No file uploaded";
+    }
+
+    function formatPaydayReview() {
+      const payPeriods = fieldValue("pay_periods");
+      const weekly = fieldValue("payday_day_of_week");
+      const monthly = fieldValue("monthly_payday_day");
+      const semi = joinFilled([fieldValue("semi_monthly_payday_1"), fieldValue("semi_monthly_payday_2")], " and ");
+      const notes = fieldValue("semi_monthly_payday_notes");
+      return joinFilled([payPeriods, weekly || monthly || semi, notes], "\n");
+    }
+
+    function updateReviewPanel() {
+      if (!reviewGrid) return;
+      updateProductSummaries();
+      const confirmation = ensureConfirmationId();
+      const rows = [
+        ["Confirmation #", confirmation],
+        ["Account Name", fieldValue("account_name")],
+        ["# of Employees", fieldValue("employee_count")],
+        ["Opener", joinFilled([fieldValue("opener_first_name"), fieldValue("opener_last_name")], " ")],
+        ["Opener Email", fieldValue("opener_email")],
+        ["HR Contact", joinFilled([fieldValue("hr_contact_name"), fieldValue("hr_contact_email")])],
+        ["Broker", joinFilled([fieldValue("broker_name"), fieldValue("broker_email")])],
+        ["Broker Comp", joinFilled([fieldValue("broker_comp"), fieldValue("broker_comp_other")])],
+        ["Enrollment Type", fieldValue("enrollment_type")],
+        ["Enrollment Platform", fieldValue("enrollment_platform")],
+        ["BCN / CAN", joinFilled([fieldValue("bcn"), fieldValue("can")])],
+        ["CED / PED", joinFilled([fieldValue("ced"), fieldValue("ped")])],
+        ["Pay Periods / Payday", formatPaydayReview()],
+        ["Deductions", fieldValue("deductions")],
+        ["Colonial Eligibility", joinFilled([fieldValue("colonial_days"), fieldValue("colonial_hours")])],
+        ["Core Eligibility", joinFilled([fieldValue("core_days"), fieldValue("core_hours")])],
+        ["AIF / GMAPP / FLEX", uploadReview("aif_gmapp_flex", "aif_not_needed")],
+        ["Census", uploadReview("census", "census_not_needed")],
+        ["Core Docs", uploadReview("core_sbc_rates", "core_sbc_rates_not_needed")],
+        ["UNUM Docs", uploadReview("unum_sbc_rates", "unum_sbc_rates_not_needed")],
+        ["Additional Docs", uploadReview("additional_documents", "additional_documents_not_needed")],
+        ["Colonial Products", joinFilled([fieldValue("colonial_dental"), fieldValue("colonial_accident"), fieldValue("colonial_disability"), fieldValue("colonial_cancer_critical"), fieldValue("colonial_hospital_med_bridge")], "\n")],
+        ["Logistics", joinFilled([fieldValue("pre_enrollment_communication_methods"), fieldValue("multilingual_needs"), fieldValue("special_shifts"), fieldValue("multiple_locations"), fieldValue("weekend_enrollment_needed"), fieldValue("packets_needed")], "\n")],
+        ["Copy Requested", fieldValue("send_copy") ? joinFilled(["Yes", fieldValue("copy_email")]) : "No"]
+      ];
+      reviewGrid.innerHTML = rows.map(([label, value]) => `
+        <div class="review-item">
+          <strong>${escapeHtml(label)}</strong>
+          <span>${escapeHtml(value || "Not answered")}</span>
+        </div>
+      `).join("");
+    }
+
+    function applyUploadNotNeededRules() {
+      const pairs = [
+        ["census", "census_not_needed"],
+        ["core_sbc_rates", "core_sbc_rates_not_needed"],
+        ["unum_sbc_rates", "unum_sbc_rates_not_needed"],
+        ["additional_documents", "additional_documents_not_needed"]
+      ];
+      pairs.forEach(([fileName, checkName]) => {
+        const fileInput = form.querySelector(`[name="${CSS.escape(fileName)}"]`);
+        const checkbox = form.querySelector(`[name="${CSS.escape(checkName)}"]`);
+        if (!fileInput || !checkbox) return;
+        if (checkbox.checked) {
+          fileInput.value = "";
+          fileInput.disabled = true;
+        } else {
+          fileInput.disabled = false;
+        }
+      });
+    }
+
+    function setControlValue(name, value) {
+      const controls = Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));
+      if (!controls.length) return;
+      controls.forEach(control => {
+        if (control.type === "checkbox" || control.type === "radio") {
+          const values = Array.isArray(value) ? value : [value];
+          control.checked = values.includes(control.value);
+        } else if (control.tagName === "SELECT") {
+          control.value = value;
+        } else if (control.type !== "file") {
+          control.value = value;
+        }
+      });
+    }
+
+    function applyTestMode() {
+      const params = new URLSearchParams(window.location.search);
+      if (!(params.get("test") === "true" || params.get("prefill") === "test")) return;
+      if (testBanner) testBanner.style.display = "block";
+      if (testModeInput) testModeInput.value = "Yes";
+      const today = new Date();
+      const plusDays = days => {
+        const d = new Date(today);
+        d.setDate(d.getDate() + days);
+        return d.toISOString().slice(0, 10);
+      };
+      const testData = {
+        account_name: "TEST ACCOUNT - DELETE",
+        employee_count: "113",
+        opener_agent_code: "808301",
+        opener_email: "tayshia.conner@coloniallifesales.com",
+        opener_first_name: "Tayshia",
+        opener_last_name: "Conner",
+        hr_contact_name: "Test HR Contact",
+        hr_contact_email: "test.hr@example.com",
+        broker_name: "Upper Room Solutions Test Broker",
+        broker_email: "testbroker@example.com",
+        broker_code: "TEST123",
+        broker_comp: "PIN LEVEL",
+        bcn: "BTEST123",
+        can: "CTEST123",
+        pay_periods: "26",
+        payday_day_of_week: "Friday",
+        deductions: "26",
+        domestic_partners: "Yes - Same & Opposite",
+        enrollment_start_date: plusDays(14),
+        enrollment_end_date: plusDays(35),
+        ced: plusDays(60),
+        ped: plusDays(74),
+        enrollment_type: ["Colonial Life", "Core Enrollment", "Mandatory 1-1"],
+        enrollment_platform: "Employee Navigator",
+        colonial_days: "FOMF 30 DAYS",
+        core_days: "FOMF 30 DAYS",
+        colonial_hours: "30 hours/week",
+        core_hours: "30 hours/week",
+        uw_offer: "Executive Partner",
+        pops_programs: "Telemedicine",
+        value_added_benefits: "Telemedicine included for 12 months",
+        enrollable_core_products: "Medical, Dental, Vision",
+        core_benefits_overview: "Test core benefits overview for formatting only.",
+        enrollment_goals: "Test submission to confirm output and Drive folder setup.",
+        colonial_dental: "Individual Dental 8100",
+        colonial_accident: "Group Accident (GAC4100)",
+        colonial_disability: "Group Disability",
+        colonial_cancer_critical: "Group Critical Illness (GCI6000)",
+        colonial_hospital_med_bridge: "None Offered",
+        individual_life_plans: "Whole Life Plus 5000",
+        accountability_checklist: ["Program request completed", "Employer contribution request completed", "CASSHM done", "NASC email received", "Agent Assist controls completed"],
+        pre_enrollment_communication_methods: ["Email", "Flyers", "Employer meeting"],
+        multilingual_needs: "No",
+        special_shifts: "Yes",
+        special_shift_details: "First and second shift.",
+        multiple_locations: "No",
+        weekend_enrollment_needed: "No",
+        packets_needed: "Yes",
+        packet_details: "Create test packets before enrollment.",
+        census_not_needed: "Not Needed",
+        core_sbc_rates_not_needed: "Not Needed",
+        unum_sbc_rates_not_needed: "Not Needed",
+        additional_documents_not_needed: "Not Needed"
+      };
+      Object.entries(testData).forEach(([key, value]) => setControlValue(key, value));
+      ensureConfirmationId();
+    }
+
     function saveProgress() {
       const payload = collectFormObject();
       Object.keys(payload).forEach(key => {
@@ -1953,6 +2240,7 @@
       const field = event.target.closest(".field");
       if (field) field.classList.remove("error");
       applyConditionalRules();
+      updateReviewPanel();
     });
 
 
@@ -2003,6 +2291,8 @@
 
       applyConditionalRules();
       updateProductSummaries();
+      ensureConfirmationId();
+      updateReviewPanel();
       if (!validateAllSteps()) {
         event.preventDefault();
         return;
@@ -2024,7 +2314,7 @@
         });
 
         successBox.style.display = "block";
-        successMessage.textContent = "Your Group Intake Form has been submitted successfully. You may now close this page.";
+        successMessage.textContent = `Your Group Intake Form has been submitted successfully. Confirmation #: ${ensureConfirmationId()}. You may now close this page.`;
         submitBtn.textContent = "Submitted";
         submitBtn.disabled = true;
         saveBtn.disabled = true;
@@ -2041,7 +2331,9 @@
     });
 
     loadProgress();
+    applyTestMode();
     applyConditionalRules();
+    updateReviewPanel();
     showStep(0);
   </script>
 </body>
