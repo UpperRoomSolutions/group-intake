@@ -486,7 +486,7 @@
 </div>
 <div aria-hidden="true" class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 </div>
-<form action="https://script.google.com/macros/s/AKfycbw5JfwHL5y2By3EVoEV4W1wiMKCSv8QbpewglkTGWyzAFXRK95mVnM2COLAW5deQYrJNQ/exec" id="intakeForm" method="POST" novalidate="">
+<form action="https://script.google.com/macros/s/AKfycbw5JfwHL5y2By3EVoEV4W1wiMKCSv8QbpewglkTGWyzAFXRK95mVnM2COLAW5deQYrJNQ/exec" id="intakeForm" method="POST" novalidate autocomplete="off">
 <input aria-hidden="true" autocomplete="off" class="honeypot" name="_honey" tabindex="-1" type="text"/>
 <input name="_subject" type="hidden" value="New Group Intake Form Submission"/>
 <input name="_template" type="hidden" value="table"/>
@@ -909,7 +909,7 @@
 <div class="field optional-note">
 <label for="colonial_dental">Colonial Individual Dental</label>
 <select id="colonial_dental" name="colonial_dental">
-<option selected>None Offered</option>
+<option value="None Offered" selected>None Offered</option>
 <option>Individual Dental 8100</option>
 </select>
 <div class="error-text">Select dental option.</div>
@@ -959,7 +959,7 @@
 <div class="field optional-note">
 <label for="colonial_accident">Colonial Accident</label>
 <select id="colonial_accident" name="colonial_accident">
-<option selected>None Offered</option>
+<option value="None Offered" selected>None Offered</option>
 <option>Individual Accident (IAC4000)</option>
 <option>Group Accident (GAC4100)</option>
 </select>
@@ -1095,7 +1095,7 @@
 <div class="field optional-note">
 <label for="colonial_disability">Colonial Disability</label>
 <select id="colonial_disability" name="colonial_disability">
-<option selected>None Offered</option>
+<option value="None Offered" selected>None Offered</option>
 <option>Individual Disability</option>
 <option>Group Disability</option>
 </select>
@@ -1244,7 +1244,7 @@
 <div class="field optional-note">
 <label for="colonial_cancer_critical">Colonial Cancer/Critical</label>
 <select id="colonial_cancer_critical" name="colonial_cancer_critical">
-<option selected>None Offered</option>
+<option value="None Offered" selected>None Offered</option>
 <option>Cancer Assist</option>
 <option>Group Critical Illness (GCI6000)</option>
 <option>Critical Illness (ICI6000)</option>
@@ -1402,7 +1402,7 @@
 <div class="field optional-note">
 <label for="colonial_hospital_med_bridge">Colonial Hospital/Med Bridge</label>
 <select id="colonial_hospital_med_bridge" name="colonial_hospital_med_bridge">
-<option selected>None Offered</option>
+<option value="None Offered" selected>None Offered</option>
 <option>INDIVIDUAL MED BRIDGE</option>
 <option>GROUP MED BRIDGE</option>
 </select>
@@ -1501,7 +1501,7 @@
 <div class="field optional-note">
 <label for="individual_life_offered">Individual Life Plans Being Offered</label>
 <select id="individual_life_offered" name="individual_life_offered">
-<option selected>None Offered</option>
+<option value="None Offered" selected>None Offered</option>
 <option>Term Life</option>
 <option>Whole Life</option>
 <option>Term Life and Whole Life</option>
@@ -1547,7 +1547,7 @@
 <div class="field optional-note">
 <label for="group_term_life_offered">Group Term Life</label>
 <select id="group_term_life_offered" name="group_term_life_offered">
-<option selected>None Offered</option>
+<option value="None Offered" selected>None Offered</option>
 <option>Group Term Life Offered</option>
 </select>
 <div class="error-text">Select Group Term Life option.</div>
@@ -2173,6 +2173,23 @@
       });
     }
 
+    const PRODUCT_DEFAULT_SELECT_IDS = [
+      "colonial_dental",
+      "colonial_accident",
+      "colonial_disability",
+      "colonial_cancer_critical",
+      "colonial_hospital_med_bridge",
+      "individual_life_offered",
+      "group_term_life_offered"
+    ];
+
+    function setColonialProductDefaults() {
+      PRODUCT_DEFAULT_SELECT_IDS.forEach(id => {
+        const control = document.getElementById(id);
+        if (control) control.value = "None Offered";
+      });
+    }
+
     function applyTestMode() {
       const params = new URLSearchParams(window.location.search);
       if (!(params.get("test") === "true" || params.get("prefill") === "test")) return;
@@ -2219,15 +2236,14 @@
         enrollable_core_products: "Medical, Dental, Vision",
         core_benefits_overview: "Test core benefits overview for formatting only.",
         enrollment_goals: "Test submission to confirm output and Drive folder setup.",
-        colonial_dental: "Individual Dental 8100",
-        colonial_accident: "Group Accident (GAC4100)",
-        colonial_disability: "Group Disability",
-        colonial_cancer_critical: "Group Critical Illness (GCI6000)",
+        colonial_dental: "None Offered",
+        colonial_accident: "None Offered",
+        colonial_disability: "None Offered",
+        colonial_cancer_critical: "None Offered",
         colonial_hospital_med_bridge: "None Offered",
-        individual_life_offered: "Whole Life",
-        group_term_life_offered: "Group Term Life Offered",
-        individual_life_plans: "Whole Life Plus 5000",
-        accountability_checklist: ["Program request completed", "Employer contribution request completed", "CASSHM done", "NASC email received", "Agent Assist controls completed"],
+        individual_life_offered: "None Offered",
+        group_term_life_offered: "None Offered",
+                accountability_checklist: ["Program request completed", "Employer contribution request completed", "CASSHM done", "NASC email received", "Agent Assist controls completed"],
         pre_enrollment_communication_methods: ["Email", "Flyers", "Employer meeting"],
         multilingual_needs: "No",
         special_shifts: "Yes",
@@ -2257,8 +2273,23 @@
     }
 
     function loadProgress() {
+      const params = new URLSearchParams(window.location.search);
+      const shouldResetSavedProgress =
+        params.get("reset") === "true" ||
+        params.get("test") === "true" ||
+        params.get("prefill") === "test";
+
+      if (shouldResetSavedProgress) {
+        localStorage.removeItem("upper_room_solutions_intake_progress");
+        setColonialProductDefaults();
+        return;
+      }
+
       const saved = localStorage.getItem("upper_room_solutions_intake_progress");
-      if (!saved) return;
+      if (!saved) {
+        setColonialProductDefaults();
+        return;
+      }
       const payload = JSON.parse(saved);
 
       Object.entries(payload).forEach(([key, value]) => {
