@@ -909,9 +909,8 @@
 <div class="field optional-note">
 <label for="colonial_dental">Colonial Individual Dental</label>
 <select id="colonial_dental" name="colonial_dental">
-<option value="">Please Select</option>
+<option selected>None Offered</option>
 <option>Individual Dental 8100</option>
-<option>None Offered</option>
 </select>
 <div class="error-text">Select dental option.</div>
 </div>
@@ -960,10 +959,9 @@
 <div class="field optional-note">
 <label for="colonial_accident">Colonial Accident</label>
 <select id="colonial_accident" name="colonial_accident">
-<option value="">Please Select</option>
+<option selected>None Offered</option>
 <option>Individual Accident (IAC4000)</option>
 <option>Group Accident (GAC4100)</option>
-<option>None Offered</option>
 </select>
 <div class="error-text">Select accident option.</div>
 </div>
@@ -1097,10 +1095,9 @@
 <div class="field optional-note">
 <label for="colonial_disability">Colonial Disability</label>
 <select id="colonial_disability" name="colonial_disability">
-<option value="">Please Select</option>
+<option selected>None Offered</option>
 <option>Individual Disability</option>
 <option>Group Disability</option>
-<option>None Offered</option>
 </select>
 <div class="error-text">Select disability option.</div>
 </div>
@@ -1247,11 +1244,10 @@
 <div class="field optional-note">
 <label for="colonial_cancer_critical">Colonial Cancer/Critical</label>
 <select id="colonial_cancer_critical" name="colonial_cancer_critical">
-<option value="">Please Select</option>
+<option selected>None Offered</option>
 <option>Cancer Assist</option>
 <option>Group Critical Illness (GCI6000)</option>
 <option>Critical Illness (ICI6000)</option>
-<option>None Offered</option>
 </select>
 <div class="error-text">Select cancer/critical option.</div>
 </div>
@@ -1406,10 +1402,9 @@
 <div class="field optional-note">
 <label for="colonial_hospital_med_bridge">Colonial Hospital/Med Bridge</label>
 <select id="colonial_hospital_med_bridge" name="colonial_hospital_med_bridge">
-<option value="">Please Select</option>
+<option selected>None Offered</option>
 <option>INDIVIDUAL MED BRIDGE</option>
 <option>GROUP MED BRIDGE</option>
-<option>None Offered</option>
 </select>
 <div class="error-text">Select hospital/med bridge option.</div>
 </div>
@@ -1503,17 +1498,72 @@
 </div>
 <div class="error-text">Complete at least one option/detail in this product section when required.</div>
 </div>
-<fieldset class="field optional-note">
-<legend>Individual Life Plans Being Offered</legend>
-<div class="choice-group">
-<label class="choice"><input name="individual_life_plans" type="checkbox" value="Term Life"/> Term Life</label>
-<label class="choice"><input name="individual_life_plans" type="checkbox" value="Whole Life"/> Whole Life</label>
+<div class="field optional-note">
+<label for="individual_life_offered">Individual Life Plans Being Offered</label>
+<select id="individual_life_offered" name="individual_life_offered">
+<option selected>None Offered</option>
+<option>Term Life</option>
+<option>Whole Life</option>
+<option>Term Life and Whole Life</option>
+</select>
+<div class="error-text">Select individual life option.</div>
 </div>
-</fieldset>
+<div class="field optional-note full product-widget conditional-hidden" id="individual_life_plans_field" data-summary-target="individual_life_plans" data-required="false">
+<label>Individual Life Plans</label>
+<input type="hidden" id="individual_life_plans" name="individual_life_plans" value=""/>
+<div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="individual_life_plans__tax_status" value="After-Tax Deduction"/> After-Tax Deduction</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_life_plans__tax_status" value="Pre-Tax Deduction"/> Pre-Tax Deduction</label>
+<label class="choice"><input class="product-control" type="radio" name="individual_life_plans__tax_status" value="Employee Chooses"/> Employee Chooses</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Plan Design</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="individual_life_plans__plan_design" value="10/15/20/30 Year Term"/> 10/15/20/30 Year Term</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_life_plans__plan_design" value="Paid-Up at 70"/> Paid-Up at 70</label>
+<label class="choice"><input class="product-control" type="checkbox" name="individual_life_plans__plan_design" value="Paid-Up at 100"/> Paid-Up at 100</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders Available</span>
+<select class="product-control" name="individual_life_plans__riders_available">
+<option value="">Please Select</option>
+<option>All Available</option>
+<option>None</option>
+<option>Custom / See Notes</option>
+</select>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">UW</span>
+<textarea class="product-control" name="individual_life_plans__uw" placeholder="GI, Full UW, offer notes, age bands, etc."></textarea>
+</div>
+</div>
+<div class="error-text">Complete at least one option/detail in this product section when individual life is selected.</div>
+</div>
+<div class="field optional-note">
+<label for="group_term_life_offered">Group Term Life</label>
+<select id="group_term_life_offered" name="group_term_life_offered">
+<option selected>None Offered</option>
+<option>Group Term Life Offered</option>
+</select>
+<div class="error-text">Select Group Term Life option.</div>
+</div>
 <div class="field optional-note full product-widget conditional-hidden" id="group_term_life_field" data-summary-target="group_term_life" data-required="false">
-<label>Group Term Life</label>
+<label>Group Term Life Details</label>
 <input type="hidden" id="group_term_life" name="group_term_life" value=""/>
 <div class="product-grid">
+<div class="product-subfield">
+<span class="product-subfield-label">Tax Status</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__tax_status" value="After-Tax Deduction"/> After-Tax Deduction</label>
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__tax_status" value="Pre-Tax Deduction"/> Pre-Tax Deduction</label>
+<label class="choice"><input class="product-control" type="radio" name="group_term_life__tax_status" value="Employee Chooses"/> Employee Chooses</label>
+</div>
+</div>
 <div class="product-subfield">
 <span class="product-subfield-label">Plan Type</span>
 <div class="choice-group tight">
@@ -1521,6 +1571,16 @@
 <label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_type" value="Group Term Life with AD&amp;D"/> Group Term Life with AD&amp;D</label>
 <label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_type" value="Group Term Life with WOP"/> Group Term Life with WOP</label>
 <label class="choice"><input class="product-control" type="radio" name="group_term_life__plan_type" value="Group Term Life with WOP &amp; AD&amp;D"/> Group Term Life with WOP &amp; AD&amp;D</label>
+</div>
+</div>
+<div class="product-subfield">
+<span class="product-subfield-label">Riders Available</span>
+<div class="choice-group tight">
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__riders_available" value="AD&D"/> AD&amp;D</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__riders_available" value="WOP"/> WOP</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__riders_available" value="Spouse Coverage"/> Spouse Coverage</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__riders_available" value="Dependent Coverage"/> Dependent Coverage</label>
+<label class="choice"><input class="product-control" type="checkbox" name="group_term_life__riders_available" value="None"/> None</label>
 </div>
 </div>
 <div class="product-subfield">
@@ -1892,30 +1952,34 @@
       setFieldVisibilityById("core_days", hasCoreEnrollment, hasCoreEnrollment);
       setFieldVisibilityById("core_hours", hasCoreEnrollment, hasCoreEnrollment);
 
-      const dental = document.getElementById("colonial_dental")?.value || "";
+      const dental = document.getElementById("colonial_dental")?.value || "None Offered";
       setPanelVisibility("individual_dental_field", dental === "Individual Dental 8100", true);
 
-      const accident = document.getElementById("colonial_accident")?.value || "";
+      const accident = document.getElementById("colonial_accident")?.value || "None Offered";
       setPanelVisibility("individual_accident_field", accident === "Individual Accident (IAC4000)", true);
       setPanelVisibility("group_accident_field", accident === "Group Accident (GAC4100)", true);
 
-      const disability = document.getElementById("colonial_disability")?.value || "";
+      const disability = document.getElementById("colonial_disability")?.value || "None Offered";
       setPanelVisibility("individual_disability_field", disability === "Individual Disability", true);
       setPanelVisibility("group_disability_field", disability === "Group Disability", true);
 
-      const cancer = document.getElementById("colonial_cancer_critical")?.value || "";
-      setPanelVisibility("cancer_assist_field", cancer === "Cancer Assist", false);
-      setPanelVisibility("individual_critical_field", cancer === "Critical Illness (ICI6000)", false);
-      setPanelVisibility("group_critical_illness_field", cancer === "Group Critical Illness (GCI6000)", false);
+      const cancer = document.getElementById("colonial_cancer_critical")?.value || "None Offered";
+      setPanelVisibility("cancer_assist_field", cancer === "Cancer Assist", true);
+      setPanelVisibility("individual_critical_field", cancer === "Critical Illness (ICI6000)", true);
+      setPanelVisibility("group_critical_illness_field", cancer === "Group Critical Illness (GCI6000)", true);
 
-      const bridge = document.getElementById("colonial_hospital_med_bridge")?.value || "";
+      const bridge = document.getElementById("colonial_hospital_med_bridge")?.value || "None Offered";
       const hasMedBridge = bridge === "INDIVIDUAL MED BRIDGE" || bridge === "GROUP MED BRIDGE";
       const hasDisability = disability === "Individual Disability" || disability === "Group Disability";
       setPanelVisibility("elimination_periods_field", hasMedBridge || hasDisability, hasMedBridge);
       setPanelVisibility("individual_med_bridge_field", bridge === "INDIVIDUAL MED BRIDGE", true);
       setPanelVisibility("group_medical_bridge_field", bridge === "GROUP MED BRIDGE", true);
 
-      setPanelVisibility("group_term_life_field", true, false);
+      const individualLife = document.getElementById("individual_life_offered")?.value || "None Offered";
+      setPanelVisibility("individual_life_plans_field", individualLife !== "None Offered", true);
+
+      const groupTermLife = document.getElementById("group_term_life_offered")?.value || "None Offered";
+      setPanelVisibility("group_term_life_field", groupTermLife !== "None Offered", true);
       updateProductSummaries();
     }
 
@@ -2062,7 +2126,7 @@
         ["Core Docs", uploadReview("core_sbc_rates", "core_sbc_rates_not_needed")],
         ["UNUM Docs", uploadReview("unum_sbc_rates", "unum_sbc_rates_not_needed")],
         ["Additional Docs", uploadReview("additional_documents", "additional_documents_not_needed")],
-        ["Colonial Products", joinFilled([fieldValue("colonial_dental"), fieldValue("colonial_accident"), fieldValue("colonial_disability"), fieldValue("colonial_cancer_critical"), fieldValue("colonial_hospital_med_bridge")], "\n")],
+        ["Colonial Products", joinFilled([fieldValue("colonial_dental"), fieldValue("colonial_accident"), fieldValue("colonial_disability"), fieldValue("colonial_cancer_critical"), fieldValue("colonial_hospital_med_bridge"), fieldValue("individual_life_offered"), fieldValue("group_term_life_offered")], "\n")],
         ["Logistics", joinFilled([fieldValue("pre_enrollment_communication_methods"), fieldValue("multilingual_needs"), fieldValue("special_shifts"), fieldValue("multiple_locations"), fieldValue("weekend_enrollment_needed"), fieldValue("packets_needed")], "\n")],
         ["Copy Requested", fieldValue("send_copy") ? joinFilled(["Yes", fieldValue("copy_email")]) : "No"]
       ];
@@ -2160,6 +2224,8 @@
         colonial_disability: "Group Disability",
         colonial_cancer_critical: "Group Critical Illness (GCI6000)",
         colonial_hospital_med_bridge: "None Offered",
+        individual_life_offered: "Whole Life",
+        group_term_life_offered: "Group Term Life Offered",
         individual_life_plans: "Whole Life Plus 5000",
         accountability_checklist: ["Program request completed", "Employer contribution request completed", "CASSHM done", "NASC email received", "Agent Assist controls completed"],
         pre_enrollment_communication_methods: ["Email", "Flyers", "Employer meeting"],
