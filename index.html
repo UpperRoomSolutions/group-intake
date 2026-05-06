@@ -521,13 +521,154 @@
 </div>
 <div class="field quarter" data-required="true">
 <label class="required" for="pay_periods"># of Pay Periods</label>
-<input id="pay_periods" inputmode="numeric" min="1" name="pay_periods" type="number"/>
-<div class="error-text">Pay periods are required.</div>
+<select id="pay_periods" name="pay_periods">
+<option value="">Select pay period frequency</option>
+<option value="12">12 - Monthly</option>
+<option value="24">24 - Semi-monthly</option>
+<option value="26">26 - Bi-weekly</option>
+<option value="52">52 - Weekly</option>
+</select>
+<div class="hint" id="pay_period_hint">Choose the payroll frequency first. The form will ask the correct payday question next.</div>
+<div class="error-text">Select the number of pay periods.</div>
 </div>
 <div class="field quarter" data-required="true">
 <label class="required" for="deductions"># of Deductions</label>
 <input id="deductions" inputmode="numeric" min="0" name="deductions" type="number"/>
+<div class="hint">Usually matches pay periods unless deductions stop early. Confirm with payroll.</div>
 <div class="error-text">Deductions are required.</div>
+</div>
+<div class="field half conditional-hidden" id="payday_weekly_field" data-required="false">
+<label for="payday_day_of_week">Payday - Day of Week</label>
+<select id="payday_day_of_week" name="payday_day_of_week" disabled>
+<option value="">Select payday</option>
+<option>Monday</option>
+<option>Tuesday</option>
+<option>Wednesday</option>
+<option>Thursday</option>
+<option>Friday</option>
+<option>Saturday</option>
+<option>Sunday</option>
+</select>
+<div class="hint">Required for weekly and bi-weekly payroll. PED should be the payroll effective date.</div>
+<div class="error-text">Select the payday.</div>
+</div>
+<div class="field half conditional-hidden" id="payday_monthly_field" data-required="false">
+<label for="monthly_payday_day">Monthly Payday - Day of Month</label>
+<select id="monthly_payday_day" name="monthly_payday_day" disabled>
+<option value="">Select monthly payday</option>
+<option value="1st">1st</option>
+<option value="2nd">2nd</option>
+<option value="3rd">3rd</option>
+<option value="4th">4th</option>
+<option value="5th">5th</option>
+<option value="6th">6th</option>
+<option value="7th">7th</option>
+<option value="8th">8th</option>
+<option value="9th">9th</option>
+<option value="10th">10th</option>
+<option value="11th">11th</option>
+<option value="12th">12th</option>
+<option value="13th">13th</option>
+<option value="14th">14th</option>
+<option value="15th">15th</option>
+<option value="16th">16th</option>
+<option value="17th">17th</option>
+<option value="18th">18th</option>
+<option value="19th">19th</option>
+<option value="20th">20th</option>
+<option value="21st">21st</option>
+<option value="22nd">22nd</option>
+<option value="23rd">23rd</option>
+<option value="24th">24th</option>
+<option value="25th">25th</option>
+<option value="26th">26th</option>
+<option value="27th">27th</option>
+<option value="28th">28th</option>
+<option value="29th">29th</option>
+<option value="30th">30th</option>
+<option value="31st">31st</option>
+<option value="Last day of the month">Last day of the month</option>
+</select>
+<div class="hint">Required when # of Pay Periods is 12.</div>
+<div class="error-text">Select the monthly payday.</div>
+</div>
+<div class="field full conditional-hidden" id="payday_semi_monthly_field" data-required="false">
+<label>Semi-monthly Payday Days</label>
+<div class="inline-row three">
+<select id="semi_monthly_payday_1" name="semi_monthly_payday_1" disabled>
+<option value="">First payday</option>
+<option value="1st">1st</option>
+<option value="2nd">2nd</option>
+<option value="3rd">3rd</option>
+<option value="4th">4th</option>
+<option value="5th">5th</option>
+<option value="6th">6th</option>
+<option value="7th">7th</option>
+<option value="8th">8th</option>
+<option value="9th">9th</option>
+<option value="10th">10th</option>
+<option value="11th">11th</option>
+<option value="12th">12th</option>
+<option value="13th">13th</option>
+<option value="14th">14th</option>
+<option value="15th">15th</option>
+<option value="16th">16th</option>
+<option value="17th">17th</option>
+<option value="18th">18th</option>
+<option value="19th">19th</option>
+<option value="20th">20th</option>
+<option value="21st">21st</option>
+<option value="22nd">22nd</option>
+<option value="23rd">23rd</option>
+<option value="24th">24th</option>
+<option value="25th">25th</option>
+<option value="26th">26th</option>
+<option value="27th">27th</option>
+<option value="28th">28th</option>
+<option value="29th">29th</option>
+<option value="30th">30th</option>
+<option value="31st">31st</option>
+<option value="Last day of the month">Last day of the month</option>
+</select>
+<select id="semi_monthly_payday_2" name="semi_monthly_payday_2" disabled>
+<option value="">Second payday</option>
+<option value="1st">1st</option>
+<option value="2nd">2nd</option>
+<option value="3rd">3rd</option>
+<option value="4th">4th</option>
+<option value="5th">5th</option>
+<option value="6th">6th</option>
+<option value="7th">7th</option>
+<option value="8th">8th</option>
+<option value="9th">9th</option>
+<option value="10th">10th</option>
+<option value="11th">11th</option>
+<option value="12th">12th</option>
+<option value="13th">13th</option>
+<option value="14th">14th</option>
+<option value="15th">15th</option>
+<option value="16th">16th</option>
+<option value="17th">17th</option>
+<option value="18th">18th</option>
+<option value="19th">19th</option>
+<option value="20th">20th</option>
+<option value="21st">21st</option>
+<option value="22nd">22nd</option>
+<option value="23rd">23rd</option>
+<option value="24th">24th</option>
+<option value="25th">25th</option>
+<option value="26th">26th</option>
+<option value="27th">27th</option>
+<option value="28th">28th</option>
+<option value="29th">29th</option>
+<option value="30th">30th</option>
+<option value="31st">31st</option>
+<option value="Last day of the month">Last day of the month</option>
+</select>
+<input id="semi_monthly_payday_notes" name="semi_monthly_payday_notes" placeholder="Optional notes, ex: if holiday, prior business day" type="text" disabled/>
+</div>
+<div class="hint">Required when # of Pay Periods is 24. Example: 15th and last day of the month.</div>
+<div class="error-text">Select both semi-monthly payday days.</div>
 </div>
 <fieldset class="field full" data-required="true">
 <legend class="required">Does the group recognize domestic partners?</legend>
@@ -1625,7 +1766,32 @@
       });
     }
 
+    function applyPayPeriodRules() {
+      const payPeriods = document.getElementById("pay_periods")?.value || "";
+      const hint = document.getElementById("pay_period_hint");
+
+      const showWeekly = payPeriods === "26" || payPeriods === "52";
+      const showMonthly = payPeriods === "12";
+      const showSemiMonthly = payPeriods === "24";
+
+      setPanelVisibility("payday_weekly_field", showWeekly, showWeekly);
+      setPanelVisibility("payday_monthly_field", showMonthly, showMonthly);
+      setPanelVisibility("payday_semi_monthly_field", showSemiMonthly, showSemiMonthly);
+
+      if (hint) {
+        const messages = {
+          "12": "Monthly payroll selected. Choose the day of the month payroll runs.",
+          "24": "Semi-monthly payroll selected. Choose the two days of the month payroll runs.",
+          "26": "Bi-weekly payroll selected. Choose the payday day of the week.",
+          "52": "Weekly payroll selected. Choose the payday day of the week."
+        };
+        hint.textContent = messages[payPeriods] || "Choose the payroll frequency first. The form will ask the correct payday question next.";
+      }
+    }
+
     function applyConditionalRules() {
+      applyPayPeriodRules();
+
       const brokerComp = document.getElementById("broker_comp")?.value || "";
       const brokerOther = document.getElementById("broker_comp_other");
       if (brokerOther) {
