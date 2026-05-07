@@ -176,6 +176,14 @@
     form.addEventListener("change",e=>{e.target.closest(".field")?.classList.remove("error");applyConditionalRules();updateReviewPanel();});
     form.addEventListener("submit",async event=>{event.preventDefault();successBox.style.display="none";if(form.querySelector('[name="_honey"]')?.value)return;applyConditionalRules();ensureConfirmationId();if(!validateAllSteps())return;localStorage.removeItem("urs_intake_progress");submitBtn.disabled=true;submitBtn.textContent="Preparing files...";try{await prepareFilePayloads();submitBtn.textContent="Submitting...";await fetch(SUBMISSION_ENDPOINT,{method:"POST",mode:"no-cors",body:new FormData(form)});successBox.style.display="block";successMessage.textContent=`Your Group Intake Form has been submitted successfully. Confirmation #: ${ensureConfirmationId()}. You may now close this page.`;submitBtn.textContent="Submitted";saveBtn.disabled=true;backBtn.style.display="none";nextBtn.style.display="none";successBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(error){form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);submitBtn.disabled=false;submitBtn.textContent="Submit";successBox.style.display="block";successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";}});
     loadProgress();applyConditionalRules();updateReviewPanel();showStep(0);
+    if (new URLSearchParams(window.location.search).get("test") === "true") {
+  setTimeout(() => {
+    applyTestMode();
+    applyConditionalRules();
+    updateReviewPanel();
+    showStep(steps.length - 1);
+  }, 300);
+}
   </script>
 </body>
 </html>
