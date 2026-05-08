@@ -300,8 +300,7 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
           });
           if(values.length)lines.push(`${label}: ${values.join(", ")}`);
         });
-        target.value=lines.join("
-");
+        target.value=lines.join("\n");
       });
     }
 
