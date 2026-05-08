@@ -38,7 +38,11 @@
           <div class="step-header"><div><h2>Account & Contacts</h2><p>Start with the account, opener, HR contact, and broker information.</p></div><span class="pill">Required basics</span></div>
           <div class="grid">
             <div class="field full" data-required="true"><label class="required" for="account_name">Account Name</label><input id="account_name" name="account_name" type="text" /><div class="error-text">Account name is required.</div></div>
+            <div class="field third" data-required="true"><label class="required" for="ein_number">EIN Number</label><input id="ein_number" name="ein_number" type="text" inputmode="numeric" placeholder="XX-XXXXXXX" /><div class="hint">Required. Use the employer Federal EIN.</div><div class="error-text">EIN number is required.</div></div>
             <div class="field third" data-required="true"><label class="required" for="employee_count"># of Employees</label><input id="employee_count" name="employee_count" type="number" min="1" /><div class="error-text">Employee count is required.</div></div>
+            <div class="field third optional-note"><label for="sic_code">SIC Code</label><input id="sic_code" name="sic_code" type="text" placeholder="Optional" /><div class="hint">Optional. Add if available.</div></div>
+            <div class="field third" data-required="true"><label class="required" for="enrollers_needed">How many enrollers are needed?</label><input id="enrollers_needed" name="enrollers_needed" type="number" min="0" placeholder="Example: 3" /><div class="hint">Estimate how many enrollers should be scheduled for this account.</div><div class="error-text">Enter the number of enrollers needed.</div></div>
+            <div class="field third" data-required="true"><label class="required" for="requested_build_completion_date">Requested Build/Guide Completion Date</label><input id="requested_build_completion_date" name="requested_build_completion_date" type="date" /><div class="hint">Internal due date for when the build/enrollment guide should be ready before enrollment begins.</div><div class="error-text">Enter the requested build or guide completion date.</div></div>
             <div class="field third" data-required="true"><label class="required" for="opener_agent_code">Opener Agent Code</label><input id="opener_agent_code" name="opener_agent_code" type="text" /><div class="error-text">Opener agent code is required.</div></div>
             <div class="field third" data-required="true"><label class="required" for="opener_email">Opener Email</label><input id="opener_email" name="opener_email" type="email" /><div class="error-text">Enter a valid opener email.</div></div>
             <div class="field" data-required="true"><label class="required">Opener</label><div class="name-row"><input name="opener_first_name" placeholder="First Name" type="text" /><input name="opener_last_name" placeholder="Last Name" type="text" /></div><div class="error-text">Opener first and last name are required.</div></div>
@@ -52,6 +56,10 @@
         <section class="step" data-name="Enrollment Setup">
           <div class="step-header"><div><h2>Enrollment Setup</h2><p>Enter timing, payroll, domestic partner rules, and enrollment type.</p></div><span class="pill">Dates & payroll</span></div>
           <div class="grid">
+            <div class="field full" data-required="true"><label class="required" for="case_type">Case Type</label><select id="case_type" name="case_type"><option value="">Please Select</option><option>New Group</option><option>Renewal - No Changes</option><option>Renewal - With Changes</option><option>Takeover</option><option>Platform Rebuild</option><option>Other</option></select><div class="hint">Renewal - No Changes keeps the form lighter. Renewal - With Changes asks what changed from last year.</div><div class="error-text">Select the case type.</div></div>
+            <div class="field full conditional-hidden" id="renewal_no_changes_confirm_field" data-required="false"><label for="renewal_no_changes_confirm">Renewal - No Changes Confirmation</label><select id="renewal_no_changes_confirm" name="renewal_no_changes_confirm"><option value="">Please Select</option><option>Confirmed - no plan, rate, eligibility, contribution, platform, payroll, or communication changes</option><option>Not sure</option></select><div class="hint">Use this only when the renewal is expected to mirror the prior enrollment.</div><div class="error-text">Confirm no changes or select Not sure.</div></div>
+            <fieldset class="field full conditional-hidden" id="renewal_change_types_field" data-required="false"><legend>What changed from last year?</legend><div class="choice-group"><label class="choice"><input name="renewal_change_types" type="checkbox" value="Product changes" /> Product changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Rate changes" /> Rate changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Eligibility changes" /> Eligibility changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Employer contribution changes" /> Employer contribution changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Carrier changes" /> Carrier changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Platform changes" /> Platform changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Payroll/deduction changes" /> Payroll/deduction changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Employee communication changes" /> Employee communication changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Other" /> Other</label></div><div class="error-text">Select at least one renewal change type.</div></fieldset>
+            <div class="field full conditional-hidden" id="renewal_changes_summary_field" data-required="false"><label for="renewal_changes_summary">Please describe the renewal changes</label><textarea id="renewal_changes_summary" name="renewal_changes_summary" placeholder="Describe only what changed: products, rates, eligibility, employer contributions, platform changes, payroll/deduction changes, employee communication, or other renewal updates."></textarea><div class="hint">This keeps renewals lighter while still capturing the operational changes.</div><div class="error-text">Describe the renewal changes.</div></div>
             <div class="field quarter" data-required="true"><label class="required" for="bcn">BCN</label><input id="bcn" name="bcn" type="text" /><div class="error-text">BCN is required.</div></div>
             <div class="field quarter" data-required="true"><label class="required" for="can">CAN</label><input id="can" name="can" type="text" /><div class="error-text">CAN is required.</div></div>
             <div class="field quarter" data-required="true"><label class="required" for="pay_periods"># of Pay Periods</label><select id="pay_periods" name="pay_periods"><option value="">Select pay period frequency</option><option value="12">12 - Monthly</option><option value="24">24 - Semi-monthly</option><option value="26">26 - Bi-weekly</option><option value="52">52 - Weekly</option></select><div class="error-text">Select the number of pay periods.</div></div>
@@ -66,22 +74,54 @@
             <div class="field quarter" data-required="true"><label class="required" for="ped">PED - Payroll Effective Date</label><input id="ped" name="ped" type="date" /><div class="error-text">PED is required.</div></div>
             <fieldset class="field full" data-required="true"><legend class="required">Enrollment Type</legend><div class="choice-group"><label class="choice"><input name="enrollment_type" type="checkbox" value="Colonial Life" /> Colonial Life</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Communication" /> Core Communication</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Enrollment" /> Core Enrollment</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Mandatory 1-1" /> Mandatory 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Voluntary 1-1" /> Voluntary 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Other" /> Other</label></div><div class="error-text">Select at least one enrollment type.</div></fieldset>
             <div class="field" data-required="true"><label class="required" for="enrollment_platform">Enrollment Platform</label><select id="enrollment_platform" name="enrollment_platform"><option value="">Please Select</option><option>Gathr</option><option>Harmony only</option><option>Employee Navigator</option></select><div class="error-text">Enrollment platform is required.</div></div>
-            <div class="field optional-note"><label for="employer_contributions">Employer Contributions</label><textarea id="employer_contributions" name="employer_contributions" placeholder="Yes/No and details"></textarea></div>
+            <div class="field optional-note full"><label for="employer_paid_benefits_details">Employer-Paid Benefits / Employer Contributions</label><textarea id="employer_paid_benefits_details" name="employer_paid_benefits_details" placeholder="Plan:
+Who is eligible:
+Contribution amount or percentage:
+Employee-only or all tiers:
+Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, contribution rules, and any tier/class differences.</div></div>
           </div>
         </section>
 
         <section class="step" data-name="Eligibility & Benefits">
           <div class="step-header"><div><h2>Eligibility & Benefits</h2><p>Add eligibility rules, required documents, and enrollment goals.</p></div><span class="pill">Plans & files</span></div>
           <div class="grid">
-            <div class="field" data-required="true"><label class="required" for="aif_gmapp_flex">Attach AIF, GMAPP, & FLEX Here</label><input data-file-key="aif_gmapp_flex" id="aif_gmapp_flex" multiple name="aif_gmapp_flex" type="file" /><div class="hint">Required. This key is corrected to match Code.gs.</div><div class="error-text">AIF, GMAPP, and FLEX attachment is required.</div></div>
+            <div class="field" id="aif_file_field" data-required="true"><label class="required" for="aif_file">Attach AIF Here</label><input data-file-key="aif" id="aif_file" multiple name="aif_file" type="file" /><div class="hint">Required for new groups.</div><div class="error-text">AIF attachment is required for new groups.</div></div>
+            <div class="field" id="flex_file_field" data-required="true"><label class="required" for="flex_file">Attach FLEX Here</label><input data-file-key="flex" id="flex_file" multiple name="flex_file" type="file" /><div class="hint">Required for new groups.</div><div class="error-text">FLEX attachment is required for new groups.</div></div>
+            <div class="field optional-note" id="gmapp_file_field" data-required="false"><label for="gmapp_file">Attach GMAPP Here</label><input data-file-key="gmapp" id="gmapp_file" multiple name="gmapp_file" type="file" /><div class="hint">Optional. Upload GMAPP if available.</div></div>
             <div class="field optional-note"><label for="census">Attach Census Here</label><input data-file-key="census" id="census" multiple name="census" type="file" /><label class="choice not-needed-choice"><input name="census_not_needed" type="checkbox" value="Not Needed" /> Not needed / not applicable</label></div>
-            <div class="field"><label for="colonial_days">Colonial Eligibility Days</label><select id="colonial_days" name="colonial_days"><option value="">Please Select</option><option>FOMF DOH</option><option>FOMF 30 DAYS</option><option>FOMF 60 DAYS</option><option>FOMF 90 DAYS</option></select></div>
-            <div class="field"><label for="colonial_hours">Colonial Eligibility Hours</label><input id="colonial_hours" name="colonial_hours" placeholder="Example: 30 hours/week" type="text" /></div>
-            <div class="field"><label for="core_days">Core Eligibility Days</label><select id="core_days" name="core_days"><option value="">Please Select</option><option>FOMF DOH</option><option>FOMF 30 DAYS</option><option>FOMF 60 DAYS</option><option>FOMF 90 DAYS</option></select></div>
-            <div class="field"><label for="core_hours">Core Eligibility Hours</label><input id="core_hours" name="core_hours" placeholder="Example: 30 hours/week" type="text" /></div>
-            <div class="field" data-required="true"><label class="required" for="uw_offer">UW Offer</label><textarea id="uw_offer" name="uw_offer"></textarea><div class="error-text">UW offer is required.</div></div>
+            <div class="field" id="colonial_days_field"><label for="colonial_days">Colonial Eligibility Days</label><select id="colonial_days" name="colonial_days"><option value="">Please Select</option><option>FOMF DOH</option><option>FOMF 30 DAYS</option><option>FOMF 60 DAYS</option><option>FOMF 90 DAYS</option></select></div>
+            <div class="field" id="colonial_hours_field"><label for="colonial_hours">Colonial Eligibility Hours</label><input id="colonial_hours" name="colonial_hours" placeholder="Example: 30 hours/week" type="text" /></div>
+            <div class="field" id="core_days_field"><label for="core_days">Core Eligibility Days</label><select id="core_days" name="core_days"><option value="">Please Select</option><option>FOMF DOH</option><option>FOMF 30 DAYS</option><option>FOMF 60 DAYS</option><option>FOMF 90 DAYS</option></select></div>
+            <div class="field" id="core_hours_field"><label for="core_hours">Core Eligibility Hours</label><input id="core_hours" name="core_hours" placeholder="Example: 30 hours/week" type="text" /></div>
+            <div class="field full optional-note"><label for="class_product_eligibility_differences">Class / Product Eligibility Differences</label><textarea id="class_product_eligibility_differences" name="class_product_eligibility_differences" placeholder="Example: Salaried vs hourly, executives only, location-based benefits, union/non-union, products limited to specific classes, waived/ineligible groups."></textarea><div class="hint">Add any differences by class, division, location, employee type, or product eligibility.</div></div>
+            <div class="field" id="uw_offer_field" data-required="true"><label class="required" for="uw_offer">UW Offer</label><textarea id="uw_offer" name="uw_offer"></textarea><div class="error-text">UW offer is required.</div></div>
+            <div class="field optional-note"><label for="eoi_underwriting_required">EOI / Underwriting Required</label><textarea id="eoi_underwriting_required" name="eoi_underwriting_required" placeholder="Which products require EOI, underwriting, GI limits, health questions, or special underwriting notes?"></textarea></div>
+            <div class="field optional-note"><label for="beneficiaries_required">Are beneficiaries required?</label><select id="beneficiaries_required" name="beneficiaries_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>By product</option><option>Unknown</option></select><textarea name="beneficiaries_required_details" placeholder="If yes or by product, list which products and any notes." style="margin-top:10px"></textarea></div>
+            <div class="field optional-note"><label for="tobacco_questions_required">Are tobacco questions required?</label><select id="tobacco_questions_required" name="tobacco_questions_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>By product</option><option>Unknown</option></select><textarea name="tobacco_questions_required_details" placeholder="If yes or by product, list which products and any notes." style="margin-top:10px"></textarea></div>
             <div class="field optional-note"><label for="pops_programs">POPS Programs</label><textarea id="pops_programs" name="pops_programs"></textarea></div>
-            <div class="field full optional-note"><label for="value_added_benefits">Value Added Benefits</label><textarea id="value_added_benefits" name="value_added_benefits"></textarea></div>
+            <fieldset class="field full optional-note" id="value_added_benefits_field">
+              <legend>Value Added Benefits / Special Offers Being Offered</legend>
+              <div class="choice-group">
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="KOFE" /> KOFE</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="Telemedicine" /> Telemedicine</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="Recuro" /> Recuro</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="Identity Theft" /> Identity Theft</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="Wellcard" /> Wellcard</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="Pet Insurance" /> Pet Insurance</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="LawAssure" /> LawAssure</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="None" /> None</label>
+                <label class="choice"><input name="value_added_benefits" type="checkbox" value="Other" /> Other</label>
+              </div>
+              <div class="hint">Select all complimentary or value-added programs that should be included in the enrollment guide or employee communication materials.</div>
+              <div class="hint conditional-hidden" id="telemedicine_propr_reminder" style="background:#fff5dd;border:1px solid #f4d391;border-radius:12px;padding:10px;margin-top:10px;color:#7a4d00;font-weight:800;">Telemedicine selected: remember to fill out the Telemedicine request on Propr.</div>
+              <div class="field full conditional-hidden" id="recuro_pppm_field" data-required="false" style="margin-top:12px;">
+                <label for="recuro_pppm">Recuro charge per person per month</label>
+                <input id="recuro_pppm" name="recuro_pppm" inputmode="decimal" placeholder="Example: 5.00" type="text" />
+                <div class="hint">Required when Recuro is selected. Enter the per person per month amount.</div>
+                <div class="error-text">Enter the Recuro per person per month charge.</div>
+              </div>
+              <textarea id="value_added_benefits_other" name="value_added_benefits_other" placeholder="Other value-added benefits or special offer notes" style="margin-top:10px"></textarea>
+            </fieldset>
             <div class="field optional-note"><label for="enrollable_core_products">Enrollable Core Products</label><textarea id="enrollable_core_products" name="enrollable_core_products"></textarea></div>
             <div class="field optional-note"><label for="core_sbc_rates">Core SBCs/Rates/Plan Info</label><input data-file-key="core_sbc_rates" id="core_sbc_rates" multiple name="core_sbc_rates" type="file" /></div>
             <div class="field optional-note"><label for="core_benefits_overview">Core Benefits Overview</label><textarea id="core_benefits_overview" name="core_benefits_overview"></textarea></div>
@@ -95,25 +135,25 @@
           <div class="step-header"><div><h2>Colonial Products</h2><p>Select product categories and add plan/rider notes. These field names match your Code.gs.</p></div><span class="pill">Product detail</span></div>
           <div class="grid">
             <div class="field"><label for="colonial_dental">Colonial Individual Dental</label><select id="colonial_dental" name="colonial_dental"><option>None Offered</option><option>Individual Dental 8100</option></select></div>
-            <div class="field"><label for="individual_dental">Individual Dental Details</label><textarea id="individual_dental" name="individual_dental" placeholder="Tax Status, Plan Design, Riders, UW"></textarea></div>
+            <div class="field"><label for="individual_dental">Individual Dental Details</label><select class="colonial-tax-status" data-target="individual_dental" id="individual_dental_tax_status" name="individual_dental_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="individual_dental" name="individual_dental" placeholder="Tax Status, Plan Design, Riders, UW"></textarea></div>
             <div class="field"><label for="colonial_accident">Colonial Accident</label><select id="colonial_accident" name="colonial_accident"><option>None Offered</option><option>Individual Accident (IAC4000)</option><option>Group Accident (GAC4100)</option></select></div>
-            <div class="field"><label for="individual_accident">Individual Accident Details</label><textarea id="individual_accident" name="individual_accident"></textarea></div>
-            <div class="field"><label for="group_accident">Group Accident Details</label><textarea id="group_accident" name="group_accident"></textarea></div>
+            <div class="field"><label for="individual_accident">Individual Accident Details</label><select class="colonial-tax-status" data-target="individual_accident" id="individual_accident_tax_status" name="individual_accident_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="individual_accident" name="individual_accident"></textarea></div>
+            <div class="field"><label for="group_accident">Group Accident Details</label><select class="colonial-tax-status" data-target="group_accident" id="group_accident_tax_status" name="group_accident_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="group_accident" name="group_accident"></textarea></div>
             <div class="field"><label for="colonial_disability">Colonial Disability</label><select id="colonial_disability" name="colonial_disability"><option>None Offered</option><option>Individual Disability</option><option>Group Disability</option></select></div>
-            <div class="field"><label for="individual_disability">Individual Disability Details</label><textarea id="individual_disability" name="individual_disability"></textarea></div>
-            <div class="field"><label for="group_disability">Group Disability Details</label><textarea id="group_disability" name="group_disability"></textarea></div>
+            <div class="field"><label for="individual_disability">Individual Disability Details</label><select class="colonial-tax-status" data-target="individual_disability" id="individual_disability_tax_status" name="individual_disability_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="individual_disability" name="individual_disability"></textarea></div>
+            <div class="field"><label for="group_disability">Group Disability Details</label><select class="colonial-tax-status" data-target="group_disability" id="group_disability_tax_status" name="group_disability_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="group_disability" name="group_disability"></textarea></div>
             <div class="field full"><label for="elimination_periods">Elimination Periods</label><textarea id="elimination_periods" name="elimination_periods"></textarea></div>
             <div class="field"><label for="colonial_cancer_critical">Colonial Cancer/Critical</label><select id="colonial_cancer_critical" name="colonial_cancer_critical"><option>None Offered</option><option>Cancer Assist</option><option>Group Critical Illness (GCI6000)</option><option>Critical Illness (ICI6000)</option></select></div>
-            <div class="field"><label for="cancer_assist">Cancer Assist Details</label><textarea id="cancer_assist" name="cancer_assist"></textarea></div>
-            <div class="field"><label for="individual_critical">Individual Critical Details</label><textarea id="individual_critical" name="individual_critical"></textarea></div>
-            <div class="field"><label for="group_critical_illness">Group Critical Illness Details</label><textarea id="group_critical_illness" name="group_critical_illness"></textarea></div>
+            <div class="field"><label for="cancer_assist">Cancer Assist Details</label><select class="colonial-tax-status" data-target="cancer_assist" id="cancer_assist_tax_status" name="cancer_assist_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="cancer_assist" name="cancer_assist"></textarea></div>
+            <div class="field"><label for="individual_critical">Individual Critical Details</label><select class="colonial-tax-status" data-target="individual_critical" id="individual_critical_tax_status" name="individual_critical_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="individual_critical" name="individual_critical"></textarea></div>
+            <div class="field"><label for="group_critical_illness">Group Critical Illness Details</label><select class="colonial-tax-status" data-target="group_critical_illness" id="group_critical_illness_tax_status" name="group_critical_illness_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="group_critical_illness" name="group_critical_illness"></textarea></div>
             <div class="field"><label for="colonial_hospital_med_bridge">Colonial Hospital/Med Bridge</label><select id="colonial_hospital_med_bridge" name="colonial_hospital_med_bridge"><option>None Offered</option><option>INDIVIDUAL MED BRIDGE</option><option>GROUP MED BRIDGE</option></select></div>
-            <div class="field"><label for="individual_med_bridge">Individual Med Bridge Details</label><textarea id="individual_med_bridge" name="individual_med_bridge"></textarea></div>
-            <div class="field"><label for="group_medical_bridge">Group Medical Bridge Details</label><textarea id="group_medical_bridge" name="group_medical_bridge"></textarea></div>
+            <div class="field"><label for="individual_med_bridge">Individual Med Bridge Details</label><select class="colonial-tax-status" data-target="individual_med_bridge" id="individual_med_bridge_tax_status" name="individual_med_bridge_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="individual_med_bridge" name="individual_med_bridge"></textarea></div>
+            <div class="field"><label for="group_medical_bridge">Group Medical Bridge Details</label><select class="colonial-tax-status" data-target="group_medical_bridge" id="group_medical_bridge_tax_status" name="group_medical_bridge_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="group_medical_bridge" name="group_medical_bridge"></textarea></div>
             <div class="field"><label for="individual_life_offered">Individual Life Plans Being Offered</label><select id="individual_life_offered" name="individual_life_offered"><option>None Offered</option><option>Term Life</option><option>Whole Life</option><option>Term Life and Whole Life</option></select></div>
-            <div class="field"><label for="individual_life_plans">Individual Life Plan Details</label><textarea id="individual_life_plans" name="individual_life_plans"></textarea></div>
+            <div class="field"><label for="individual_life_plans">Individual Life Plan Details</label><select class="colonial-tax-status" data-target="individual_life_plans" id="individual_life_plans_tax_status" name="individual_life_plans_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="individual_life_plans" name="individual_life_plans"></textarea></div>
             <div class="field"><label for="group_term_life_offered">Group Term Life</label><select id="group_term_life_offered" name="group_term_life_offered"><option>None Offered</option><option>Group Term Life Offered</option></select></div>
-            <div class="field"><label for="group_term_life">Group Term Life Details</label><textarea id="group_term_life" name="group_term_life"></textarea></div>
+            <div class="field"><label for="group_term_life">Group Term Life Details</label><select class="colonial-tax-status" data-target="group_term_life" id="group_term_life_tax_status" name="group_term_life_tax_status"><option value="">Tax Status - Select Pre or Post</option><option value="Pre-Tax">Pre-Tax</option><option value="Post-Tax">Post-Tax</option></select><textarea id="group_term_life" name="group_term_life"></textarea></div>
           </div>
         </section>
 
@@ -161,11 +201,58 @@
     function validateStep(index){let valid=true;steps[index].querySelectorAll(".field").forEach(field=>{const ok=isFieldGroupValid(field);field.classList.toggle("error",!ok);if(!ok)valid=false;});if(!valid)steps[index].querySelector(".field.error")?.scrollIntoView({behavior:"smooth",block:"center"});return valid;}
     function validateAllSteps(){for(let i=0;i<steps.length;i++){if(!validateStep(i)){showStep(i);return false;}}return true;}
     function setPanelVisibility(id, visible, required=false){const field=document.getElementById(id);if(!field)return;field.classList.toggle("conditional-hidden",!visible);field.dataset.required=visible&&required?"true":"false";field.querySelectorAll("input,select,textarea").forEach(c=>{c.disabled=!visible;if(!visible){if(c.type==="checkbox"||c.type==="radio")c.checked=false;else c.value="";}});if(!visible)field.classList.remove("error");}
-    function applyConditionalRules(){const pay=document.getElementById("pay_periods")?.value||"";setPanelVisibility("payday_weekly_field",pay==="26"||pay==="52",pay==="26"||pay==="52");setPanelVisibility("payday_monthly_field",pay==="12",pay==="12");setPanelVisibility("payday_semi_monthly_field",pay==="24",pay==="24");const copy=document.getElementById("send_copy")?.checked;const copyField=document.getElementById("copy_request_field");if(copyField)copyField.dataset.required=copy?"true":"false";}
+    function updateColonialTaxStatusSummaries(){
+      document.querySelectorAll(".colonial-tax-status").forEach(select=>{
+        const target=document.getElementById(select.dataset.target);
+        if(!target)return;
+        const selected=String(select.value||"").trim();
+        let current=String(target.value||"");
+        current=current.replace(/^Tax Status:\s*.*(?:\r?\n)?/i,"");
+        if(selected)target.value=`Tax Status: ${selected}${current ? "\n"+current : ""}`;
+        else target.value=current;
+      });
+    }
+
+    function applyConditionalRules(){
+      const pay=document.getElementById("pay_periods")?.value||"";
+      setPanelVisibility("payday_weekly_field",pay==="26"||pay==="52",pay==="26"||pay==="52");
+      setPanelVisibility("payday_monthly_field",pay==="12",pay==="12");
+      setPanelVisibility("payday_semi_monthly_field",pay==="24",pay==="24");
+
+      const caseType=document.getElementById("case_type")?.value||"";
+      const isRenewalNoChanges=caseType==="Renewal - No Changes";
+      const isRenewalWithChanges=caseType==="Renewal - With Changes";
+      const isRenewal=isRenewalNoChanges||isRenewalWithChanges;
+      setPanelVisibility("renewal_no_changes_confirm_field",isRenewalNoChanges,isRenewalNoChanges);
+      setPanelVisibility("renewal_change_types_field",isRenewalWithChanges,isRenewalWithChanges);
+      setPanelVisibility("renewal_changes_summary_field",isRenewalWithChanges,isRenewalWithChanges);
+
+      // Hide new-group-only questions for renewals. These can still be included in renewal notes if something changed.
+      setPanelVisibility("aif_file_field",!isRenewal,!isRenewal);
+      setPanelVisibility("flex_file_field",!isRenewal,!isRenewal);
+      setPanelVisibility("gmapp_file_field",!isRenewal,false);
+      setPanelVisibility("uw_offer_field",!isRenewal,!isRenewal);
+      setPanelVisibility("colonial_days_field",!isRenewal,false);
+      setPanelVisibility("colonial_hours_field",!isRenewal,false);
+      setPanelVisibility("core_days_field",!isRenewal,false);
+      setPanelVisibility("core_hours_field",!isRenewal,false);
+
+      const valueAddSelections = Array.from(form.querySelectorAll('input[name="value_added_benefits"]')).filter(input => input.checked).map(input => input.value);
+      const telemedicineSelected = valueAddSelections.includes("Telemedicine");
+      const recuroSelected = valueAddSelections.includes("Recuro");
+      const telemedicineReminder = document.getElementById("telemedicine_propr_reminder");
+      if (telemedicineReminder) telemedicineReminder.classList.toggle("conditional-hidden", !telemedicineSelected);
+      setPanelVisibility("recuro_pppm_field", recuroSelected, recuroSelected);
+
+      const copy=document.getElementById("send_copy")?.checked;
+      const copyField=document.getElementById("copy_request_field");
+      if(copyField)copyField.dataset.required=copy?"true":"false";
+      updateColonialTaxStatusSummaries();
+    }
     function fieldValue(name){const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));if(!controls.length)return"";const first=controls[0];if(first.type==="checkbox"||first.type==="radio")return controls.filter(c=>c.checked).map(c=>c.value).join(", ");if(first.type==="file")return Array.from(first.files||[]).map(f=>f.name).join(", ");if(first.tagName==="SELECT")return first.options[first.selectedIndex]?.text||first.value||"";return first.value||"";}
     function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
     function ensureConfirmationId(){if(confirmationInput.value)return confirmationInput.value;const account=(fieldValue("account_name")||"ACCOUNT").replace(/[^A-Za-z0-9]/g,"").slice(0,10).toUpperCase()||"ACCOUNT";const d=new Date();const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;const rand=Math.random().toString(36).slice(2,6).toUpperCase();confirmationInput.value=`URS-${stamp}-${account}-${rand}`;return confirmationInput.value;}
-    function updateReviewPanel(){if(!reviewGrid)return;ensureConfirmationId();const rows=[["Confirmation #",fieldValue("confirmation_id")],["Account",fieldValue("account_name")],["Employees",fieldValue("employee_count")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Broker",`${fieldValue("broker_name")} | ${fieldValue("broker_email")}`],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],["Pay Periods",fieldValue("pay_periods")],["AIF / GMAPP / FLEX",fieldValue("aif_gmapp_flex")||"No file uploaded"],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")]];reviewGrid.innerHTML=rows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");}
+    function updateReviewPanel(){if(!reviewGrid)return;ensureConfirmationId();const rows=[["Confirmation #",fieldValue("confirmation_id")],["Account",fieldValue("account_name")],["EIN",fieldValue("ein_number")],["Case Type",fieldValue("case_type")],["Renewal No-Changes Confirmation",fieldValue("renewal_no_changes_confirm")],["Renewal Change Types",fieldValue("renewal_change_types")],["Renewal Changes",fieldValue("renewal_changes_summary")],["Employees",fieldValue("employee_count")],["SIC Code",fieldValue("sic_code")],["Enrollers Needed",fieldValue("enrollers_needed")],["Requested Build/Guide Completion Date",fieldValue("requested_build_completion_date")],["Class / Product Eligibility Differences",fieldValue("class_product_eligibility_differences")],["Employer-Paid Benefits",fieldValue("employer_paid_benefits_details")],["Value Added Benefits",[fieldValue("value_added_benefits"),fieldValue("recuro_pppm") ? ("Recuro PPPM: $" + fieldValue("recuro_pppm")) : "",fieldValue("value_added_benefits_other")].filter(Boolean).join(" | ")],["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Broker",`${fieldValue("broker_name")} | ${fieldValue("broker_email")}`],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],["Pay Periods",fieldValue("pay_periods")],["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["GMAPP",fieldValue("gmapp_file")||"No file uploaded"],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")]];reviewGrid.innerHTML=rows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");}
     function saveProgress(){const data={};new FormData(form).forEach((v,k)=>{if(v instanceof File)return;if(data[k])data[k]=Array.isArray(data[k])?[...data[k],v]:[data[k],v];else data[k]=v;});localStorage.setItem("urs_intake_progress",JSON.stringify(data));successBox.style.display="block";successMessage.textContent="Progress saved in this browser. File uploads cannot be saved until final submission.";}
     function loadProgress(){const saved=localStorage.getItem("urs_intake_progress");if(!saved)return;try{const data=JSON.parse(saved);Object.entries(data).forEach(([k,v])=>{Array.from(form.querySelectorAll(`[name="${CSS.escape(k)}"]`)).forEach(c=>{const vals=Array.isArray(v)?v:[v];if(c.type==="checkbox"||c.type==="radio")c.checked=vals.includes(c.value);else if(c.type!=="file")c.value=v;});});}catch(e){}}
     function readFileAsBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=reject;reader.readAsDataURL(file);});}
@@ -182,12 +269,15 @@
     }
     function addFakeTestAttachmentPayload(){
       form.querySelectorAll(".test-file-payload").forEach(el=>el.remove());
-      const fakeText="TEST FILE ONLY - AIF GMAPP FLEX placeholder for form automation test.";
-      const fakeBase64=btoa(fakeText);
+      const fakeAifBase64=btoa("TEST FILE ONLY - AIF placeholder for form automation test.");
+      const fakeFlexBase64=btoa("TEST FILE ONLY - FLEX placeholder for form automation test.");
       const payloads={
-        "file__aif_gmapp_flex__0__name":"TEST_AIF_GMAPP_FLEX.txt",
-        "file__aif_gmapp_flex__0__type":"text/plain",
-        "file__aif_gmapp_flex__0__data":fakeBase64
+        "file__aif__0__name":"TEST_AIF.txt",
+        "file__aif__0__type":"text/plain",
+        "file__aif__0__data":fakeAifBase64,
+        "file__flex__0__name":"TEST_FLEX.txt",
+        "file__flex__0__type":"text/plain",
+        "file__flex__0__data":fakeFlexBase64
       };
       Object.entries(payloads).forEach(([name,value])=>{
         const hidden=document.createElement("input");
@@ -197,13 +287,16 @@
         hidden.className="test-file-payload";
         form.appendChild(hidden);
       });
-      const aif=document.getElementById("aif_gmapp_flex");
-      const aifField=aif?.closest(".field");
-      if(aifField){
-        aifField.dataset.required="false";
-        aifField.classList.remove("error");
-        aifField.classList.add("optional-note");
-      }
+      ["aif_file","flex_file"].forEach(id=>{
+        const control=document.getElementById(id);
+        const field=control?.closest(".field");
+        if(field){
+          field.dataset.required="false";
+          field.classList.remove("error");
+          field.classList.add("optional-note");
+          field.querySelector("label")?.classList.remove("required");
+        }
+      });
     }
     function applyTestMode(){
       const params=new URLSearchParams(window.location.search);
@@ -219,7 +312,22 @@
       };
       const testData={
         account_name:"TEST ACCOUNT - DELETE",
+        
+        ein_number:"12-3456789",
+        case_type:"New Group",
+        renewal_change_types:["Rate changes","Employee communication changes"],
+        renewal_changes_summary:"Renewal test: rates updated, guide needs refreshed, employer contribution remains the same, no new products added.",
         employee_count:"113",
+        sic_code:"6411",
+        enrollers_needed:"3",
+        requested_build_completion_date:plusDays(10),
+        class_product_eligibility_differences:"Salaried and hourly are eligible for all Colonial products. Executive class has employer-paid life. Part-time employees under 30 hours are ineligible.",
+        employer_paid_benefits_details:"Plan: Group Term Life\nWho is eligible: Full-time employees\nContribution: 100% employee-only\nTier: Employee only\nNotes: Voluntary buy-up available for employee/spouse/dependent if approved.",
+        beneficiaries_required:"Yes",
+        beneficiaries_required_details:"Required for life products only.",
+        tobacco_questions_required:"By product",
+        tobacco_questions_required_details:"Required for life and critical illness where tobacco-distinct rates apply.",
+        eoi_underwriting_required:"EOI required for late entrants and amounts over GI. Group Term Life requires EOI above guaranteed issue limit.",
         opener_agent_code:"808301",
         opener_email:"tayshia.conner@coloniallifesales.com",
         opener_first_name:"Tayshia",
@@ -248,17 +356,31 @@
         core_hours:"30 hours/week",
         uw_offer:"Executive Partner test offer",
         pops_programs:"Telemedicine",
-        value_added_benefits:"Telemedicine included for 12 months.",
+        value_added_benefits:["Telemedicine","KOFE","Recuro","Identity Theft"],
+        recuro_pppm:"5.00",
+        value_added_benefits_other:"Telemedicine request should be completed on Propr. Recuro rate is test-only.",
         enrollable_core_products:"Medical, Dental, Vision",
         core_benefits_overview:"Test core benefits overview.",
-        enrollment_goals:"Test submission to confirm email, Drive folder, PDF, and DOCX generation.",
-        colonial_dental:"None Offered",
-        colonial_accident:"None Offered",
-        colonial_disability:"None Offered",
-        colonial_cancer_critical:"None Offered",
-        colonial_hospital_med_bridge:"None Offered",
-        individual_life_offered:"None Offered",
-        group_term_life_offered:"None Offered",
+        enrollment_goals:"Test submission to confirm email, Drive folder, PDF creation, Google Doc link, and Drive folder link.",
+        colonial_dental:"Individual Dental 8100",
+        colonial_accident:"Group Accident (GAC4100)",
+        colonial_disability:"Group Disability",
+        colonial_cancer_critical:"Group Critical Illness (GCI6000)",
+        colonial_hospital_med_bridge:"GROUP MED BRIDGE",
+        individual_life_offered:"Term Life and Whole Life",
+        group_term_life_offered:"Group Term Life Offered",
+        individual_dental_tax_status:"Post-Tax",
+        individual_accident_tax_status:"Post-Tax",
+        group_accident_tax_status:"Pre-Tax",
+        individual_disability_tax_status:"Post-Tax",
+        group_disability_tax_status:"Post-Tax",
+        cancer_assist_tax_status:"Post-Tax",
+        individual_critical_tax_status:"Post-Tax",
+        group_critical_illness_tax_status:"Post-Tax",
+        individual_med_bridge_tax_status:"Post-Tax",
+        group_medical_bridge_tax_status:"Post-Tax",
+        individual_life_plans_tax_status:"Post-Tax",
+        group_term_life_tax_status:"Post-Tax",
         accountability_checklist:["Program request completed","Employer contribution request completed","CASSHM done","NASC email received","Agent Assist controls completed"],
         pre_enrollment_communication_methods:["Email","Flyers","Employer meeting"],
         multilingual_needs:"No",
@@ -285,7 +407,7 @@
     saveBtn.addEventListener("click",saveProgress);
     form.addEventListener("input",e=>{e.target.closest(".field")?.classList.remove("error");updateReviewPanel();});
     form.addEventListener("change",e=>{e.target.closest(".field")?.classList.remove("error");applyConditionalRules();updateReviewPanel();});
-    form.addEventListener("submit",async event=>{event.preventDefault();successBox.style.display="none";if(form.querySelector('[name="_honey"]')?.value)return;applyConditionalRules();ensureConfirmationId();if(!validateAllSteps())return;localStorage.removeItem("urs_intake_progress");submitBtn.disabled=true;submitBtn.textContent="Preparing files...";try{await prepareFilePayloads();submitBtn.textContent="Submitting...";await fetch(SUBMISSION_ENDPOINT,{method:"POST",mode:"no-cors",body:new FormData(form)});successBox.style.display="block";successMessage.textContent=`Your Group Intake Form has been submitted successfully. Confirmation #: ${ensureConfirmationId()}. You may now close this page.`;submitBtn.textContent="Submitted";saveBtn.disabled=true;backBtn.style.display="none";nextBtn.style.display="none";successBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(error){form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);submitBtn.disabled=false;submitBtn.textContent="Submit";successBox.style.display="block";successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";}});
+    form.addEventListener("submit",async event=>{event.preventDefault();successBox.style.display="none";if(form.querySelector('[name="_honey"]')?.value)return;applyConditionalRules();updateColonialTaxStatusSummaries();ensureConfirmationId();if(!validateAllSteps())return;localStorage.removeItem("urs_intake_progress");submitBtn.disabled=true;submitBtn.textContent="Preparing files...";try{await prepareFilePayloads();submitBtn.textContent="Submitting...";await fetch(SUBMISSION_ENDPOINT,{method:"POST",mode:"no-cors",body:new FormData(form)});successBox.style.display="block";successMessage.textContent=`Your Group Intake Form has been submitted successfully. Confirmation #: ${ensureConfirmationId()}. You may now close this page.`;submitBtn.textContent="Submitted";saveBtn.disabled=true;backBtn.style.display="none";nextBtn.style.display="none";successBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(error){form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);submitBtn.disabled=false;submitBtn.textContent="Submit";successBox.style.display="block";successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";}});
     const params=new URLSearchParams(window.location.search);
     const isTest=params.get("test")==="true"||params.get("prefill")==="test";
     if(!isTest)loadProgress();
