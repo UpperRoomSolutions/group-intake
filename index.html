@@ -274,7 +274,13 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
         });
       }
       const checkboxes=controls.filter(c=>c.type==="checkbox");const radios=controls.filter(c=>c.type==="radio");const files=controls.filter(c=>c.type==="file");
-      if(checkboxes.length)return checkboxes.some(c=>c.checked);if(radios.length)return radios.some(c=>c.checked);if(files.length)return files.some(c=>c.files&&c.files.length>0);
+      if(checkboxes.length)return checkboxes.some(c=>c.checked);if(radios.length)return radios.some(c=>c.checked);
+      if(files.length){
+        return files.some(c=>c.files&&c.files.length>0) || files.some(c=>{
+          const key=c.dataset.fileKey||c.name;
+          return !!form.querySelector(`[name^="file__${CSS.escape(key)}__"][name$="__data"]`);
+        });
+      }
       return controls.filter(c=>c.type!=="hidden").every(c=>String(c.value||"").trim().length>0 && (c.type!=="email" || c.checkValidity()));
     }
     function validateStep(index){let valid=true;steps[index].querySelectorAll(".field").forEach(field=>{const ok=isFieldGroupValid(field);field.classList.toggle("error",!ok);if(!ok)valid=false;});if(!valid)steps[index].querySelector(".field.error")?.scrollIntoView({behavior:"smooth",block:"center"});return valid;}
@@ -501,6 +507,60 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
         group_medical_bridge_tax_status:"Post-Tax",
         individual_life_plans_tax_status:"Post-Tax",
         group_term_life_tax_status:"Post-Tax",
+
+        // Product panel detail selections for test mode. These make the selected product panels pass validation.
+        individual_dental__tax_status:"Post-Tax",
+        individual_dental__plan_design:["Standard (MAC 100/80/50) $1000 MAX"],
+        individual_dental__waiting_period:"No",
+        individual_dental__riders:["Ortho (ER)","Vision (EE)"],
+
+        group_accident__tax_status:"Pre-Tax",
+        group_accident__plan_design:"On/Off-Job Accident Coverage",
+        group_accident__benefit_levels:["Preferred"],
+        group_accident__riders:["Recovery Plus Package","Active Lifestyles"],
+        group_accident__wellbeing:"Standard - $50",
+
+        group_disability__tax_status:"Post-Tax",
+        group_disability__psych:"NO",
+        group_disability__max_amount:"$3,000",
+        group_disability__hospital:"Yes",
+        group_disability__table_rate:"Test Rate Table",
+        group_disability__notes:"Test group disability design notes.",
+
+        elimination_periods__3_months:["14/14"],
+        elimination_periods__6_months:["14/14"],
+        elimination_periods__12_months:["30/30"],
+
+        group_critical_illness__tax_status:"Post-Tax",
+        group_critical_illness__plan_design:"CI w/cancer",
+        group_critical_illness__riders:["Progressive","Initial Diagnosis"],
+        group_critical_illness__health_screening:"$50",
+        group_critical_illness__age_tobacco:["Issue Age","Uni-Tobacco"],
+        group_critical_illness__increments:"$5000",
+        group_critical_illness__max_face_amount:"$30,000",
+
+        group_medical_bridge__tax_status:"Post-Tax",
+        group_medical_bridge__plan_design:"Plan 2 - NON HSA",
+        group_medical_bridge__plan_type:["Composite (Plan2)"],
+        group_medical_bridge__levels:["$1000"],
+        group_medical_bridge__riders:["Observation Room","Wellbeing $100 Standard"],
+
+        individual_life_plans__tax_status:"Post-Tax",
+        individual_life_plans__plan_design:["10/15/20/30 Year Term","Paid-Up at 100"],
+        individual_life_plans__riders:"All Available",
+        individual_life_plans__uw:"Test GI/UW notes for life products.",
+
+        group_term_life__tax_status:"Post-Tax",
+        group_term_life__plan_design:"Group Term Life with AD&D",
+        group_term_life__riders:["AD&D","Spouse Coverage","Dependent Coverage"],
+        group_term_life__plan_level:"Both",
+        group_term_life__face_amount:["Even increments"],
+        group_term_life__tobacco:["Uni-Tobacco"],
+        group_term_life__eoi_employee:"$100,000",
+        group_term_life__eoi_spouse:"$25,000",
+        group_term_life__max_face_amount:"$250,000",
+        group_term_life__rate_table:"Test Rate Table",
+
         accountability_checklist:["Program request completed","Employer contribution request completed","CASSHM done","NASC email received","Agent Assist controls completed"],
         pre_enrollment_communication_methods:["Email","Flyers","Employer meeting"],
         multilingual_needs:"No",
@@ -527,7 +587,7 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
     saveBtn.addEventListener("click",saveProgress);
     form.addEventListener("input",e=>{e.target.closest(".field")?.classList.remove("error");updateReviewPanel();});
     form.addEventListener("change",e=>{e.target.closest(".field")?.classList.remove("error");applyConditionalRules();updateReviewPanel();});
-    form.addEventListener("submit",async event=>{event.preventDefault();successBox.style.display="none";if(form.querySelector('[name="_honey"]')?.value)return;applyConditionalRules();updateColonialTaxStatusSummaries();ensureConfirmationId();if(!validateAllSteps())return;localStorage.removeItem("urs_intake_progress");submitBtn.disabled=true;submitBtn.textContent="Preparing files...";try{await prepareFilePayloads();submitBtn.textContent="Submitting...";await fetch(SUBMISSION_ENDPOINT,{method:"POST",mode:"no-cors",body:new FormData(form)});successBox.style.display="block";successMessage.textContent=`Your Group Intake Form has been submitted successfully. Confirmation #: ${ensureConfirmationId()}. You may now close this page.`;submitBtn.textContent="Submitted";saveBtn.disabled=true;backBtn.style.display="none";nextBtn.style.display="none";successBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(error){form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);submitBtn.disabled=false;submitBtn.textContent="Submit";successBox.style.display="block";successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";}});
+    form.addEventListener("submit",async event=>{event.preventDefault();successBox.style.display="none";if(form.querySelector('[name="_honey"]')?.value)return;applyConditionalRules();updateColonialTaxStatusSummaries();ensureConfirmationId();if(!validateAllSteps()){successBox.style.display="block";successMessage.textContent="Submit is blocked because one or more required fields are missing. I moved you to the first field that needs attention.";return;}localStorage.removeItem("urs_intake_progress");submitBtn.disabled=true;submitBtn.textContent="Preparing files...";try{await prepareFilePayloads();submitBtn.textContent="Submitting...";await fetch(SUBMISSION_ENDPOINT,{method:"POST",mode:"no-cors",body:new FormData(form)});successBox.style.display="block";successMessage.textContent=`Your Group Intake Form has been submitted successfully. Confirmation #: ${ensureConfirmationId()}. You may now close this page.`;submitBtn.textContent="Submitted";saveBtn.disabled=true;backBtn.style.display="none";nextBtn.style.display="none";successBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(error){form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);submitBtn.disabled=false;submitBtn.textContent="Submit";successBox.style.display="block";successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";}});
     const params=new URLSearchParams(window.location.search);
     const isTest=params.get("test")==="true"||params.get("prefill")==="test";
     if(!isTest)loadProgress();
