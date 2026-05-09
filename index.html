@@ -52,7 +52,7 @@
       <div class="eyebrow">Upper Room Solutions</div>
       <h1>Group Intake Form</h1>
       <p>Complete this intake to prepare the enrollment team with account details, contacts, eligibility rules, plan information, and supporting documents.</p>
-      <div class="test-banner" id="testBanner">Test mode is on. The form has been prefilled for a submission test.</div>
+      <div class="test-banner" id="testBanner">Prefill mode is on. Sample data has been filled in, but the form still submits through the normal live rules.</div>
     </header>
 
     <section class="form-card">
@@ -64,6 +64,7 @@
       <form action="https://script.google.com/macros/s/AKfycbw5JfwHL5y2By3EVoEV4W1wiMKCSv8QbpewglkTGWyzAFXRK95mVnM2COLAW5deQYrJNQ/exec" id="intakeForm" method="POST" novalidate autocomplete="off">
         <input aria-hidden="true" autocomplete="off" class="honeypot" name="_honey" tabindex="-1" type="text" />
         <input id="confirmation_id" name="confirmation_id" type="hidden" />
+        <input id="test_mode" name="test_mode" type="hidden" value="" />
 
         <section class="step active" data-name="Account & Contacts">
           <div class="step-header"><div><h2>Account & Contacts</h2><p>Start with the account, opener, HR contact, and broker information.</p></div><span class="pill">Required basics</span></div>
@@ -238,7 +239,7 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
           </div>
         </section>
 
-        <div class="actions"><div class="left-actions"><button class="btn-secondary" id="backBtn" type="button">Back</button><button class="btn-secondary" id="saveBtn" type="button">Save Progress</button></div><div class="right-actions"><button class="btn-primary" id="nextBtn" type="button">Next</button><button class="btn-gold" id="submitBtn" style="display:none" type="submit">Submit</button></div></div>
+        <div class="actions"><div class="left-actions"><button class="btn-secondary" id="backBtn" type="button">Back</button><button class="btn-secondary" id="saveBtn" type="button">Save Progress</button><button class="btn-secondary" id="prefillTestBtn" style="display:none" type="button">Prefill Test</button></div><div class="right-actions"><button class="btn-primary" id="nextBtn" type="button">Next</button><button class="btn-gold" id="submitBtn" style="display:none" type="submit">Submit</button></div></div>
       </form>
       <div class="success-box" id="successBox"><strong>Thank you. Your submission has been processed.</strong><span id="successMessage">Your form has been submitted.</span></div>
     </section>
@@ -255,11 +256,31 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
     const nextBtn = document.getElementById("nextBtn");
     const submitBtn = document.getElementById("submitBtn");
     const saveBtn = document.getElementById("saveBtn");
+    const prefillTestBtn = document.getElementById("prefillTestBtn");
     const successBox = document.getElementById("successBox");
     const successMessage = document.getElementById("successMessage");
     const confirmationInput = document.getElementById("confirmation_id");
     const reviewGrid = document.getElementById("reviewGrid");
     let currentStep = 0;
+
+    function isPrefillTestMode(){
+      const params=new URLSearchParams(window.location.search);
+      const truthy=value=>["true","1","yes","y","test","prefill","demo"].includes(String(value||"").toLowerCase());
+      return truthy(params.get("test")) || truthy(params.get("prefill")) || truthy(params.get("mode")) || window.location.hash.toLowerCase().includes("test");
+    }
+    function markTestModeActive(){
+      document.getElementById("testBanner")?.style.setProperty("display","block");
+      if(prefillTestBtn)prefillTestBtn.style.display="inline-flex";
+      let marker=document.getElementById("test_mode");
+      if(!marker){
+        marker=document.createElement("input");
+        marker.type="hidden";
+        marker.id="test_mode";
+        marker.name="test_mode";
+        form.appendChild(marker);
+      }
+      marker.value="Prefilled Test Submission";
+    }
 
     function showStep(index){applyConditionalRules();currentStep=index;steps.forEach((s,i)=>s.classList.toggle("active",i===index));progressFill.style.width=`${((index+1)/steps.length)*100}%`;stepLabel.textContent=`Step ${index+1} of ${steps.length}`;stepName.textContent=steps[index].dataset.name;backBtn.disabled=index===0;nextBtn.style.display=index===steps.length-1?"none":"inline-flex";submitBtn.style.display=index===steps.length-1?"inline-flex":"none";updateReviewPanel();window.scrollTo({top:0,behavior:"smooth"});}
     function isFieldGroupValid(field){
@@ -375,14 +396,43 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
 
       updateProductSummaries();
     }
-    function fieldValue(name){const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));if(!controls.length)return"";const first=controls[0];if(first.type==="checkbox"||first.type==="radio")return controls.filter(c=>c.checked).map(c=>c.value).join(", ");if(first.type==="file")return Array.from(first.files||[]).map(f=>f.name).join(", ");if(first.tagName==="SELECT")return first.options[first.selectedIndex]?.text||first.value||"";return first.value||"";}
+    function fieldValue(name){const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));if(!controls.length)return"";const first=controls[0];if(first.type==="checkbox"||first.type==="radio")return controls.filter(c=>c.checked).map(c=>c.value).join(", ");if(first.type==="file"){const uploaded=Array.from(first.files||[]).map(f=>f.name).join(", ");if(uploaded)return uploaded;const key=first.dataset.fileKey||first.name;return Array.from(form.querySelectorAll(`[name^="file__${CSS.escape(key)}__"][name$="__name"]`)).map(c=>c.value).join(", ");}if(first.tagName==="SELECT")return first.options[first.selectedIndex]?.text||first.value||"";return first.value||"";}
     function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
     function ensureConfirmationId(){if(confirmationInput.value)return confirmationInput.value;const account=(fieldValue("account_name")||"ACCOUNT").replace(/[^A-Za-z0-9]/g,"").slice(0,10).toUpperCase()||"ACCOUNT";const d=new Date();const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;const rand=Math.random().toString(36).slice(2,6).toUpperCase();confirmationInput.value=`URS-${stamp}-${account}-${rand}`;return confirmationInput.value;}
-    function updateReviewPanel(){if(!reviewGrid)return;ensureConfirmationId();const rows=[["Confirmation #",fieldValue("confirmation_id")],["Account",fieldValue("account_name")],["EIN",fieldValue("ein_number")],["Case Type",fieldValue("case_type")],["Renewal No-Changes Confirmation",fieldValue("renewal_no_changes_confirm")],["Renewal Change Types",fieldValue("renewal_change_types")],["Renewal Changes",fieldValue("renewal_changes_summary")],["Employees",fieldValue("employee_count")],["SIC Code",fieldValue("sic_code")],["Enrollers Needed",fieldValue("enrollers_needed")],["Requested Build/Guide Completion Date",fieldValue("requested_build_completion_date")],["Class / Product Eligibility Differences",fieldValue("class_product_eligibility_differences")],["Employer-Paid Benefits",fieldValue("employer_paid_benefits_details")],["Value Added Benefits",[fieldValue("value_added_benefits"),fieldValue("recuro_pppm") ? ("Recuro PPPM: $" + fieldValue("recuro_pppm")) : "",fieldValue("value_added_benefits_other")].filter(Boolean).join(" | ")],["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Broker",`${fieldValue("broker_name")} | ${fieldValue("broker_email")}`],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],["Pay Periods",fieldValue("pay_periods")],["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["GMAPP",fieldValue("gmapp_file")||"No file uploaded"],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")]];reviewGrid.innerHTML=rows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");}
+    function updateReviewPanel(){if(!reviewGrid)return;ensureConfirmationId();const rows=[["Account",fieldValue("account_name")],["EIN",fieldValue("ein_number")],["Case Type",fieldValue("case_type")],["Renewal No-Changes Confirmation",fieldValue("renewal_no_changes_confirm")],["Renewal Change Types",fieldValue("renewal_change_types")],["Renewal Changes",fieldValue("renewal_changes_summary")],["Employees",fieldValue("employee_count")],["SIC Code",fieldValue("sic_code")],["Enrollers Needed",fieldValue("enrollers_needed")],["Requested Build/Guide Completion Date",fieldValue("requested_build_completion_date")],["Class / Product Eligibility Differences",fieldValue("class_product_eligibility_differences")],["Employer-Paid Benefits",fieldValue("employer_paid_benefits_details")],["Value Added Benefits",[fieldValue("value_added_benefits"),fieldValue("recuro_pppm") ? ("Recuro PPPM: $" + fieldValue("recuro_pppm")) : "",fieldValue("value_added_benefits_other")].filter(Boolean).join(" | ")],["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Broker",`${fieldValue("broker_name")} | ${fieldValue("broker_email")}`],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],["Pay Periods",fieldValue("pay_periods")],["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["GMAPP",fieldValue("gmapp_file")||"No file uploaded"],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")]];reviewGrid.innerHTML=rows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");}
     function saveProgress(){const data={};new FormData(form).forEach((v,k)=>{if(v instanceof File)return;if(data[k])data[k]=Array.isArray(data[k])?[...data[k],v]:[data[k],v];else data[k]=v;});localStorage.setItem("urs_intake_progress",JSON.stringify(data));successBox.style.display="block";successMessage.textContent="Progress saved in this browser. File uploads cannot be saved until final submission.";}
     function loadProgress(){const saved=localStorage.getItem("urs_intake_progress");if(!saved)return;try{const data=JSON.parse(saved);Object.entries(data).forEach(([k,v])=>{Array.from(form.querySelectorAll(`[name="${CSS.escape(k)}"]`)).forEach(c=>{const vals=Array.isArray(v)?v:[v];if(c.type==="checkbox"||c.type==="radio")c.checked=vals.includes(c.value);else if(c.type!=="file")c.value=v;});});}catch(e){}}
     function readFileAsBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=reject;reader.readAsDataURL(file);});}
     async function prepareFilePayloads(){document.querySelectorAll(".generated-file-payload").forEach(el=>el.remove());const fileInputs=Array.from(form.querySelectorAll('input[type="file"]'));for(const input of fileInputs){const fieldKey=input.dataset.fileKey||input.name;const files=Array.from(input.files||[]);for(let index=0;index<files.length;index++){const file=files[index];const base64=await readFileAsBase64(file);const payloads={[`file__${fieldKey}__${index}__name`]:file.name,[`file__${fieldKey}__${index}__type`]:file.type||"application/octet-stream",[`file__${fieldKey}__${index}__data`]:base64};Object.entries(payloads).forEach(([name,value])=>{const hidden=document.createElement("input");hidden.type="hidden";hidden.name=name;hidden.value=value;hidden.className="generated-file-payload";form.appendChild(hidden);});}input.disabled=true;}}
+
+    function updateColonialTaxStatusSummaries(){
+      const taxMap={
+        individual_dental_tax_status:"individual_dental__tax_status",
+        individual_accident_tax_status:"individual_accident__tax_status",
+        group_accident_tax_status:"group_accident__tax_status",
+        individual_disability_tax_status:"individual_disability__tax_status",
+        group_disability_tax_status:"group_disability__tax_status",
+        cancer_assist_tax_status:"cancer_assist__tax_status",
+        individual_critical_tax_status:"individual_critical__tax_status",
+        group_critical_illness_tax_status:"group_critical_illness__tax_status",
+        individual_med_bridge_tax_status:"individual_med_bridge__tax_status",
+        group_medical_bridge_tax_status:"group_medical_bridge__tax_status",
+        individual_life_plans_tax_status:"individual_life_plans__tax_status",
+        group_term_life_tax_status:"group_term_life__tax_status"
+      };
+      Object.entries(taxMap).forEach(([summaryName,detailName])=>{
+        let hidden=form.querySelector(`input[name="${CSS.escape(summaryName)}"]`);
+        if(!hidden){
+          hidden=document.createElement("input");
+          hidden.type="hidden";
+          hidden.name=summaryName;
+          hidden.id=summaryName;
+          hidden.className="tax-summary-payload";
+          form.appendChild(hidden);
+        }
+        hidden.value=fieldValue(detailName);
+      });
+    }
 
     function setControlValue(name, value){
       const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));
@@ -424,12 +474,11 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
         }
       });
     }
-    function applyTestMode(){
-      const params=new URLSearchParams(window.location.search);
-      const isTest=params.get("test")==="true"||params.get("prefill")==="test";
+    function applyTestMode(force=false){
+      const isTest=force||isPrefillTestMode();
       if(!isTest)return false;
       localStorage.removeItem("urs_intake_progress");
-      document.getElementById("testBanner")?.style.setProperty("display","block");
+      markTestModeActive();
       const today=new Date();
       const plusDays=days=>{
         const d=new Date(today);
@@ -577,19 +626,82 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
         send_copy:""
       };
       Object.entries(testData).forEach(([key,value])=>setControlValue(key,value));
+      applyConditionalRules();
+      updateColonialTaxStatusSummaries();
       addFakeTestAttachmentPayload();
       ensureConfirmationId();
+      updateReviewPanel();
       return true;
     }
 
     nextBtn.addEventListener("click",()=>{applyConditionalRules();if(!validateStep(currentStep))return;showStep(Math.min(currentStep+1,steps.length-1));});
     backBtn.addEventListener("click",()=>showStep(Math.max(currentStep-1,0)));
     saveBtn.addEventListener("click",saveProgress);
+    prefillTestBtn?.addEventListener("click",()=>{applyTestMode(true);showStep(steps.length-1);successBox.style.display="block";successMessage.textContent="Sample data has been prefilled. Review it, then submit normally when ready.";});
     form.addEventListener("input",e=>{e.target.closest(".field")?.classList.remove("error");updateReviewPanel();});
     form.addEventListener("change",e=>{e.target.closest(".field")?.classList.remove("error");applyConditionalRules();updateReviewPanel();});
-    form.addEventListener("submit",async event=>{event.preventDefault();successBox.style.display="none";if(form.querySelector('[name="_honey"]')?.value)return;applyConditionalRules();updateColonialTaxStatusSummaries();ensureConfirmationId();if(!validateAllSteps()){successBox.style.display="block";successMessage.textContent="Submit is blocked because one or more required fields are missing. I moved you to the first field that needs attention.";return;}localStorage.removeItem("urs_intake_progress");submitBtn.disabled=true;submitBtn.textContent="Preparing files...";try{await prepareFilePayloads();submitBtn.textContent="Submitting...";await fetch(SUBMISSION_ENDPOINT,{method:"POST",mode:"no-cors",body:new FormData(form)});successBox.style.display="block";successMessage.textContent=`Your Group Intake Form has been submitted successfully. Confirmation #: ${ensureConfirmationId()}. You may now close this page.`;submitBtn.textContent="Submitted";saveBtn.disabled=true;backBtn.style.display="none";nextBtn.style.display="none";successBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(error){form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);submitBtn.disabled=false;submitBtn.textContent="Submit";successBox.style.display="block";successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";}});
-    const params=new URLSearchParams(window.location.search);
-    const isTest=params.get("test")==="true"||params.get("prefill")==="test";
+    function isDebugSubmitMode(){
+      const params=new URLSearchParams(window.location.search);
+      const truthy=value=>["true","1","yes","y","debug","show","open"].includes(String(value||"").toLowerCase());
+      return truthy(params.get("debug")) || truthy(params.get("showResponse")) || truthy(params.get("show_response"));
+    }
+    function ensureSubmitIframe(){
+      let frame=document.getElementById("ursSubmitFrame");
+      if(!frame){
+        frame=document.createElement("iframe");
+        frame.id="ursSubmitFrame";
+        frame.name="ursSubmitFrame";
+        frame.style.display="none";
+        document.body.appendChild(frame);
+      }
+      return frame;
+    }
+    form.addEventListener("submit",async event=>{
+      event.preventDefault();
+      successBox.style.display="none";
+      if(form.querySelector('[name="_honey"]')?.value)return;
+      applyConditionalRules();
+      updateColonialTaxStatusSummaries();
+      ensureConfirmationId();
+      if(!validateAllSteps()){
+        successBox.style.display="block";
+        successMessage.textContent="Submit is blocked because one or more required fields are missing. I moved you to the first field that needs attention.";
+        return;
+      }
+      localStorage.removeItem("urs_intake_progress");
+      submitBtn.disabled=true;
+      submitBtn.textContent="Preparing files...";
+      try{
+        await prepareFilePayloads();
+        submitBtn.textContent="Submitting...";
+        const debugMode=isDebugSubmitMode();
+        form.method="POST";
+        form.action=SUBMISSION_ENDPOINT;
+        form.target=debugMode ? "_blank" : "ursSubmitFrame";
+        if(!debugMode)ensureSubmitIframe();
+        HTMLFormElement.prototype.submit.call(form);
+        successBox.style.display="block";
+        successMessage.textContent=debugMode
+          ? "Submission sent. Check the new browser tab for the Apps Script response or error."
+          : "Your Group Intake Form has been submitted successfully. You may now close this page.";
+        submitBtn.textContent=debugMode ? "Submit Again" : "Submitted";
+        submitBtn.disabled=!debugMode;
+        saveBtn.disabled=true;
+        backBtn.style.display="none";
+        nextBtn.style.display="none";
+        successBox.scrollIntoView({behavior:"smooth",block:"center"});
+      }catch(error){
+        form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);
+        submitBtn.disabled=false;
+        submitBtn.textContent="Submit";
+        successBox.style.display="block";
+        successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";
+      }
+    });
+    const paramsForStartup=new URLSearchParams(window.location.search);
+    const resetSavedProgress=["true","1","yes","y","reset"].includes(String(paramsForStartup.get("reset")||"").toLowerCase());
+    if(resetSavedProgress)localStorage.removeItem("urs_intake_progress");
+    const isTest=isPrefillTestMode();
     if(!isTest)loadProgress();
     applyTestMode();
     applyConditionalRules();
