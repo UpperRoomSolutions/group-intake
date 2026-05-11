@@ -70,6 +70,7 @@
           <div class="step-header"><div><h2>Account & Contacts</h2><p>Start with the account, opener, HR contact, and broker information.</p></div><span class="pill">Required basics</span></div>
           <div class="grid">
             <div class="field full" data-required="true"><label class="required" for="account_name">Account Name</label><input id="account_name" name="account_name" type="text" /><div class="error-text">Account name is required.</div></div>
+            <div class="field full" data-required="true"><label class="required" for="account_address">Group Address</label><textarea id="account_address" name="account_address" placeholder="Street address, city, state, ZIP"></textarea><div class="hint">Used to fill the Address box under General Information on the Enrollment Guide.</div><div class="error-text">Group address is required.</div></div>
             <div class="field third" data-required="true"><label class="required" for="ein_number">EIN Number</label><input id="ein_number" name="ein_number" type="text" inputmode="numeric" placeholder="XX-XXXXXXX" /><div class="hint">Required. Use the employer Federal EIN.</div><div class="error-text">EIN number is required.</div></div>
             <div class="field third" data-required="true"><label class="required" for="employee_count"># of Employees</label><input id="employee_count" name="employee_count" type="number" min="1" /><div class="error-text">Employee count is required.</div></div>
             <div class="field third optional-note"><label for="sic_code">SIC Code</label><input id="sic_code" name="sic_code" type="text" placeholder="Optional" /><div class="hint">Optional. Add if available.</div></div>
@@ -106,6 +107,34 @@
             <div class="field quarter" data-required="true"><label class="required" for="ped">PED - Payroll Effective Date</label><input id="ped" name="ped" type="date" /><div class="error-text">PED is required.</div></div>
             <fieldset class="field full" data-required="true"><legend class="required">Enrollment Type</legend><div class="choice-group"><label class="choice"><input name="enrollment_type" type="checkbox" value="Colonial Life" /> Colonial Life</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Communication" /> Core Communication</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Enrollment" /> Core Enrollment</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Mandatory 1-1" /> Mandatory 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Voluntary 1-1" /> Voluntary 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Other" /> Other</label></div><div class="error-text">Select at least one enrollment type.</div></fieldset>
             <div class="field" data-required="true"><label class="required" for="enrollment_platform">Enrollment Platform</label><select id="enrollment_platform" name="enrollment_platform"><option value="">Please Select</option><option>Gathr</option><option>Harmony only</option><option>Employee Navigator</option></select><div class="error-text">Enrollment platform is required.</div></div>
+            <div class="field full conditional-hidden" id="en_build_notice_field" data-required="false"><label>Employee Navigator Build Details</label><div class="hint">This section only appears when Enrollment Platform is Employee Navigator. It stays hidden for Gathr or Harmony only builds.</div></div>
+            <fieldset class="field full conditional-hidden" id="en_employee_classes_field" data-required="true"><legend class="required">Employee Classes for EN Build</legend><div class="choice-group"><label class="choice"><input name="en_employee_classes" type="checkbox" value="All Employees" /> All Employees</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Full-Time" /> Full-Time</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Part-Time" /> Part-Time</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Salaried" /> Salaried</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Hourly" /> Hourly</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Union" /> Union</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Non-Union" /> Non-Union</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Location-Based" /> Location-Based</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Other" /> Other</label></div><div class="error-text">Select at least one employee class for the EN build.</div></fieldset>
+            <div class="field conditional-hidden" id="en_benefits_differ_by_class_field" data-required="true"><label class="required" for="en_benefits_differ_by_class">Are benefits offered differently by class?</label><select id="en_benefits_differ_by_class" name="en_benefits_differ_by_class"><option value="">Please Select</option><option>Yes</option><option>No</option></select><div class="error-text">Select whether benefits differ by class.</div></div>
+            <div class="field full conditional-hidden" id="en_class_rules_field" data-required="false"><label for="en_class_rules">Class Rules / Differences</label><textarea id="en_class_rules" name="en_class_rules" placeholder="Example: Full-time employees are eligible for all benefits. Part-time employees are Colonial only. Location A has different contribution rules."></textarea><div class="hint">Required only if benefits are offered differently by class.</div><div class="error-text">Describe the class rules or differences.</div></div>
+            <div class="field conditional-hidden" id="en_eligibility_same_all_benefits_field" data-required="true"><label class="required" for="en_eligibility_same_all_benefits">Are eligibility rules the same for all benefits?</label><select id="en_eligibility_same_all_benefits" name="en_eligibility_same_all_benefits"><option value="">Please Select</option><option>Yes</option><option>No</option></select><div class="error-text">Select whether eligibility rules are the same for all benefits.</div></div>
+            <div class="field full conditional-hidden" id="en_eligibility_differences_field" data-required="false"><label for="en_eligibility_differences">Eligibility Differences by Benefit</label><textarea id="en_eligibility_differences" name="en_eligibility_differences" placeholder="Medical:
+Dental:
+Vision:
+Life:
+Disability:
+Colonial:"></textarea><div class="hint">Required only if eligibility rules are not the same for all benefits.</div><div class="error-text">List the eligibility differences by benefit.</div></div>
+            <div class="field conditional-hidden" id="en_waiting_period_type_field" data-required="true"><label class="required" for="en_waiting_period_type">Waiting Period Type</label><select id="en_waiting_period_type" name="en_waiting_period_type"><option value="">Please Select</option><option>Date of hire</option><option>First of the month following date of hire</option><option>First of the month following 30 days</option><option>30 days</option><option>60 days</option><option>90 days</option><option>Other</option></select><div class="error-text">Select the waiting period type.</div></div>
+            <div class="field conditional-hidden" id="en_waiting_period_varies_field" data-required="true"><label class="required" for="en_waiting_period_varies">Does waiting period vary by class or benefit?</label><select id="en_waiting_period_varies" name="en_waiting_period_varies"><option value="">Please Select</option><option>Yes</option><option>No</option></select><div class="error-text">Select whether waiting period varies.</div></div>
+            <div class="field full conditional-hidden" id="en_waiting_period_details_field" data-required="false"><label for="en_waiting_period_details">Waiting Period Variance Details</label><textarea id="en_waiting_period_details" name="en_waiting_period_details" placeholder="Explain any waiting period differences by class or benefit."></textarea><div class="hint">Required only if waiting period varies.</div><div class="error-text">Describe the waiting period differences.</div></div>
+            <div class="field conditional-hidden" id="en_contribution_type_field" data-required="true"><label class="required" for="en_contribution_type">Employer Contribution Type for EN</label><select id="en_contribution_type" name="en_contribution_type"><option value="">Please Select</option><option>Flat dollar amount</option><option>Percentage of premium</option><option>By tier</option><option>By class</option><option>Employer pays employee-only</option><option>Employer pays specific coverage level</option><option>No employer contribution</option><option>Other / See notes</option></select><div class="error-text">Select the contribution type.</div></div>
+            <div class="field full conditional-hidden" id="en_contribution_tier_details_field" data-required="false"><label for="en_contribution_tier_details">Contribution Details by Coverage Tier / Class</label><textarea id="en_contribution_tier_details" name="en_contribution_tier_details" placeholder="Employee Only:
+Employee + Spouse:
+Employee + Child(ren):
+Family:
+Class-specific notes:"></textarea><div class="hint">Use this when contribution details vary by tier, coverage level, or class.</div></div>
+            <div class="field full conditional-hidden" id="en_plan_rate_build_details_field" data-required="true"><label class="required" for="en_plan_rate_build_details">Plan / Rate Build Details</label><textarea id="en_plan_rate_build_details" name="en_plan_rate_build_details" placeholder="Carrier:
+Plan Name:
+Plan Year:
+Effective Date:
+Rate Type: Age-banded, Composite, Tiered, Volume-based
+Required Forms or Attachments:"></textarea><div class="error-text">Enter the plan/rate build details, or note where they are attached.</div></div>
+            <div class="field conditional-hidden" id="en_carrier_feeds_required_field" data-required="true"><label class="required" for="en_carrier_feeds_required">Carrier Feeds Required?</label><select id="en_carrier_feeds_required" name="en_carrier_feeds_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><div class="error-text">Select whether carrier feeds are required.</div></div>
+            <div class="field full conditional-hidden" id="en_carrier_feed_notes_field" data-required="false"><label for="en_carrier_feed_notes">Carrier Feed Notes</label><textarea id="en_carrier_feed_notes" name="en_carrier_feed_notes" placeholder="List carriers needing feeds, known vendor/EDI notes, or questions for opener follow-up."></textarea></div>
             <div class="field optional-note full"><label for="employer_paid_benefits_details">Employer-Paid Benefits / Employer Contributions</label><textarea id="employer_paid_benefits_details" name="employer_paid_benefits_details" placeholder="Plan:
 Who is eligible:
 Contribution amount or percentage:
@@ -355,6 +384,23 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
 
       const enrollmentTypes = Array.from(form.querySelectorAll('input[name="enrollment_type"]')).filter(input => input.checked).map(input => input.value);
       const hasColonialEnrollment = enrollmentTypes.includes("Colonial Life");
+      const enrollmentPlatform = document.getElementById("enrollment_platform")?.value || "";
+      const isEmployeeNavigatorBuild = enrollmentPlatform === "Employee Navigator";
+
+      setPanelVisibility("en_build_notice_field", isEmployeeNavigatorBuild, false);
+      setPanelVisibility("en_employee_classes_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_benefits_differ_by_class_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_class_rules_field", isEmployeeNavigatorBuild && document.getElementById("en_benefits_differ_by_class")?.value === "Yes", isEmployeeNavigatorBuild && document.getElementById("en_benefits_differ_by_class")?.value === "Yes");
+      setPanelVisibility("en_eligibility_same_all_benefits_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_eligibility_differences_field", isEmployeeNavigatorBuild && document.getElementById("en_eligibility_same_all_benefits")?.value === "No", isEmployeeNavigatorBuild && document.getElementById("en_eligibility_same_all_benefits")?.value === "No");
+      setPanelVisibility("en_waiting_period_type_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_waiting_period_varies_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_waiting_period_details_field", isEmployeeNavigatorBuild && document.getElementById("en_waiting_period_varies")?.value === "Yes", isEmployeeNavigatorBuild && document.getElementById("en_waiting_period_varies")?.value === "Yes");
+      setPanelVisibility("en_contribution_type_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_contribution_tier_details_field", isEmployeeNavigatorBuild && !["", "No employer contribution"].includes(document.getElementById("en_contribution_type")?.value || ""), false);
+      setPanelVisibility("en_plan_rate_build_details_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_carrier_feeds_required_field", isEmployeeNavigatorBuild, isEmployeeNavigatorBuild);
+      setPanelVisibility("en_carrier_feed_notes_field", isEmployeeNavigatorBuild && ["Yes", "Unknown"].includes(document.getElementById("en_carrier_feeds_required")?.value || ""), false);
 
       // AIF, FLEX, UW Offer, and Colonial eligibility details are required only when Colonial Life is selected.
       // This restores the original workflow: core-only builds can submit without AIF/FLEX, Colonial builds cannot.
@@ -411,7 +457,22 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
     function fieldValue(name){const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));if(!controls.length)return"";const first=controls[0];if(first.type==="checkbox"||first.type==="radio")return controls.filter(c=>c.checked).map(c=>c.value).join(", ");if(first.type==="file"){const uploaded=Array.from(first.files||[]).map(f=>f.name).join(", ");if(uploaded)return uploaded;const key=first.dataset.fileKey||first.name;return Array.from(form.querySelectorAll(`[name^="file__${CSS.escape(key)}__"][name$="__name"]`)).map(c=>c.value).join(", ");}if(first.tagName==="SELECT")return first.options[first.selectedIndex]?.text||first.value||"";return first.value||"";}
     function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
     function ensureConfirmationId(){if(confirmationInput.value)return confirmationInput.value;const account=(fieldValue("account_name")||"ACCOUNT").replace(/[^A-Za-z0-9]/g,"").slice(0,10).toUpperCase()||"ACCOUNT";const d=new Date();const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;const rand=Math.random().toString(36).slice(2,6).toUpperCase();confirmationInput.value=`URS-${stamp}-${account}-${rand}`;return confirmationInput.value;}
-    function updateReviewPanel(){if(!reviewGrid)return;ensureConfirmationId();const rows=[["Account",fieldValue("account_name")],["EIN",fieldValue("ein_number")],["Case Type",fieldValue("case_type")],["Renewal No-Changes Confirmation",fieldValue("renewal_no_changes_confirm")],["Renewal Change Types",fieldValue("renewal_change_types")],["Renewal Changes",fieldValue("renewal_changes_summary")],["Employees",fieldValue("employee_count")],["SIC Code",fieldValue("sic_code")],["Enrollers Needed",fieldValue("enrollers_needed")],["Requested Build/Guide Completion Date",fieldValue("requested_build_completion_date")],["Class / Product Eligibility Differences",fieldValue("class_product_eligibility_differences")],["Employer-Paid Benefits",fieldValue("employer_paid_benefits_details")],["Value Added Benefits / POPS Programs",[fieldValue("value_added_benefits"),fieldValue("pops_programs"),fieldValue("recuro_pppm") ? ("Recuro PPPM: $" + fieldValue("recuro_pppm")) : "",fieldValue("value_added_benefits_other")].filter(Boolean).join(" | ")],["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Broker",`${fieldValue("broker_name")} | ${fieldValue("broker_email")}`],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],["Pay Periods",fieldValue("pay_periods")],["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["GMAPP",fieldValue("gmapp_file")||"No file uploaded"],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")]];reviewGrid.innerHTML=rows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");}
+    function updateReviewPanel(){if(!reviewGrid)return;ensureConfirmationId();const rows=[["Account",fieldValue("account_name")],["Group Address",fieldValue("account_address")],["EIN",fieldValue("ein_number")],["Case Type",fieldValue("case_type")],["Renewal No-Changes Confirmation",fieldValue("renewal_no_changes_confirm")],["Renewal Change Types",fieldValue("renewal_change_types")],["Renewal Changes",fieldValue("renewal_changes_summary")],["Employees",fieldValue("employee_count")],["SIC Code",fieldValue("sic_code")],["Enrollers Needed",fieldValue("enrollers_needed")],["Requested Build/Guide Completion Date",fieldValue("requested_build_completion_date")],["Class / Product Eligibility Differences",fieldValue("class_product_eligibility_differences")],["Employer-Paid Benefits",fieldValue("employer_paid_benefits_details")],["Value Added Benefits / POPS Programs",[fieldValue("value_added_benefits"),fieldValue("pops_programs"),fieldValue("recuro_pppm") ? ("Recuro PPPM: $" + fieldValue("recuro_pppm")) : "",fieldValue("value_added_benefits_other")].filter(Boolean).join(" | ")],["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Broker",`${fieldValue("broker_name")} | ${fieldValue("broker_email")}`],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],
+["EN Build Details", fieldValue("enrollment_platform")==="Employee Navigator" ? [
+  "Classes: "+fieldValue("en_employee_classes"),
+  "Benefits Differ By Class: "+fieldValue("en_benefits_differ_by_class"),
+  fieldValue("en_class_rules") ? "Class Rules: "+fieldValue("en_class_rules") : "",
+  "Eligibility Same All Benefits: "+fieldValue("en_eligibility_same_all_benefits"),
+  fieldValue("en_eligibility_differences") ? "Eligibility Differences: "+fieldValue("en_eligibility_differences") : "",
+  "Waiting Period: "+fieldValue("en_waiting_period_type"),
+  "Waiting Period Varies: "+fieldValue("en_waiting_period_varies"),
+  fieldValue("en_waiting_period_details") ? "Waiting Details: "+fieldValue("en_waiting_period_details") : "",
+  "Contribution Type: "+fieldValue("en_contribution_type"),
+  fieldValue("en_contribution_tier_details") ? "Contribution Details: "+fieldValue("en_contribution_tier_details") : "",
+  "Plan/Rate Details: "+fieldValue("en_plan_rate_build_details"),
+  "Carrier Feeds: "+fieldValue("en_carrier_feeds_required"),
+  fieldValue("en_carrier_feed_notes") ? "Carrier Feed Notes: "+fieldValue("en_carrier_feed_notes") : ""
+].filter(Boolean).join("\n") : "Not applicable"],["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],["Pay Periods",fieldValue("pay_periods")],["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["GMAPP",fieldValue("gmapp_file")||"No file uploaded"],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")]];reviewGrid.innerHTML=rows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");}
     function saveProgress(){const data={};new FormData(form).forEach((v,k)=>{if(v instanceof File)return;if(data[k])data[k]=Array.isArray(data[k])?[...data[k],v]:[data[k],v];else data[k]=v;});localStorage.setItem("urs_intake_progress",JSON.stringify(data));successBox.style.display="block";successMessage.textContent="Progress saved in this browser. File uploads cannot be saved until final submission.";}
     function loadProgress(){const saved=localStorage.getItem("urs_intake_progress");if(!saved)return;try{const data=JSON.parse(saved);Object.entries(data).forEach(([k,v])=>{Array.from(form.querySelectorAll(`[name="${CSS.escape(k)}"]`)).forEach(c=>{const vals=Array.isArray(v)?v:[v];if(c.type==="checkbox"||c.type==="radio")c.checked=vals.includes(c.value);else if(c.type!=="file")c.value=v;});});}catch(e){}}
     function readFileAsBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=reject;reader.readAsDataURL(file);});}
@@ -499,6 +560,7 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
       };
       const testData={
         account_name:"TEST ACCOUNT - DELETE",
+        account_address:"123 Test Street\nCleveland, OH 44114",
         
         ein_number:"12-3456789",
         case_type:"New Group",
@@ -537,6 +599,27 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
         ped:plusDays(74),
         enrollment_type:["Colonial Life","Core Enrollment","Mandatory 1-1"],
         enrollment_platform:"Employee Navigator",
+        en_employee_classes:["All Employees","Full-Time"],
+        en_benefits_differ_by_class:"No",
+        en_class_rules:"",
+        en_eligibility_same_all_benefits:"Yes",
+        en_eligibility_differences:"",
+        en_waiting_period_type:"First of the month following 30 days",
+        en_waiting_period_varies:"No",
+        en_waiting_period_details:"",
+        en_contribution_type:"By tier",
+        en_contribution_tier_details:"Employee Only: Employer contributes $250/month
+Employee + Spouse: See contribution sheet
+Employee + Child(ren): See contribution sheet
+Family: See contribution sheet",
+        en_plan_rate_build_details:"Carrier: Test Carrier
+Plan Name: Test Medical PPO
+Plan Year: 2026
+Effective Date: Test CED
+Rate Type: Tiered
+Required Forms or Attachments: See uploaded SBC/rates",
+        en_carrier_feeds_required:"Unknown",
+        en_carrier_feed_notes:"Confirm carrier feed requirements with broker/opener.",
         colonial_days:"FOMF 30 DAYS",
         colonial_hours:"30 hours/week",
         core_days:"FOMF 30 DAYS",
