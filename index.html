@@ -155,6 +155,14 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
               <textarea id="value_added_benefits_other" name="value_added_benefits_other" placeholder="Other value-added benefits or special offer notes" style="margin-top:10px"></textarea>
             </fieldset>
             <div class="field optional-note"><label for="enrollable_core_products">Enrollable Core Products</label><textarea id="enrollable_core_products" name="enrollable_core_products"></textarea></div>
+            <div class="field full optional-note"><label>Core Product Tax Status</label><div class="inline-row three">
+              <select id="medical_tax_status" name="medical_tax_status"><option value="">Medical Tax Status</option><option>Pre-Tax</option><option>Post-Tax</option></select>
+              <select id="dental_tax_status" name="dental_tax_status"><option value="">Dental Tax Status</option><option>Pre-Tax</option><option>Post-Tax</option></select>
+              <select id="vision_tax_status" name="vision_tax_status"><option value="">Vision Tax Status</option><option>Pre-Tax</option><option>Post-Tax</option></select>
+              <select id="fsa_tax_status" name="fsa_tax_status"><option value="">FSA Tax Status</option><option>Pre-Tax</option><option>Post-Tax</option></select>
+              <select id="ltd_tax_status" name="ltd_tax_status"><option value="">LTD Tax Status</option><option>Pre-Tax</option><option>Post-Tax</option></select>
+              <select id="life_tax_status" name="life_tax_status"><option value="">Life Tax Status</option><option>Pre-Tax</option><option>Post-Tax</option></select>
+            </div><div class="hint">These populate the Tax Status column in the CORE Benefits table on the enrollment guide.</div></div>
             <div class="field optional-note"><label for="core_sbc_rates">Core SBCs/Rates/Plan Info</label><input data-file-key="core_sbc_rates" id="core_sbc_rates" multiple name="core_sbc_rates" type="file" /></div>
             <div class="field optional-note"><label for="core_benefits_overview">Core Benefits Overview</label><textarea id="core_benefits_overview" name="core_benefits_overview"></textarea></div>
             <div class="field optional-note"><label for="enrollable_unum_products">Enrollable UNUM Products</label><textarea id="enrollable_unum_products" name="enrollable_unum_products"></textarea></div>
@@ -539,7 +547,13 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
         recuro_pppm:"5.00",
         value_added_benefits_other:"Telemedicine request should be completed on Propr. Recuro rate is test-only.",
         enrollable_core_products:"Medical, Dental, Vision",
-        core_benefits_overview:"Test core benefits overview.",
+        core_benefits_overview:"Medical - Pre-Tax\nDental - Pre-Tax\nVision - Pre-Tax",
+        medical_tax_status:"Pre-Tax",
+        dental_tax_status:"Pre-Tax",
+        vision_tax_status:"Pre-Tax",
+        fsa_tax_status:"Pre-Tax",
+        ltd_tax_status:"Post-Tax",
+        life_tax_status:"Post-Tax",
         enrollment_goals:"Test submission to confirm email, Drive folder, PDF creation, Google Doc link, and Drive folder link.",
         colonial_dental:"Individual Dental 8100",
         colonial_accident:"Group Accident (GAC4100)",
