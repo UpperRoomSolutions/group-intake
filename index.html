@@ -734,9 +734,10 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
     form.addEventListener("input",e=>{e.target.closest(".field")?.classList.remove("error");updateReviewPanel();});
     form.addEventListener("change",e=>{e.target.closest(".field")?.classList.remove("error");applyConditionalRules();updateReviewPanel();});
     function isDebugSubmitMode(){
-      const params=new URLSearchParams(window.location.search);
-      const truthy=value=>["true","1","yes","y","debug","show","open"].includes(String(value||"").toLowerCase());
-      return truthy(params.get("debug")) || truthy(params.get("showResponse")) || truthy(params.get("show_response"));
+      // Always keep the Apps Script response inside the hidden iframe.
+      // This prevents Google Apps Script pages/popups from opening after submit,
+      // even if the URL contains debug=true.
+      return false;
     }
     function ensureSubmitIframe(){
       let frame=document.getElementById("ursSubmitFrame");
@@ -774,11 +775,9 @@ Any notes:"></textarea><div class="hint">Use this for employer-paid benefits, co
         if(!debugMode)ensureSubmitIframe();
         HTMLFormElement.prototype.submit.call(form);
         successBox.style.display="block";
-        successMessage.textContent=debugMode
-          ? "Submission sent. Check the new browser tab for the Apps Script response or error."
-          : "Your Group Intake Form has been submitted successfully. You may now close this page.";
-        submitBtn.textContent=debugMode ? "Submit Again" : "Submitted";
-        submitBtn.disabled=!debugMode;
+        successMessage.textContent="Your Group Intake Form has been submitted successfully. You may now close this page.";
+        submitBtn.textContent="Submitted";
+        submitBtn.disabled=true;
         saveBtn.disabled=true;
         backBtn.style.display="none";
         nextBtn.style.display="none";
