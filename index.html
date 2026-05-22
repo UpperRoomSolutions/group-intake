@@ -1,819 +1,937 @@
-/*******************************************************
- * Upper Room Solutions - Group Intake Form Handler
- * FULL REPLACEMENT Code.gs
- * Replace the ENTIRE Google Apps Script Code.gs with this file.
- *******************************************************/
-
-const TO_EMAIL = 'tayshia.conner@coloniallifesales.com';
-const DRIVE_PARENT_FOLDER_NAME = 'URS Group Intake Submissions';
-const FROM_NAME = 'Upper Room Solutions Intake Form';
-const TEMPLATE_DOC_ID = '1ae4mDIj9I8u4VlExvJXxbPBtpCsQDX_dnoeojHyqdqw';
-
-function doGet() {
-  return app_htmlResponse_('Group Intake Form Web App', 'The web app is active and ready to receive form submissions.');
-}
-
-function doPost(e) {
-  try {
-    const data = app_parsePostData_(e);
-    if (data._honey) return app_htmlResponse_('Ignored', 'Submission ignored.');
-
-    const validation = app_validateRequired_(data);
-    if (!validation.ok) {
-      return app_htmlResponse_(
-        'Missing Required Information',
-        'The following required fields were not received:<br><br>' + validation.missing.map(app_escapeHtml_).join('<br>')
-      );
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upper Room Solutions | Group Intake Form</title>
+  <style>
+    :root {
+      --navy: #183f47;
+      --navy-dark: #0f2f35;
+      --teal: #00aeb3;
+      --teal-dark: #087782;
+      --teal-soft: #e8fbfb;
+      --ink: #1f2937;
+      --muted: #667085;
+      --line: #d8e3e8;
+      --paper: #ffffff;
+      --soft: #f7fbfc;
+      --danger: #b91c1c;
+      --success: #0f766e;
+      --radius: 18px;
+      --shadow: 0 18px 45px rgba(24, 63, 71, 0.14);
     }
-
-    const submittedAt = new Date();
-    const accountName = app_displayValue_(app_getValue_(data, ['account_name', 'accountName'])) || 'Unknown Account';
-    const timestamp = Utilities.formatDate(submittedAt, Session.getScriptTimeZone(), 'yyyy-MM-dd HH-mm');
-    const safeAccount = app_sanitizeFileName_(accountName);
-    const docTitle = 'Enrollment Guide - ' + safeAccount + ' - ' + timestamp;
-
-    const parentFolder = app_getOrCreateFolder_(DRIVE_PARENT_FOLDER_NAME);
-    const submissionFolder = parentFolder.createFolder(docTitle);
-
-    const savedFiles = app_saveIncomingFiles_(data, submissionFolder);
-
-    const templateCopy = DriveApp.getFileById(TEMPLATE_DOC_ID).makeCopy(docTitle, submissionFolder);
-    const doc = DocumentApp.openById(templateCopy.getId());
-
-    buildEnrollmentGuideDoc_(doc, data, savedFiles, submittedAt);
-    doc.saveAndClose();
-
-    const docUrl = doc.getUrl();
-    const pdfBlob = DriveApp.getFileById(doc.getId()).getBlob().getAs(MimeType.PDF).setName(docTitle + '.pdf');
-    const pdfFile = submissionFolder.createFile(pdfBlob.copyBlob()).setName(docTitle + '.pdf');
-    const pdfUrl = pdfFile.getUrl();
-    const folderUrl = submissionFolder.getUrl();
-
-    const emailBody = app_buildLinksOnlyEmailBody_(accountName, docUrl, pdfUrl, folderUrl, savedFiles);
-
-    MailApp.sendEmail({
-      to: TO_EMAIL,
-      subject: 'Enrollment Guide Ready - ' + accountName,
-      body: emailBody,
-      attachments: [pdfBlob],
-      name: FROM_NAME
-    });
-
-    const copyRequested = String(app_getValue_(data, ['send_copy']) || '').toLowerCase() === 'yes';
-    const copyEmail = app_getValue_(data, ['copy_email', 'opener_email']);
-    if (copyRequested && copyEmail) {
-      MailApp.sendEmail({
-        to: copyEmail,
-        subject: 'Copy of Enrollment Guide - ' + accountName,
-        body: emailBody,
-        attachments: [pdfBlob],
-        name: FROM_NAME
-      });
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(0, 174, 179, 0.22), transparent 34rem),
+        linear-gradient(135deg, #f4fbfc 0%, #ffffff 46%, #eef5f7 100%);
+      padding: 28px 14px;
     }
+    .shell { width: min(1160px, 100%); margin: 0 auto; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #183f47 0%, #0b6f79 62%, #00aeb3 100%);
+      color: #ffffff;
+      border-radius: 28px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 999px;
+      border: 38px solid rgba(255, 255, 255, 0.18);
+      right: -92px;
+      top: -118px;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .logo-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .logo-mark {
+      width: 92px;
+      height: 92px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 22px rgba(0, 0, 0, 0.2);
+      flex: 0 0 auto;
+    }
+    .logo-mark span { font-size: 32px; font-weight: 900; letter-spacing: -0.08em; color: #ffffff; }
+    .logo-text strong { display: block; font-size: clamp(22px, 4vw, 34px); letter-spacing: -0.04em; line-height: 1.05; }
+    .logo-text small { display: block; color: #dbeafe; margin-top: 5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-size: 12px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.14); color: #e6ffff; border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 999px; padding: 8px 12px; font-size: 13px; letter-spacing: 0.02em; margin-bottom: 14px; }
+    h1 { margin: 0; font-size: clamp(30px, 5vw, 48px); line-height: 1.05; letter-spacing: -0.04em; }
+    .hero p { margin: 14px 0 0; max-width: 800px; color: #dbe4f3; font-size: 16px; line-height: 1.6; }
+    .form-card { margin-top: -22px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(10px); border: 1px solid rgba(216, 227, 232, 0.96); border-radius: 28px; box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 2; }
+    .progress-wrap { padding: 24px 24px 0; background: linear-gradient(180deg, #ffffff, #fbfcff); }
+    .progress-meta { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 12px; color: var(--muted); font-size: 14px; }
+    .progress-bar { height: 10px; width: 100%; background: #e7ebf1; border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 20%; border-radius: 999px; background: linear-gradient(90deg, var(--teal-dark), var(--teal)); transition: width 0.22s ease; }
+    form { padding: 24px; }
+    .step { display: none; }
+    .step.active { display: block; animation: rise 0.18s ease; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .step-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .step-header h2 { margin: 0; font-size: 24px; letter-spacing: -0.025em; color: var(--navy); }
+    .step-header p { margin: 6px 0 0; color: var(--muted); line-height: 1.5; }
+    .pill { white-space: nowrap; background: var(--teal-soft); color: #07565d; border: 1px solid #a7eded; border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 800; }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .field { grid-column: span 6; background: var(--paper); border: 1px solid #e1e6ee; border-radius: var(--radius); padding: 14px; transition: border 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease; }
+    .field:focus-within { border-color: rgba(0, 174, 179, 0.82); box-shadow: 0 0 0 4px rgba(0, 174, 179, 0.16); transform: translateY(-1px); }
+    .field.full { grid-column: 1 / -1; }
+    .field.third { grid-column: span 4; }
+    .field.quarter { grid-column: span 3; }
+    label, legend { display: block; font-size: 13px; font-weight: 800; letter-spacing: 0.01em; color: #374151; margin-bottom: 9px; }
+    .required > label::after, label.required::after { content: " *"; color: var(--danger); }
+    input, select, textarea { width: 100%; border: 1px solid #cfd7e3; border-radius: 13px; padding: 12px 13px; font: inherit; color: var(--ink); background: #ffffff; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0, 174, 179, 0.12); }
+    textarea { min-height: 108px; resize: vertical; }
+    input[type="file"] { background: #f9fafb; border-style: dashed; padding: 18px; }
+    .choice-group { display: flex; flex-wrap: wrap; gap: 10px; }
+    .choice { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #d7dde6; border-radius: 999px; padding: 10px 12px; background: #fbfcff; cursor: pointer; user-select: none; }
+    .choice:hover { border-color: #a7eded; background: #f4ffff; }
+    .choice input { width: auto; margin: 0; accent-color: var(--navy); }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 8px; line-height: 1.45; }
+    .error-text { display: none; color: var(--danger); font-size: 12px; margin-top: 8px; font-weight: 700; }
+    .field.error { border-color: rgba(185, 28, 28, 0.55); box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.08); }
+    .field.error .error-text { display: block; }
+    .js-hidden { display: none !important; }
+    .product-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .product-tile { border: 1px solid #d7dde6; border-radius: 18px; padding: 14px; background: #fbfcff; cursor: pointer; transition: 0.16s ease; }
+    .product-tile:hover { border-color: #9be7ea; transform: translateY(-1px); }
+    .product-tile input { width: auto; margin-right: 8px; accent-color: var(--navy); }
+    .product-tile strong { display: inline; color: var(--navy); }
+    .product-tile small { display: block; color: var(--muted); margin-top: 7px; line-height: 1.35; }
+    .product-card { grid-column: 1 / -1; border-left: 5px solid var(--teal); background: linear-gradient(180deg, #ffffff, #f9fefe); border-radius: 20px; border: 1px solid #dbe4ea; overflow: hidden; }
+    .product-card-header { padding: 16px 16px 12px; display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #e6eef2; }
+    .product-card-header h3 { margin: 0; color: var(--navy); font-size: 19px; }
+    .product-card-header span { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .product-card-body { padding: 16px; }
+    .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .product-subfield { border: 1px solid #e1e6ee; background: #fbfcff; border-radius: 14px; padding: 12px; }
+    .product-subfield.full { grid-column: 1 / -1; }
+    .product-subfield-label { display: block; font-weight: 800; font-size: 13px; color: #374151; margin-bottom: 9px; }
+    .section-divider { grid-column: 1 / -1; margin: 4px 0 -2px; font-weight: 900; color: var(--navy); font-size: 14px; letter-spacing: 0.02em; }
+    .easy-details { grid-column: 1 / -1; border: 1px solid #dbe4ea; border-radius: 16px; background: #ffffff; overflow: hidden; }
+    .easy-details summary { cursor: pointer; list-style: none; padding: 14px 16px; font-weight: 900; color: var(--navy); background: linear-gradient(180deg, #f8ffff, #ffffff); border-bottom: 1px solid #e6eef2; }
+    .easy-details summary::-webkit-details-marker { display: none; }
+    .easy-details summary::after { content: "Open details"; float: right; font-size: 12px; color: #07565d; background: var(--teal-soft); border: 1px solid #a7eded; padding: 4px 8px; border-radius: 999px; }
+    .easy-details[open] summary::after { content: "Hide details"; }
+    .easy-details-inner { padding: 14px; }
+    .review-panel { grid-column: 1 / -1; background: #fbfcff; border: 1px solid #d7dde6; border-radius: var(--radius); padding: 16px; }
+    .review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .review-item { border: 1px solid #e1e6ee; background: #ffffff; border-radius: 14px; padding: 10px 12px; min-height: 58px; }
+    .review-item strong { display: block; color: #374151; font-size: 12px; margin-bottom: 5px; }
+    .review-item span { display: block; color: var(--ink); white-space: pre-wrap; line-height: 1.35; }
+    .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding-top: 20px; margin-top: 24px; }
+    .left-actions, .right-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    button { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; font-weight: 800; cursor: pointer; transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease; }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--navy); color: #ffffff; box-shadow: 0 10px 24px rgba(24, 63, 71, 0.22); }
+    .btn-gold { background: var(--teal); color: #05383d; box-shadow: 0 10px 24px rgba(0, 174, 179, 0.24); }
+    .btn-secondary { background: #eef2f7; color: var(--navy); }
+    .success-box { display: none; margin: 20px 24px 24px; padding: 18px; border: 1px solid rgba(15, 118, 110, 0.25); background: #ecfdf5; color: #064e3b; border-radius: 18px; line-height: 1.55; }
+    .success-box strong { display: block; margin-bottom: 5px; }
+    .honeypot { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+    @media (max-width: 840px) {
+      body { padding: 14px 8px; }
+      .hero { padding: 22px; border-radius: 22px; }
+      .logo-row { align-items: flex-start; }
+      .logo-mark { width: 74px; height: 74px; }
+      .logo-mark span { font-size: 26px; }
+      .form-card { border-radius: 22px; }
+      form { padding: 18px; }
+      .progress-wrap { padding: 18px 18px 0; }
+      .field, .field.third, .field.quarter { grid-column: 1 / -1; }
+      .step-header { flex-direction: column; }
+      .product-picker, .product-grid, .review-grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column-reverse; align-items: stretch; }
+      .left-actions, .right-actions, button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="logo-row">
+        <div class="logo-mark"><span>URS</span></div>
+        <div class="logo-text">
+          <strong>Upper Room Solutions, LLC</strong>
+          <small>Enrollment build intake</small>
+        </div>
+      </div>
+      <span class="eyebrow">Coordinator build request</span>
+      <h1>Group Intake Form</h1>
+      <p>Capture the group setup, eligibility, products, riders, attachments, and guide instructions without making the form feel like a benefits control room.</p>
+    </header>
 
-    return app_htmlResponse_(
-      'Thank you.',
-      'Submission processed successfully.<br><br>' +
-      '<strong>Group Name:</strong> ' + app_escapeHtml_(accountName) + '<br>' +
-      '<strong>Google Doc:</strong> <a target="_blank" href="' + docUrl + '">Open Doc</a><br>' +
-      '<strong>PDF:</strong> <a target="_blank" href="' + pdfUrl + '">Open PDF</a><br>' +
-      '<strong>Drive Folder:</strong> <a target="_blank" href="' + folderUrl + '">Open Folder</a>'
-    );
-  } catch (err) {
-    const message = err && err.stack ? err.stack : String(err);
-    try {
-      MailApp.sendEmail({
-        to: TO_EMAIL,
-        subject: 'Group Intake Form Error',
-        body: 'There was an error processing a form submission:\n\n' + message,
-        name: FROM_NAME
-      });
-    } catch (mailErr) {}
-    return app_htmlResponse_('Submission Error', '<pre style="white-space:pre-wrap">' + app_escapeHtml_(message) + '</pre>');
-  }
-}
+    <section class="form-card">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="stepText">Step 1 of 5</span>
+          <span id="stepName">Account & Contacts</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
 
-function app_parsePostData_(e) {
-  const out = {};
-  const params = e && e.parameters ? e.parameters : {};
-  Object.keys(params).forEach(function(key) {
-    const value = params[key];
-    out[key] = value && value.length === 1 ? value[0] : value;
-  });
-  return out;
-}
+      <form id="intakeForm" novalidate>
+        <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off" />
 
-function app_validateRequired_(data) {
-  const missing = [];
-  if (app_isEmpty_(app_getValue_(data, ['account_name', 'accountName']))) missing.push('Account / Group Name');
-  if (app_isEmpty_(app_getValue_(data, ['ein_number', 'ein']))) missing.push('EIN Number');
+        <section class="step active" data-name="Account & Contacts">
+          <div class="step-header">
+            <div><h2>Account & Contacts</h2><p>Start with the group basics and main contact details.</p></div>
+            <span class="pill">Required setup</span>
+          </div>
+          <div class="grid">
+            <div class="field required"><label for="account_name">Account Name</label><input id="account_name" name="account_name" required /><div class="error-text">Account name is required.</div></div>
+            <div class="field"><label for="ein">EIN</label><input id="ein" name="ein" placeholder="XX-XXXXXXX" /></div>
+            <div class="field full required"><label for="account_address">Account Address</label><textarea id="account_address" name="account_address" required placeholder="Street, suite, city, state, ZIP"></textarea><div class="error-text">Account address is required.</div></div>
+            <div class="field third"><label for="employee_count"># Employees</label><input id="employee_count" name="employee_count" type="number" min="0" /></div>
+            <div class="field third"><label for="requested_completion_date">Requested Build/Guide Completion Date</label><input id="requested_completion_date" name="requested_completion_date" type="date" /></div>
+            <div class="field third"><label for="enrollers_needed">Enrollers Needed / BCs Needed</label><input id="enrollers_needed" name="enrollers_needed" type="number" min="0" /></div>
+            <div class="field required"><label for="opener_name">Opener Name</label><input id="opener_name" name="opener_name" required /><div class="error-text">Opener name is required.</div></div>
+            <div class="field required"><label for="opener_email">Opener Email</label><input id="opener_email" name="opener_email" type="email" required /><div class="error-text">Valid opener email is required.</div></div>
+            <div class="field"><label for="producer_number">Producer #</label><input id="producer_number" name="producer_number" /></div>
+            <div class="field"><label for="risk_rating">Risk Rating</label><input id="risk_rating" name="risk_rating" /></div>
+            <div class="field"><label for="broker_name">Broker Name</label><input id="broker_name" name="broker_name" /></div>
+            <div class="field"><label for="broker_email">Broker Email</label><input id="broker_email" name="broker_email" type="email" /></div>
+            <div class="field"><label for="broker_code">Broker Code</label><input id="broker_code" name="broker_code" /></div>
+            <div class="field"><label for="broker_comp">Broker Comp</label><input id="broker_comp" name="broker_comp" /></div>
+            <div class="field"><label for="hr_contact_name">HR Contact Name</label><input id="hr_contact_name" name="hr_contact_name" /></div>
+            <div class="field"><label for="hr_contact_email">HR Contact Email</label><input id="hr_contact_email" name="hr_contact_email" type="email" /></div>
+            <div class="field full"><label for="additional_contacts">Additional Contacts</label><textarea id="additional_contacts" name="additional_contacts" placeholder="Payroll, carrier contact, plan admin, DGA, etc."></textarea></div>
+          </div>
+        </section>
 
-  const enrollmentType = app_displayValue_(app_getValue_(data, ['enrollment_type', 'enrollmentType']));
-  const hasColonialLife = /colonial life/i.test(enrollmentType);
-  if (hasColonialLife) {
-    if (!app_hasIncomingFile_(data, 'aif')) missing.push('AIF attachment');
-    if (!app_hasIncomingFile_(data, 'flex')) missing.push('FLEX attachment');
-    if (app_isEmpty_(app_getValue_(data, ['uw_offer', 'uwOffer']))) missing.push('UW Offer');
-  }
+        <section class="step" data-name="Enrollment Setup">
+          <div class="step-header">
+            <div><h2>Enrollment Setup</h2><p>Confirm payroll, enrollment timing, platform, and admin checklist items.</p></div>
+            <span class="pill">Build foundation</span>
+          </div>
+          <div class="grid">
+            <div class="field required"><label for="case_type">Case Type</label><select id="case_type" name="case_type" required><option value="">Please Select</option><option>New Group</option><option>Existing Group</option><option>Renewal</option><option>Takeover</option><option>Rework / Correction</option></select><div class="error-text">Case type is required.</div></div>
+            <div class="field"><label for="takeover">Takeover?</label><select id="takeover" name="takeover"><option value="">Please Select</option><option>No</option><option>Yes</option><option>Unknown</option></select></div>
+            <div class="field"><label for="bcn">BCN</label><input id="bcn" name="bcn" /></div>
+            <div class="field"><label for="can">CAN</label><input id="can" name="can" /></div>
+            <div class="field"><label for="payroll_frequency">Payroll Frequency</label><select id="payroll_frequency" name="payroll_frequency"><option value="">Please Select</option><option>Weekly</option><option>Biweekly</option><option>Semi-Monthly</option><option>Monthly</option><option>Other</option></select></div>
+            <div class="field"><label for="pay_ded_periods">Pay & Ded Periods</label><input id="pay_ded_periods" name="pay_ded_periods" placeholder="Example: 26/26" /></div>
+            <div class="field full"><label>Payroll Day(s)</label><div class="choice-group"><label class="choice"><input type="checkbox" name="payroll_days" value="Monday" /> Monday</label><label class="choice"><input type="checkbox" name="payroll_days" value="Tuesday" /> Tuesday</label><label class="choice"><input type="checkbox" name="payroll_days" value="Wednesday" /> Wednesday</label><label class="choice"><input type="checkbox" name="payroll_days" value="Thursday" /> Thursday</label><label class="choice"><input type="checkbox" name="payroll_days" value="Friday" /> Friday</label><label class="choice"><input type="checkbox" name="payroll_days" value="Varies" /> Varies</label></div></div>
+            <div class="field"><label for="domestic_partner">Domestic Partner</label><select id="domestic_partner" name="domestic_partner"><option value="">Please Select</option><option>No</option><option>Yes - Same Sex Only</option><option>Yes - Same & Opposite</option><option>Unknown</option></select></div>
+            <div class="field"><label for="enrollment_platform">Enrollment Platform</label><select id="enrollment_platform" name="enrollment_platform"><option value="">Please Select</option><option>Gathr</option><option>Employee Navigator</option><option>Propr</option><option>Carrier Platform</option><option>Paper</option><option>Other</option></select></div>
+            <div class="field"><label for="enrollment_type">Enrollment Type</label><select id="enrollment_type" name="enrollment_type"><option value="">Please Select</option><option>Colonial Life, Mandatory 1-1</option><option>Colonial Life, Self-Service</option><option>Core Only</option><option>Full Benefits Enrollment</option><option>New Hire</option><option>QLE / Life Event</option></select></div>
+            <div class="field"><label for="enrollment_method">Enrollment Method / How</label><input id="enrollment_method" name="enrollment_method" placeholder="Telephonic, onsite, self-service, hybrid, etc." /></div>
+            <div class="field third"><label for="enrollment_start_date">Enrollment Start Date</label><input id="enrollment_start_date" name="enrollment_start_date" type="date" /></div>
+            <div class="field third"><label for="enrollment_end_date">Enrollment End Date</label><input id="enrollment_end_date" name="enrollment_end_date" type="date" /></div>
+            <div class="field third"><label for="ced">CED</label><input id="ced" name="ced" type="date" /></div>
+            <div class="field third"><label for="ped">PED</label><input id="ped" name="ped" type="date" /></div>
+            <div class="field third"><label for="first_deduction_date">First Deduction Date</label><input id="first_deduction_date" name="first_deduction_date" type="date" /></div>
+            <div class="field third"><label for="shell_build_by_date">Shell Build By Date</label><input id="shell_build_by_date" name="shell_build_by_date" type="date" /></div>
+            <div class="field full"><label>Administration Checklist</label><div class="choice-group"><label class="choice"><input type="checkbox" name="accountability_checklist" value="Program request completed" /> Program request completed</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Employer contribution request completed" /> Employer contribution request completed</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Employer Contribution Form" /> Employer Contribution Form</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Application for Group Insurance" /> Application for Group Insurance</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="DGA Completed CASSHM" /> DGA Completed CASSHM</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="NASC email received" /> NASC email received</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Agent Assist controls completed" /> Agent Assist controls completed</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Coverage website complete" /> Coverage website complete</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Enrollment packets built" /> Enrollment packets built</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Digital postcard complete" /> Digital postcard complete</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Posters/flyers complete" /> Posters/flyers complete</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Shell built" /> Shell built</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="Shell tested by opener & BC" /> Shell tested by opener & BC</label><label class="choice"><input type="checkbox" name="accountability_checklist" value="EIN added in Fast Forms notes" /> EIN added in Fast Forms notes</label></div></div>
+            <div class="field full"><label for="administration_notes">Administration Notes</label><textarea id="administration_notes" name="administration_notes" placeholder="NASC pending reason, food contact, presentation notes, shell testing notes, etc."></textarea></div>
+          </div>
+        </section>
 
-  return { ok: missing.length === 0, missing: missing };
-}
+        <section class="step" data-name="Navigator & Eligibility">
+          <div class="step-header">
+            <div><h2>Employee Navigator & Eligibility</h2><p>Capture EN needs, eligibility rules, and high-level benefit details.</p></div>
+            <span class="pill">Eligibility rules</span>
+          </div>
+          <div class="grid">
+            <div class="field"><label for="employee_navigator_needed">Employee Navigator Build Needed?</label><select id="employee_navigator_needed" name="employee_navigator_needed"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select></div>
+            <div class="field"><label for="en_group_id">EN Group ID</label><input id="en_group_id" name="en_group_id" /></div>
+            <div class="field full"><label for="en_classes">Class / Eligibility Groups</label><textarea id="en_classes" name="en_classes" placeholder="Class names, waiting periods, hours, salary/hourly, location class rules, etc."></textarea></div>
+            <div class="field full"><label for="core_benefits">Core Benefits to Build / Enroll</label><textarea id="core_benefits" name="core_benefits" placeholder="Medical, dental, vision, life, disability, FSA/HSA, EAP, retirement, etc."></textarea></div>
+            <div class="field"><label for="colonial_eligibility">Colonial Eligibility</label><input id="colonial_eligibility" name="colonial_eligibility" placeholder="Example: FOMF 30 days / 20 hours" /></div>
+            <div class="field"><label for="core_eligibility">Core Eligibility</label><input id="core_eligibility" name="core_eligibility" placeholder="Example: FOMF 30 days / 32 hours" /></div>
+            <div class="field"><label for="uw_offer">UW Offer</label><select id="uw_offer" name="uw_offer"><option value="">Please Select</option><option>Diamond Offer</option><option>Standard Offer</option><option>GI Offer</option><option>PE-GI</option><option>SI</option><option>SI/SI1</option><option>PEGI</option><option>GX</option><option>Full Underwriting</option><option>Unknown</option></select></div>
+            <div class="field"><label for="beneficiaries_required">Beneficiaries Required</label><select id="beneficiaries_required" name="beneficiaries_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>By product</option><option>Unknown</option></select></div>
+            <div class="field"><label for="tobacco_questions_required">Tobacco Questions Required</label><select id="tobacco_questions_required" name="tobacco_questions_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>By product</option><option>Unknown</option></select></div>
+            <div class="field"><label for="value_added_benefits">Value Added Benefits / POPS</label><input id="value_added_benefits" name="value_added_benefits" placeholder="Example: Free Telemedicine, Wellcard" /><div class="hint">Reminder: Complete the Telemedicine request on Propr if applicable.</div></div>
+            <div class="field"><label for="union_eligible">Union EEs Eligible?</label><select id="union_eligible" name="union_eligible"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option><option>N/A</option></select></div>
+            <div class="field"><label for="seasonal_eligible">Seasonal EEs Eligible?</label><select id="seasonal_eligible" name="seasonal_eligible"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option><option>N/A</option></select></div>
+            <div class="field full"><label for="eligibility_notes">Eligibility / Benefit Notes</label><textarea id="eligibility_notes" name="eligibility_notes" placeholder="Exceptions, rehire rules, seasonal employees, union/non-union, owner eligibility, employer contributions, etc."></textarea></div>
+          </div>
+        </section>
 
-function app_hasIncomingFile_(data, fieldKey) {
-  const direct = app_getValue_(data, [fieldKey + '_file', fieldKey]);
-  if (!app_isEmpty_(direct) && !/^\[object File\]$/i.test(String(direct))) return true;
-  const pattern = new RegExp('^file__' + fieldKey + '__\\d+__data$');
-  return Object.keys(data || {}).some(function(key) {
-    return pattern.test(key) && !app_isEmpty_(data[key]);
-  });
-}
+        <section class="step" data-name="Colonial Products">
+          <div class="step-header">
+            <div><h2>Colonial Products</h2><p>Pick the products being offered. Each product starts simple and keeps Harmony details tucked away.</p></div>
+            <span class="pill">Products & riders</span>
+          </div>
+          <div class="grid">
+            <div class="field full"><label>Products Offered</label><div class="product-picker" id="productPicker"></div><div class="hint">Select each product offered. Product setup cards appear below.</div></div>
+            <div id="productCards" class="grid" style="grid-column: 1 / -1;"></div>
+          </div>
+        </section>
 
-function app_saveIncomingFiles_(data, folder) {
-  const grouped = {};
-  Object.keys(data || {}).forEach(function(key) {
-    const m = key.match(/^file__(.+?)__(\d+)__(name|type|data)$/);
-    if (!m) return;
-    const field = m[1];
-    const index = m[2];
-    const prop = m[3];
-    if (!grouped[field]) grouped[field] = {};
-    if (!grouped[field][index]) grouped[field][index] = {};
-    grouped[field][index][prop] = Array.isArray(data[key]) ? data[key][0] : data[key];
-  });
+        <section class="step" data-name="Logistics & Submit">
+          <div class="step-header">
+            <div><h2>Logistics & Final Details</h2><p>Attach documents, request a Word copy, review, and submit.</p></div>
+            <span class="pill">Review & submit</span>
+          </div>
+          <div class="grid">
+            <div class="field"><label for="locations">Locations</label><select id="locations" name="locations"><option value="">Please Select</option><option>Single Location</option><option>Multiple Locations</option><option>Virtual / Remote</option><option>Hybrid</option></select><textarea name="location_details" placeholder="Location names, addresses, virtual links, or additional enrollment locations" style="margin-top:10px;"></textarea></div>
+            <div class="field"><label for="packets_needed">Packets Needed?</label><select id="packets_needed" name="packets_needed"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Digital Only</option><option>Unknown</option></select><textarea name="packet_details" placeholder="Packet counts, delivery details, or special packet notes" style="margin-top:10px;"></textarea></div>
+            <div class="field"><label for="multilingual_needs">Languages Needed?</label><select id="multilingual_needs" name="multilingual_needs"><option value="">Please Select</option><option>No</option><option>Yes</option><option>Unknown</option></select><textarea name="multilingual_details" placeholder="Languages needed, default is English if blank" style="margin-top:10px;"></textarea></div>
+            <div class="field"><label for="special_shifts">Special Shifts?</label><select id="special_shifts" name="special_shifts"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><textarea name="special_shift_details" placeholder="Night shifts, overnight shifts, or special scheduling needs" style="margin-top:10px;"></textarea></div>
+            <div class="field"><label for="weekend_enrollment_needed">Weekend Enrollment Needed?</label><select id="weekend_enrollment_needed" name="weekend_enrollment_needed"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><textarea name="weekend_enrollment_details" placeholder="Weekend dates/times or details" style="margin-top:10px;"></textarea></div>
+            <div class="field"><label for="presentation_how">Group Presentation(s) - How</label><input id="presentation_how" name="presentation_how" placeholder="In person, Zoom, recorded, not needed, etc." /></div>
+            <div class="field full"><label for="logistics_notes">Additional Logistics Notes</label><textarea id="logistics_notes" name="logistics_notes" placeholder="Any remaining setup, communication, scheduling, or food/contact details"></textarea></div>
 
-  const saved = [];
-  Object.keys(grouped).forEach(function(field) {
-    Object.keys(grouped[field]).forEach(function(index) {
-      const item = grouped[field][index];
-      if (!item.name || !item.data) return;
-      try {
-        const bytes = Utilities.base64Decode(item.data);
-        const blob = Utilities.newBlob(bytes, item.type || 'application/octet-stream', app_sanitizeFileName_(item.name));
-        const file = folder.createFile(blob);
-        saved.push({ field: field, name: item.name, url: file.getUrl(), id: file.getId() });
-      } catch (err) {
-        saved.push({ field: field, name: item.name + ' (could not save)', url: '', id: '' });
+            <div class="field full"><label for="aif">Account Information Form / AIF</label><input data-file-key="AIF" id="aif" name="aif" type="file" multiple /><label class="choice" style="margin-top:10px;"><input name="aif_not_needed" type="checkbox" value="Not Needed" /> Not needed</label></div>
+            <div class="field full"><label for="census">Census / Employee Data</label><input data-file-key="Census" id="census" name="census" type="file" multiple /><label class="choice" style="margin-top:10px;"><input name="census_not_needed" type="checkbox" value="Not Needed" /> Not needed</label></div>
+            <div class="field full"><label for="rates">Rates / Contribution Documents</label><input data-file-key="Rates" id="rates" name="rates" type="file" multiple /><label class="choice" style="margin-top:10px;"><input name="rates_not_needed" type="checkbox" value="Not Needed" /> Not needed</label></div>
+            <div class="field full"><label for="flex">Flex / POP / Cafeteria Plan Documents</label><input data-file-key="Flex" id="flex" name="flex" type="file" multiple /><label class="choice" style="margin-top:10px;"><input name="flex_not_needed" type="checkbox" value="Not Needed" /> Not needed</label></div>
+            <div class="field full"><label for="additional_documents">Additional Documents</label><input data-file-key="Additional Documents" id="additional_documents" name="additional_documents" type="file" multiple /><label class="choice" style="margin-top:10px;"><input name="additional_documents_not_needed" type="checkbox" value="Not Needed" /> Not needed / no additional documents</label></div>
+
+            <fieldset class="field full" id="copy_request_field">
+              <legend>Send editable Word copy?</legend>
+              <div class="choice-group"><label class="choice"><input id="send_copy" name="send_copy" type="checkbox" value="Yes" /> Yes, send a Word copy</label></div>
+              <div class="grid" style="margin-top:10px;"><div class="field"><label for="copy_email">Copy Email</label><input id="copy_email" name="copy_email" type="email" placeholder="Where should the Word copy be sent?" /></div><div class="field"><label for="copy_name">Recipient Name</label><input id="copy_name" name="copy_name" placeholder="Recipient name, if different" /></div></div>
+              <div class="hint">The copied recipient receives only the generated editable Word document.</div>
+            </fieldset>
+
+            <div class="review-panel"><h3>Final Review</h3><p>Review the key details before submitting. Use Back to make changes.</p><div class="review-grid" id="reviewGrid"></div></div>
+          </div>
+        </section>
+
+        <div class="actions">
+          <div class="left-actions"><button type="button" class="btn-secondary" id="backBtn">Back</button></div>
+          <div class="right-actions"><button type="button" class="btn-secondary" id="reviewBtn">Refresh Review</button><button type="button" class="btn-primary" id="nextBtn">Next</button><button type="submit" class="btn-gold js-hidden" id="submitBtn">Submit Intake</button></div>
+        </div>
+      </form>
+      <div class="success-box" id="successBox"><strong>Submission received.</strong>Your Group Intake Form has been submitted successfully.</div>
+    </section>
+  </main>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdE9AoEfmXJWGnJpZkqOXqOGi9aTNnTNygInqIuzlPv0BGRop-x0yTyv-VyI1Q8r3G/exec";
+    const ADMIN_EMAIL = "tayshiahorner@gmail.com";
+
+    const productConfigs = [
+      {
+        key: "individual_accident_4000",
+        title: "Individual Accident 4000",
+        tag: "IAC4000",
+        description: "Individual accident setup with quick fields first and riders tucked below.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          checks("coverage_options", "Coverage Option - Who is covered", ["Employee", "Employee and Spouse", "Employee and Dependent Child(ren)", "Employee, Spouse and Dependent Child(ren)"]),
+          checks("plan_options", "Plan Option", ["On/Off-Job Accident Coverage", "Off-Job Accident Coverage"]),
+          checks("benefit_levels", "Benefit Level", ["Basic", "Preferred", "Premier"]),
+          select("wellbeing", "Wellbeing Assistance", ["Without", "Standard - $50", "Standard - $100", "Basic - $50", "Basic - $100"])
+        ],
+        detailsTitle: "Harmony Details / Optional Benefits & Riders",
+        details: [
+          select("disability_risk_class", "Disability Risk Class", ["AAA", "AA", "A", "B", "N/A"]),
+          select("employer_contribution", "Employer Contribution", ["No", "Yes"]),
+          checks("active_lifestyles", "Active Lifestyles", ["Without", "With"]),
+          select("gunshot_wound", "Gunshot Wound (Employee Only)", ["Without", "$1,000", "$5,000"]),
+          checks("employee_riders", "Employee Optional Riders", ["Critical Illness Rider", "Sickness Hospital Confinement Rider"]),
+          checks("primary_insured_options", "Primary Insured Options", ["Enable Spouse as Primary Insured", "Enable Dependent as Primary Insured"]),
+          textarea("notes", "Notes")
+        ]
+      },
+      {
+        key: "individual_dental_8100",
+        title: "Individual Dental 8100",
+        tag: "IDN8100",
+        description: "Dental plan options, waiting period, ortho, vision, and employer contribution.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          checks("claims_waiting_period", "Claims Eligibility Waiting Period", ["12 Month Waiting Period", "Waive Waiting Period", "Credit for Time Insured (CFTI)"]),
+          checks("coverage_options", "Coverage Options", ["Named Insured", "Named Insured and Spouse", "Named Insured and Dependent Child(ren)", "Named Insured, Spouse and Dependent Child(ren)"]),
+          checks("plan_options", "Plan Options - Maximum of two plus Retiree", ["Preventive (MAC 100/50/0) $750 MAX", "Standard (MAC 100/80/50) $1,000 MAX", "Enhanced (MAC 100/80/50) $3,000 MAX", "Premier (MAC 100/90/60) $5,000 MAX", "Freedom (UCR 100/80/50) $1,000 MAX", "Freedom Premier (UCR 100/80/50) $2,000 MAX", "Retiree Plan (MAC 100/80/50) $1,500 MAX"])
+        ],
+        detailsTitle: "Harmony Details / Optional Benefits",
+        details: [
+          checks("employer_optional_benefits", "Employer Optional Benefit", ["Orthodontic Benefit"]),
+          checks("employee_optional_riders", "Employee Optional Rider", ["Vision Rider"]),
+          select("employer_contribution", "Employer Contribution", ["No", "Yes"]),
+          textarea("notes", "Notes")
+        ]
+      },
+      {
+        key: "individual_disability_3000",
+        title: "Individual Disability 3000",
+        tag: "ISTD3000",
+        description: "Individual STD setup with UW, risk class, plan, benefit amount, and riders.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          select("underwriting_level", "Underwriting Level", ["Standard Issue (SI/SI1)", "Guaranteed Issue", "Post Enrollment Guaranteed Issue"]),
+          select("risk_class", "Risk Class", ["AAA", "AA", "A", "B"]),
+          checks("plan_options", "Plan", ["On/Off Job Accident and On/Off Job Sickness", "Off Job Accident & Off Job Sickness"]),
+          text("max_salary_percent", "Maximum % of Salary", "Example: 60%"),
+          text("max_benefit_amount", "Maximum Benefit Amount", "Example: 4000")
+        ],
+        detailsTitle: "Harmony Details / Benefit Periods & Riders",
+        details: [
+          select("disable_access", "Disable Access to Product Setup", ["No", "Yes"]),
+          checks("new_hire_exception", "New Hire Exception", ["Apply underwriting exception to new hires only"]),
+          text("new_hire_exception_days", "New hire employed no more than X days"),
+          checks("employer_choice_benefits", "Employer Choice Benefits", ["First Day Hospital", "Psychiatric and Psychological Condition"]),
+          checks("employee_choice_riders", "Employee Choice Riders", ["Health Screening Rider", "Additional Disability Benefit Rider"]),
+          checks("benefit_periods", "Benefit Periods", ["3 Month Benefit Period", "6 Month Benefit Period", "12 Month Benefit Period", "24 Month Benefit Period"], 2),
+          checks("elimination_periods", "Elimination Periods", ["0 days Accident/7 days Sickness", "0 days Accident/14 days Sickness", "0 days Accident/30 days Sickness", "7 days Accident/7 days Sickness", "7 days Accident/14 days Sickness", "14 days Accident/14 days Sickness", "30 days Accident/30 days Sickness"]),
+          checks("credit_for_time", "Credit for Time Insured", ["Credit for Time Insured"]),
+          textarea("notes", "Notes")
+        ]
+      },
+      {
+        key: "individual_medical_bridge",
+        title: "Individual Medical Bridge",
+        tag: "IMB7000",
+        description: "Individual hospital/medical bridge setup with plan and confinement levels.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          select("underwriting_level", "Underwriting Level", ["Standard Issue (SI and SI Level 1)", "Post Enrollment Guaranteed Issue (PEGI)"]),
+          checks("coverage_options", "Coverage Options", ["Employee", "Employee and Spouse", "Employee and Dependent Children", "Employee, Spouse and Dependent Children"]),
+          checks("primary_coverage", "Primary Coverage Plan", ["Plan 1 HSA Compliant", "Plan 2 with Outpatient Surgical Benefit", "Plan 3 with Diagnostic Procedure Benefit", "Plan 1 with Daily Hospital Confinement - NJ Only"]),
+          checks("hospital_confinement_levels", "Hospital Confinement Levels", ["$500", "$1,000", "$1,500", "$2,000", "$2,500", "$3,000", "$4,000", "$5,000"])
+        ],
+        detailsTitle: "Harmony Details / Riders & Plan Benefits",
+        details: [
+          checks("employer_choice_benefits", "Employer Choice Benefits", ["Medical Treatment Package: Accident Only", "Medical Treatment Package"]),
+          select("outpatient_surgery", "Outpatient Surgery", ["Option 1: $500/$1000/$1500", "Option 2: $750/$1500/$2500", "Option 3: $1500/$3000/$4500"]),
+          select("health_screening", "Health Screening", ["None", "$50", "$100"]),
+          checks("employee_choice_benefits", "Employee Choice Benefits", ["Daily Hospital Confinement Benefit", "Enhanced Intensive Care Unit Confinement Benefit"]),
+          select("employer_contribution", "Employer Contribution", ["No", "Yes"]),
+          textarea("notes", "Notes")
+        ]
+      },
+      {
+        key: "individual_critical_illness_6000",
+        title: "Individual Critical Illness 6000",
+        tag: "ICI6000",
+        description: "Individual critical illness setup with coverage options and riders.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          checks("plans", "Plan", ["Critical Illness", "Critical Illness & Cancer"]),
+          checks("coverage_options", "Coverage Options", ["Named Insured", "Named Insured and Spouse", "Named Insured and Dependent Child(ren)", "Named Insured, Spouse and Dependent Child(ren)"]),
+          text("minimum_face_amount", "Minimum Face Amount in Enrollment", "Example: $5,000"),
+          text("maximum_face_amount", "Maximum Face Amount in Enrollment", "Example: $75,000"),
+          text("maximum_gi_amount", "Maximum Guaranteed Issue Amount", "Example: $20,000")
+        ],
+        detailsTitle: "Harmony Details / Optional Benefit & Riders",
+        details: [
+          text("new_hire_eligibility_period", "New Hire Eligibility Period (days)", "Example: 365"),
+          select("wellbeing_assistance", "Wellbeing Assistance", ["Without", "Standard - $50", "Standard - $75", "Standard - $100", "Max - $50", "Max - $75", "Max - $100"]),
+          checks("employee_optional_riders", "Employee Optional Riders", ["Infectious Diseases Rider", "Progressive Diseases Rider", "Supplemental Conditions Rider"]),
+          textarea("notes", "Notes")
+        ]
+      },
+      {
+        key: "individual_whole_life_plus",
+        title: "Whole Life Plus",
+        tag: "IWL5000",
+        description: "Whole Life Plus with full employee, spouse, and child rider capture.",
+        quick: [
+          select("tax_status", "Tax Status", ["Post-Tax", "Pre-Tax", "Employee Chooses"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          text("gi_exception", "GI / Benefit Eligibility", "Example: $200K ages 18-50, $75K ages 51-79"),
+          checks("employee_coverage", "Employee Coverage", ["Paid-Up at Age 70", "Paid-Up at Age 100"]),
+          checks("spouse_coverage", "Spouse Coverage", ["Paid-Up at Age 70", "Paid-Up at Age 100"]),
+          checks("dependent_child_coverage", "Dependent Child Coverage", ["Paid-Up at Age 70", "Paid-Up at Age 100"])
+        ],
+        detailsTitle: "Harmony Details / Whole Life Riders",
+        details: [
+          checks("employee_riders", "Employee Available Riders", ["10-Year Spouse Term Life Benefit", "20-Year Spouse Term Life Benefit", "Children's Term Life Benefit", "Accelerated Death Benefit for Long-Term Care Services", "Restoration of Benefits", "Chronic Care Accelerated Death Benefit", "Accidental Death Benefit", "Critical Illness Accelerated Death Benefit", "Guaranteed Purchase Option Benefit", "Waiver of Premium Benefit"]),
+          checks("spouse_riders", "Spouse Available Riders", ["Children's Term Life Benefit", "Accelerated Death Benefit for Long-Term Care Services", "Restoration of Benefits", "Chronic Care Accelerated Death Benefit", "Accidental Death Benefit", "Critical Illness Accelerated Death Benefit", "Guaranteed Purchase Option Benefit", "Waiver of Premium Benefit"]),
+          checks("dependent_child_riders", "Dependent Child Available Riders", ["Accidental Death Benefit", "Accelerated Death Benefit for Long-Term Care Services", "Restoration of Benefits", "Chronic Care Accelerated Death Benefit", "Critical Illness Accelerated Death Benefit", "Guaranteed Purchase Option Benefit"]),
+          textarea("notes", "Notes")
+        ]
+      },
+      {
+        key: "individual_term_life",
+        title: "Term Life",
+        tag: "ITL5000",
+        description: "Individual term life with term options and employee/spouse riders.",
+        quick: [
+          select("tax_status", "Tax Status", ["Post-Tax", "Pre-Tax", "Employee Chooses"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          checks("employee_coverage", "Employee Coverage", ["10-Year Term", "15-Year Term", "20-Year Term", "30-Year Term"]),
+          select("max_underwriting", "Maximum UW Available", ["Limit to Simplified Issue", "Limit to Simplified Issue 1", "Full Underwriting"]),
+          text("face_amount_or_max", "Face Amount / Max", "Example: $100,000")
+        ],
+        detailsTitle: "Harmony Details / Employee & Spouse Options",
+        details: [
+          select("underwriting_exception", "Underwriting Exception", ["None", "Post Enrollment Guaranteed Issue (PEGI)", "Other"]),
+          checks("new_hire_exception", "New Hire Exception", ["Apply underwriting exception to new hires only"]),
+          text("new_hire_exception_days", "New hire employed no more than X days"),
+          checks("employee_options", "Employee Options", ["10-Year Spouse Term Life Benefit", "20-Year Spouse Term Life Benefit", "Children's Term Life Benefit", "Waiver of Premium Benefit", "Accidental Death Benefit", "Critical Illness Accelerated Death Benefit", "Chronic Care Accelerated Death Benefit"]),
+          checks("spouse_coverage", "Spouse Coverage", ["10-Year Term", "15-Year Term", "20-Year Term", "30-Year Term"]),
+          checks("spouse_options", "Spouse Options", ["Children's Term Life Benefit", "Waiver of Premium Benefit", "Accidental Death Benefit", "Critical Illness Accelerated Death Benefit", "Chronic Care Accelerated Death Benefit"]),
+          textarea("notes", "Notes")
+        ]
+      },
+      {
+        key: "group_accident_4100",
+        title: "Group Accident 4100",
+        tag: "GAC4100",
+        description: "Group accident plan with employer optional benefits tucked into details.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          select("employer_contribution", "Employer Contributions", ["No", "Yes"]),
+          text("rate_table", "Rate Table", "Example: Composite"),
+          text("compensation_classification", "Compensation Classification"),
+          checks("plan_type", "Plan Type", ["On/Off-Job Accident Coverage", "Off-Job Accident Coverage"]),
+          checks("add_level", "AD&D Level", ["Economy", "Basic", "Preferred", "Premier"]),
+          checks("accident_hospital_level", "Accident Hospital Benefit Level", ["Economy", "Basic", "Preferred", "Premier"]),
+          select("wellbeing_assistance", "Wellbeing Assistance", ["Without", "Standard - $50", "Standard - $75", "Standard - $100", "Max - $50", "Max - $75", "Max - $100"])
+        ],
+        detailsTitle: "Harmony Details / Employer Optional Benefits",
+        details: [
+          checks("optional_benefits", "Optional Benefits", ["Recovery Plus Package", "Active Lifestyles", "Healthcare Employee Benefit", "Building Benefit"]),
+          select("personal_safety", "Personal Safety Benefit", ["Without", "With CPR", "Without CPR"]),
+          select("sickness_hospital", "Sickness Hospital Benefits", ["Without", "Pre-Existing Conditions Limitation Applies", "Pre-Existing Conditions Limitation Is Waived"]),
+          select("gunshot_wound", "Gunshot Wound", ["Without", "$1,000", "$5,000"]),
+          textarea("instructional_text", "Instructional Text"),
+          textarea("notes", "Healthcare / Employer Contribution Notes")
+        ]
+      },
+      {
+        key: "group_disability",
+        title: "Group Disability",
+        tag: "GDIS",
+        description: "Group disability setup with benefit periods and elimination periods tucked away.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("eligible_employees", "Number of Eligible Employees"),
+          text("min_hours", "Min Hours / Week"),
+          select("underwriting_exception", "Underwriting Exception", ["Standard Issue (SI and SI Level 1)", "Post Enrollment Guaranteed Issue (PEGI)", "Guaranteed Issue (GI)", "Guaranteed Issue/Pre-ex Waived (GX)"]),
+          text("maximum_benefit_amount", "Maximum Benefit Amount Available", "Example: $4,000"),
+          text("maximum_percent_income", "Maximum Percent of Income", "Example: 60%"),
+          checks("plan_type", "Plan", ["Off-Job Only", "On/Off-Job"])
+        ],
+        detailsTitle: "Harmony Details / Benefit Periods",
+        details: [
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          text("new_hire_eligibility_period", "New Hire Eligibility Period (days)"),
+          select("employer_contribution", "Employer Contributions", ["No", "Yes"]),
+          checks("employer_choice_benefits", "Employer Choice Benefits", ["Psychiatric and Psychological Condition", "First Day Hospital"]),
+          text("rate_table", "Rate Table"),
+          text("reason_for_rate_change", "Reason for Rate Change"),
+          checks("rate_exception", "Rate Exception", ["Request Rate Exception from Group Underwriting"]),
+          checks("benefit_periods", "Benefit Periods - only 2 can be offered", ["3 Month Benefit Period", "6 Month Benefit Period", "12 Month Benefit Period", "24 Month Benefit Period"], 2),
+          checks("elimination_periods", "Elimination Periods", ["0 days Accident/7 days Sickness", "7 days Accident/7 days Sickness", "7 days Accident/14 days Sickness", "0 days Accident/14 days Sickness", "14 days Accident/14 days Sickness", "0 days Accident/30 days Sickness", "30 days Accident/30 days Sickness"]),
+          textarea("instructional_text", "Instructional Text"),
+          textarea("notes", "Employer Contribution / Setup Notes")
+        ]
+      },
+      {
+        key: "group_critical_illness_6000",
+        title: "Group Critical Illness 6000",
+        tag: "GCI6000",
+        description: "Group critical illness with Plan 1/2/3 support and up to 3 optional benefits per plan.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("eligible_employees", "Number of Eligible Employees"),
+          select("rate_structure", "Rate Structure for Plans 1, 2 & 3", ["Issue Age", "Attained Age"]),
+          text("min_hours", "Min Hours / Week"),
+          text("new_hire_waiting_period", "New Hire Waiting Period (days)"),
+          text("new_hire_eligibility_period", "New Hire Eligibility Period (days)"),
+          checks("coverage_options", "Coverage Options", ["Named Insured", "Named Insured and Spouse", "Named Insured and Dependent Child(ren)", "Named Insured, Spouse and Dependent Child(ren)"]),
+          select("plan_count", "How many GCI plan options?", ["1 Plan", "2 Plans", "3 Plans"]),
+          section("Plan 1"),
+          text("plan_1_name", "Plan 1 Name", "Example: Plan 1 - Critical Illness"),
+          select("plan_1_type", "Plan 1 Type", ["Critical Illness", "Critical Illness & Cancer", "Cancer"]),
+          text("plan_1_max_face", "Plan 1 Maximum Face Amount"),
+          text("plan_1_max_gi", "Plan 1 Maximum GI Amount"),
+          text("plan_1_increments", "Plan 1 Face Amount Increments", "Example: $1,000"),
+          select("plan_1_wellbeing", "Plan 1 Wellbeing", ["None", "$50", "$75", "$100"]),
+          checks("plan_1_optional_benefits", "Plan 1 Optional Benefits - choose up to 3", ["First Diagnosis Building Benefit", "Heart Benefits", "Infectious Diseases Benefit", "Progressive Diseases Benefit"], 3),
+          section("Plan 2"),
+          text("plan_2_name", "Plan 2 Name", "Example: Plan 2 - Critical Illness & Cancer"),
+          select("plan_2_type", "Plan 2 Type", ["Critical Illness", "Critical Illness & Cancer", "Cancer"]),
+          text("plan_2_max_face", "Plan 2 Maximum Face Amount"),
+          text("plan_2_max_gi", "Plan 2 Maximum GI Amount"),
+          text("plan_2_increments", "Plan 2 Face Amount Increments", "Example: $1,000"),
+          select("plan_2_wellbeing", "Plan 2 Wellbeing", ["None", "$50", "$75", "$100"]),
+          checks("plan_2_optional_benefits", "Plan 2 Optional Benefits - choose up to 3", ["First Diagnosis Building Benefit", "Heart Benefits", "Infectious Diseases Benefit", "Progressive Diseases Benefit"], 3),
+          section("Plan 3"),
+          text("plan_3_name", "Plan 3 Name"),
+          select("plan_3_type", "Plan 3 Type", ["Critical Illness", "Critical Illness & Cancer", "Cancer"]),
+          text("plan_3_max_face", "Plan 3 Maximum Face Amount"),
+          text("plan_3_max_gi", "Plan 3 Maximum GI Amount"),
+          text("plan_3_increments", "Plan 3 Face Amount Increments", "Example: $1,000"),
+          select("plan_3_wellbeing", "Plan 3 Wellbeing", ["None", "$50", "$75", "$100"]),
+          checks("plan_3_optional_benefits", "Plan 3 Optional Benefits - choose up to 3", ["First Diagnosis Building Benefit", "Heart Benefits", "Infectious Diseases Benefit", "Progressive Diseases Benefit"], 3)
+        ],
+        detailsTitle: "Harmony Details / GCI Plan Options",
+        details: [
+          select("plan_1_employer_contribution", "Plan 1 Employer Contributions", ["No", "Yes"]),
+          select("plan_1_tobacco_rating", "Plan 1 Tobacco Rating", ["Tobacco Distinct", "Uni-Tobacco"]),
+          text("plan_1_rate_table", "Plan 1 Rate Table"),
+          textarea("plan_1_instructional_text", "Plan 1 Instructional Text"),
+          select("plan_2_employer_contribution", "Plan 2 Employer Contributions", ["No", "Yes"]),
+          select("plan_2_tobacco_rating", "Plan 2 Tobacco Rating", ["Tobacco Distinct", "Uni-Tobacco"]),
+          text("plan_2_rate_table", "Plan 2 Rate Table"),
+          textarea("plan_2_instructional_text", "Plan 2 Instructional Text"),
+          select("plan_3_employer_contribution", "Plan 3 Employer Contributions", ["No", "Yes"]),
+          select("plan_3_tobacco_rating", "Plan 3 Tobacco Rating", ["Tobacco Distinct", "Uni-Tobacco"]),
+          text("plan_3_rate_table", "Plan 3 Rate Table"),
+          textarea("plan_3_instructional_text", "Plan 3 Instructional Text"),
+          textarea("notes", "GCI Notes")
+        ]
+      },
+      {
+        key: "group_medical_bridge",
+        title: "Group Med Bridge / Group Hospital Indemnity",
+        tag: "GMB7000",
+        description: "Group hospital indemnity with levels limited to two selections.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("plan_name", "Plan Name", "Example: Plan 2 - Non-HSA"),
+          select("plan_type", "Plan", ["1 (HSA)", "2 (Non-HSA)"]),
+          checks("hospital_confinement_levels", "Hospital Confinement Levels - up to 2", ["1 ($500)", "2 ($1000)", "3 ($1500)", "4 ($2000)", "5 ($2500)", "6 ($3000)", "7 ($4000)", "8 ($5000)"], 2),
+          select("wellbeing", "Wellbeing / Health Screening", ["None", "$50", "$75", "$100"]),
+          select("employer_contribution", "Employer Contributions", ["No", "Yes"])
+        ],
+        detailsTitle: "Harmony Details / Group Med Bridge Benefits",
+        details: [
+          checks("benefits", "Benefits", ["Observation Room", "Daily Hospital Confinement", "Inpatient Mental and Nervous", "Rehabilitation Unit Confinement", "Medical Treatment Package (Accident Only)"]),
+          textarea("healthcare_notes", "Healthcare / Employer Contribution Notes")
+        ]
+      },
+      {
+        key: "group_term_life",
+        title: "Group Term Life",
+        tag: "GTL",
+        description: "Group term setup with rate table, EOI, tobacco rating, and optional coverages.",
+        quick: [
+          select("tax_status", "Tax Status", ["Pre-Tax", "Post-Tax", "Employee Chooses"]),
+          text("rate_table", "Rate Table"),
+          text("face_amount_determined_by", "Face Amount Determined By"),
+          text("max_face_amount", "Max Face Amount"),
+          select("tobacco_rating", "Tobacco Rating", ["Tobacco Distinct", "Uni-Tobacco", "N/A"]),
+          text("plan_type", "Plan Type")
+        ],
+        detailsTitle: "Harmony Details / EOI & Optional Coverages",
+        details: [
+          text("eoi_employee", "EOI Employee"),
+          text("eoi_spouse", "EOI Spouse"),
+          textarea("optional_coverages", "Optional Coverages"),
+          textarea("notes", "Notes")
+        ]
       }
-    });
-  });
-  return saved;
-}
+    ];
 
-function app_getOrCreateFolder_(name) {
-  const folders = DriveApp.getFoldersByName(name);
-  if (folders.hasNext()) return folders.next();
-  return DriveApp.createFolder(name);
-}
+    function text(name, label, placeholder = "") { return { type: "text", name, label, placeholder }; }
+    function textarea(name, label, placeholder = "") { return { type: "textarea", name, label, placeholder }; }
+    function select(name, label, options) { return { type: "select", name, label, options }; }
+    function checks(name, label, options, max = null) { return { type: "checkboxGroup", name, label, options, max }; }
+    function section(label) { return { type: "section", label }; }
 
-function app_buildLinksOnlyEmailBody_(accountName, docUrl, pdfUrl, folderUrl, savedFiles) {
-  const uploadLines = (savedFiles || []).map(function(file) {
-    return '- ' + (file.field || 'file') + ': ' + (file.name || 'Uploaded file') + (file.url ? ' | ' + file.url : '');
-  }).join('\n');
+    const form = document.getElementById("intakeForm");
+    const steps = Array.from(document.querySelectorAll(".step"));
+    const progressFill = document.getElementById("progressFill");
+    const stepText = document.getElementById("stepText");
+    const stepName = document.getElementById("stepName");
+    const backBtn = document.getElementById("backBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const reviewBtn = document.getElementById("reviewBtn");
+    const reviewGrid = document.getElementById("reviewGrid");
+    const successBox = document.getElementById("successBox");
+    let currentStep = 0;
 
-  return 'Group Name: ' + accountName + '\n\n' +
-    'Links:\n' +
-    'Google Doc: ' + docUrl + '\n' +
-    'PDF: ' + pdfUrl + '\n' +
-    'Drive Folder: ' + folderUrl + '\n' +
-    (uploadLines ? '\nUploaded Files:\n' + uploadLines + '\n' : '');
-}
+    renderProducts();
+    showStep(0);
+    applyCheckboxLimits();
 
-function app_htmlResponse_(title, message) {
-  const html = '<!doctype html><html><head><base target="_top"><meta name="viewport" content="width=device-width, initial-scale=1">' +
-    '<style>body{font-family:Arial,sans-serif;padding:28px;line-height:1.5;color:#1f2937} .card{max-width:760px;border:1px solid #d7dde6;border-radius:16px;padding:20px;box-shadow:0 12px 32px rgba(0,0,0,.08)} h1{margin-top:0;color:#16233f} a{color:#16233f;font-weight:700}</style>' +
-    '</head><body><div class="card"><h1>' + app_escapeHtml_(title) + '</h1><div>' + message + '</div></div></body></html>';
-  return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
+    function renderProducts() {
+      const picker = document.getElementById("productPicker");
+      const cards = document.getElementById("productCards");
+      picker.innerHTML = productConfigs.map(cfg => `
+        <label class="product-tile">
+          <input type="checkbox" name="selected_products" value="${escapeHtml(cfg.key)}" data-product-key="${escapeHtml(cfg.key)}" />
+          <strong>${escapeHtml(cfg.title)}</strong>
+          <small>${escapeHtml(cfg.description)}</small>
+        </label>
+      `).join("");
+      cards.innerHTML = productConfigs.map(cfg => productCardMarkup(cfg)).join("");
+      picker.addEventListener("change", toggleProductCards);
+      toggleProductCards();
+    }
 
-function app_getValue_(data, keys) {
-  for (let i = 0; i < keys.length; i++) {
-    const value = data[keys[i]];
-    if (!app_isEmpty_(value)) return value;
-  }
-  return '';
-}
+    function productCardMarkup(cfg) {
+      return `
+        <div class="product-card js-hidden" data-product-card="${escapeHtml(cfg.key)}">
+          <div class="product-card-header">
+            <div><h3>${escapeHtml(cfg.title)}</h3><span>${escapeHtml(cfg.description)}</span></div>
+            <span class="pill">${escapeHtml(cfg.tag)}</span>
+          </div>
+          <div class="product-card-body">
+            <div class="product-grid">
+              ${cfg.quick.map(f => fieldMarkup(cfg.key, f)).join("")}
+              <details class="easy-details">
+                <summary>${escapeHtml(cfg.detailsTitle || "Harmony Details / Riders")}</summary>
+                <div class="easy-details-inner"><div class="product-grid">${cfg.details.map(f => fieldMarkup(cfg.key, f)).join("")}</div></div>
+              </details>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
-function app_displayValue_(value) {
-  if (value === null || value === undefined) return '';
-  if (Array.isArray(value)) return value.filter(function(v) { return !app_isEmpty_(v); }).join(', ');
-  return String(value || '').replace(/\u000b/g, '\n').trim();
-}
+    function fieldMarkup(productKey, field) {
+      if (field.type === "section") return `<div class="section-divider">${escapeHtml(field.label)}</div>`;
+      const name = `${productKey}__${field.name}`;
+      const full = field.type === "textarea" || field.type === "checkboxGroup" ? " full" : "";
+      let inner = "";
+      if (field.type === "text") {
+        inner = `<input class="product-control" name="${escapeAttr(name)}" placeholder="${escapeAttr(field.placeholder || "")}" />`;
+      } else if (field.type === "textarea") {
+        inner = `<textarea class="product-control" name="${escapeAttr(name)}" placeholder="${escapeAttr(field.placeholder || "")}"></textarea>`;
+      } else if (field.type === "select") {
+        inner = `<select class="product-control" name="${escapeAttr(name)}"><option value="">Please Select</option>${field.options.map(opt => `<option>${escapeHtml(opt)}</option>`).join("")}</select>`;
+      } else if (field.type === "checkboxGroup") {
+        const maxAttr = field.max ? ` data-max-checks="${field.max}"` : "";
+        const note = field.max ? `<div class="hint">Choose up to ${field.max}.</div>` : "";
+        inner = `<div class="choice-group"${maxAttr}>${field.options.map(opt => `<label class="choice"><input class="product-control" type="checkbox" name="${escapeAttr(name)}" value="${escapeAttr(opt)}" /> ${escapeHtml(opt)}</label>`).join("")}</div>${note}`;
+      }
+      return `<div class="product-subfield${full}"><span class="product-subfield-label">${escapeHtml(field.label)}</span>${inner}</div>`;
+    }
 
-function app_isEmpty_(value) {
-  if (value === null || value === undefined) return true;
-  if (Array.isArray(value)) return value.length === 0 || value.every(app_isEmpty_);
-  return String(value).trim() === '';
-}
+    function toggleProductCards() {
+      const selected = new Set(Array.from(document.querySelectorAll('[name="selected_products"]:checked')).map(el => el.value));
+      document.querySelectorAll("[data-product-card]").forEach(card => {
+        card.classList.toggle("js-hidden", !selected.has(card.dataset.productCard));
+        if (!selected.has(card.dataset.productCard)) clearControls(card);
+      });
+    }
 
-function app_sanitizeFileName_(name) {
-  return String(name || 'Untitled').replace(/[\\/:*?"<>|#%{}~&]/g, '-').replace(/\s+/g, ' ').trim().slice(0, 120) || 'Untitled';
-}
+    function clearControls(container) {
+      Array.from(container.querySelectorAll("input, select, textarea")).forEach(el => {
+        if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+        else el.value = "";
+      });
+    }
 
-function app_escapeHtml_(value) {
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-/*******************************************************
- * URS Enrollment Guide Autofill + UW Product Rules Patch
- * Enrollment Guide autofill and UW product rules.
- * Included in this full replacement file.
- *******************************************************/
-
-const URS_PATCH_TO_EMAIL = 'tayshia.conner@coloniallifesales.com';
-const URS_PATCH_COORDINATOR_NAME = 'Tayshia Conner';
-const URS_PATCH_COORDINATOR_PHONE = '330.440.8203';
-const URS_PATCH_UW_HELP_DESK = '(800) 438-6423 Option: 2 and 4';
-const URS_PATCH_ENROLLMENT_SOLUTIONS = '(800) 438-6423 Option: 2 and 5';
-
-function buildEnrollmentGuideDoc_(doc, data, savedFiles, submittedAt) {
-  const body = doc.getBody();
-
-  const values = buildTemplateValueMap_(data || {}, savedFiles || []);
-  fillTemplateTables_(body, values);
-
-  try { if (typeof fillCoreBenefitsTable_ === 'function') fillCoreBenefitsTable_(body, data || {}); } catch (e) {}
-  try { if (typeof replaceSpecialOffersSection_ === 'function') replaceSpecialOffersSection_(body, data || {}); } catch (e) {}
-  try { if (typeof ensureEnrollmentLogisticsSection_ === 'function') ensureEnrollmentLogisticsSection_(body, data || {}); } catch (e) {}
-
-  replaceColonialProductsSection_(body, data || {});
-
-  try { if (typeof appendAdditionalIntakeDetailsSection_ === 'function') appendAdditionalIntakeDetailsSection_(body, data || {}, savedFiles || []); } catch (e) {}
-  try { if (typeof removeConfirmationMentions_ === 'function') removeConfirmationMentions_(body); } catch (e) {}
-  try { if (typeof addFooterSafe_ === 'function') addFooterSafe_(doc, submittedAt || new Date()); } catch (e) {}
-}
-
-function buildTemplateValueMap_(data, savedFiles) {
-  const opener = uwFix_joinLines_([
-    uwFix_joinParts_([uwFix_get_(data, ['opener_first_name']), uwFix_get_(data, ['opener_last_name'])], ' '),
-    uwFix_get_(data, ['opener_email']),
-    uwFix_get_(data, ['opener_phone'])
-  ]);
-
-  const brokerLine = uwFix_formatBrokerLine_(data);
-  const accountContact = uwFix_joinLines_([uwFix_get_(data, ['hr_contact_name']), uwFix_get_(data, ['hr_contact_email']), uwFix_get_(data, ['hr_contact_phone'])]);
-  const enrollmentPeriod = uwFix_joinParts_([uwFix_formatDate_(uwFix_get_(data, ['enrollment_start_date'])), uwFix_formatDate_(uwFix_get_(data, ['enrollment_end_date']))], ' - ');
-  const requestedCompletion = uwFix_formatDate_(uwFix_get_(data, ['requested_build_completion_date', 'requested_completion_date']));
-
-  return {
-    'Account Name': uwFix_get_(data, ['account_name', 'accountName']),
-    'Group Name': uwFix_get_(data, ['account_name', 'accountName']),
-    'Address': uwFix_get_(data, ['account_address', 'address', 'business_address']),
-    'Account Address': uwFix_get_(data, ['account_address', 'address', 'business_address']),
-    'EIN': uwFix_get_(data, ['ein_number', 'ein']),
-    'Account Contact': accountContact,
-    'HR Contact': accountContact,
-    'Account Broker': brokerLine,
-    'Broker Name/Email': brokerLine,
-    'Broker': brokerLine,
-    'Opener': opener,
-
-    'Coordinator': URS_PATCH_COORDINATOR_NAME + ' ' + URS_PATCH_COORDINATOR_PHONE,
-    'Benefits Counselors': uwFix_get_(data, ['benefits_counselors', 'benefit_counselors']),
-    'Support': uwFix_get_(data, ['support_contact']) || opener,
-    'UW Help Desk': URS_PATCH_UW_HELP_DESK,
-    'Enrollment Solutions': URS_PATCH_ENROLLMENT_SOLUTIONS,
-
-    'Case Type': uwFix_get_(data, ['case_type']),
-    'Type of Enrollment': uwFix_get_(data, ['enrollment_type', 'enrollmentType']),
-    'Enrollment Type': uwFix_get_(data, ['enrollment_type', 'enrollmentType']),
-    'CL Tax Status': uwFix_collectTaxStatuses_(data),
-    'BCN': uwFix_get_(data, ['bcn']),
-    'CAN': uwFix_get_(data, ['can']),
-    'Platform': uwFix_formatPlatform_(data),
-    'Enrollment Platform': uwFix_formatPlatform_(data),
-    'BC Username': uwFix_get_(data, ['bc_username']),
-    '# Employees': uwFix_get_(data, ['employee_count']),
-    'New Hire Eligibility': uwFix_formatEligibility_(data),
-    'Eligibility Requirements': uwFix_formatEligibility_(data),
-    'Dynamic Dating Enabled': uwFix_get_(data, ['dynamic_dating_enabled', 'dynamic_dates']),
-    'Domestic Partner': uwFix_get_(data, ['domestic_partners']),
-    'Pay & Ded Periods': uwFix_formatPayDed_(data),
-    'Payroll Day(s)': uwFix_get_(data, ['payday_day_of_week', 'payroll_day']),
-    'Beneficiaries Required': uwFix_joinParts_([uwFix_get_(data, ['beneficiaries_required']), uwFix_get_(data, ['beneficiaries_required_details'])], ' - '),
-    'Tobacco Questions Required': uwFix_joinParts_([uwFix_get_(data, ['tobacco_questions_required']), uwFix_get_(data, ['tobacco_questions_required_details'])], ' - '),
-    'Value Added Benefits / POPS': uwFix_joinLines_([uwFix_get_(data, ['value_added_benefits']), uwFix_get_(data, ['pops_programs'])]),
-
-    'Group Meetings': uwFix_yesDetails_(data, 'group_meetings', 'group_meetings_details'),
-    'Multiple Locations': uwFix_yesDetails_(data, 'multiple_locations', 'location_details'),
-    'Enrollment Period': enrollmentPeriod,
-    'CED': uwFix_formatDate_(uwFix_get_(data, ['ced'])),
-    'PED': uwFix_formatDate_(uwFix_get_(data, ['ped'])),
-    '1st Deduction & PED': uwFix_joinParts_([uwFix_formatDate_(uwFix_get_(data, ['first_deduction_date'])), uwFix_formatDate_(uwFix_get_(data, ['ped']))], ' / '),
-    'Requested Build/Guide Completion Date': requestedCompletion,
-
-    'Harmony Account #': uwFix_get_(data, ['harmony_account_number']),
-    'Call Center': uwFix_get_(data, ['call_center_support']),
-    'Enabled': uwFix_get_(data, ['call_center_support']),
-
-    'New Hire Plan': uwFix_get_(data, ['new_hire_plan']),
-    'Late Entrants': uwFix_get_(data, ['late_entrants']),
-    'Enrollment Logistics': uwFix_buildEnrollmentLogisticsText_(data),
-
-    'AIF': uwFix_savedFileNames_(savedFiles, 'aif') || uwFix_get_(data, ['aif_file']),
-    'FLEX': uwFix_savedFileNames_(savedFiles, 'flex') || uwFix_get_(data, ['flex_file']),
-    'GMAPP': uwFix_savedFileNames_(savedFiles, 'gmapp') || uwFix_get_(data, ['gmapp_file'])
-  };
-}
-
-function fillTemplateTables_(body, values) {
-  const tables = body.getTables();
-  tables.forEach(function(table) {
-    for (let r = 0; r < table.getNumRows(); r++) {
-      const row = table.getRow(r);
-      if (row.getNumCells() < 2) continue;
-      const label = uwFix_normalizeLabel_(row.getCell(0).getText());
-      Object.keys(values).forEach(function(key) {
-        if (uwFix_normalizeLabel_(key) === label) {
-          setTemplateCellText_(row.getCell(1), uwFix_display_(values[key]));
+    function applyCheckboxLimits() {
+      document.addEventListener("change", e => {
+        if (!e.target.matches('input[type="checkbox"]')) return;
+        const group = e.target.closest("[data-max-checks]");
+        if (!group) return;
+        const max = Number(group.dataset.maxChecks);
+        const boxes = Array.from(group.querySelectorAll('input[type="checkbox"]'));
+        const checked = boxes.filter(b => b.checked);
+        if (checked.length > max) {
+          e.target.checked = false;
+          alert(`Please select up to ${max} option(s) for this field.`);
         }
       });
     }
-  });
-}
 
-function setTemplateCellText_(cell, value) {
-  const textValue = uwFix_display_(value);
-  try {
-    cell.clear();
-    const p = cell.appendParagraph(textValue);
-    p.setFontFamily('Arial').setFontSize(10).setSpacingBefore(0).setSpacingAfter(0);
-  } catch (e) {
-    try {
-      cell.editAsText().setText(textValue);
-      cell.editAsText().setFontFamily('Arial').setFontSize(10).setBold(false);
-    } catch (ignore) {}
-  }
-}
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, steps.length - 1));
+      steps.forEach((step, i) => step.classList.toggle("active", i === currentStep));
+      const pct = ((currentStep + 1) / steps.length) * 100;
+      progressFill.style.width = pct + "%";
+      stepText.textContent = "Step " + (currentStep + 1) + " of " + steps.length;
+      stepName.textContent = steps[currentStep].dataset.name || "";
+      backBtn.disabled = currentStep === 0;
+      nextBtn.classList.toggle("js-hidden", currentStep === steps.length - 1);
+      submitBtn.classList.toggle("js-hidden", currentStep !== steps.length - 1);
+      if (currentStep === steps.length - 1) buildReview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-function replaceColonialProductsSection_(body, data) {
-  let idx = uwFix_findHeadingIndex_(body, 'Colonial Product Information');
-  if (idx < 0) {
-    body.appendParagraph('Colonial Product Information:');
-    idx = body.getNumChildren() - 1;
-    try { uwFix_styleHeading_(body.getChild(idx).asParagraph()); } catch (e) {}
-  }
+    function setFieldError(field, hasError) {
+      const wrapper = field.closest(".field");
+      if (wrapper) wrapper.classList.toggle("error", hasError);
+    }
 
-  const end = uwFix_findNextHeadingIndex_(body, idx + 1, [
-    'Submission Documents',
-    'Uploaded File Links',
-    'Additional Intake Form Details',
-    'Internal Build Intake',
-    'Template / Build Diagnostics'
-  ]);
+    function validateCurrentStep() {
+      let valid = true;
+      const activeStep = steps[currentStep];
+      const requiredFields = Array.from(activeStep.querySelectorAll("[required]"));
+      requiredFields.forEach(field => {
+        const isInvalid = !field.value || (field.type === "email" && !field.checkValidity());
+        setFieldError(field, isInvalid);
+        if (isInvalid) valid = false;
+      });
+      return valid;
+    }
 
-  uwFix_removeChildrenBetween_(body, idx + 1, end - 1);
+    function selectedValuesByName(name) {
+      return Array.from(document.querySelectorAll(`[name="${cssEscape(name)}"]:checked`)).map(el => el.value).filter(Boolean);
+    }
 
-  const uwOffer = uwFix_display_(uwFix_get_(data, ['uw_offer', 'uwOffer', 'guide__uw_offer']));
-  let entries = uwFix_entriesFromSubmittedJson_(data);
-  if (!entries.length) entries = uwFix_applyUwOfferRules_(uwFix_buildProductEntries_(data), uwOffer);
+    function getSimpleFields() {
+      const ignored = new Set(["website", "selected_products"]);
+      const simple = {};
+      Array.from(form.elements).forEach(el => {
+        if (!el.name || ignored.has(el.name) || el.classList.contains("product-control") || el.type === "file") return;
+        if (el.type === "checkbox") {
+          if (!simple[el.name]) simple[el.name] = [];
+          if (el.checked) simple[el.name].push(el.value);
+        } else if (el.type !== "radio" || el.checked) {
+          simple[el.name] = el.value.trim();
+        }
+      });
+      Object.keys(simple).forEach(k => {
+        if (Array.isArray(simple[k])) simple[k] = simple[k].join(", ");
+      });
+      return simple;
+    }
 
-  let insertAt = idx + 1;
+    function collectProducts() {
+      const selectedKeys = selectedValuesByName("selected_products");
+      return productConfigs.filter(cfg => selectedKeys.includes(cfg.key)).map(cfg => {
+        const fields = [];
+        [...cfg.quick, ...cfg.details].forEach(field => {
+          if (field.type === "section") return;
+          const name = `${cfg.key}__${field.name}`;
+          let value = "";
+          if (field.type === "checkboxGroup") value = selectedValuesByName(name).join(", ");
+          else {
+            const el = form.querySelector(`[name="${cssEscape(name)}"]`);
+            value = el ? el.value.trim() : "";
+          }
+          if (value) fields.push({ label: field.label, value });
+        });
+        return { key: cfg.key, title: cfg.title, tag: cfg.tag, fields };
+      });
+    }
 
-  const eligibility = body.insertParagraph(insertAt++, 'Eligibility to participate in Colonial product offerings is based on: Colonial Minimum Hour Requirements');
-  uwFix_styleParagraph_(eligibility, 10, false);
+    function buildReview() {
+      const simple = getSimpleFields();
+      const products = collectProducts();
+      const items = [
+        ["Account", simple.account_name],
+        ["Opener", [simple.opener_name, simple.opener_email].filter(Boolean).join(" | ")],
+        ["Case Type", simple.case_type],
+        ["BCN / CAN", [simple.bcn, simple.can].filter(Boolean).join(" / ")],
+        ["Enrollment", [simple.enrollment_start_date, simple.enrollment_end_date].filter(Boolean).join(" to ")],
+        ["CED / PED", [simple.ced, simple.ped].filter(Boolean).join(" / ")],
+        ["Platform", simple.enrollment_platform],
+        ["Products", products.map(p => p.title).join(", ")],
+        ["Word Copy", simple.send_copy === "Yes" ? (simple.copy_email || "Requested") : "No"],
+        ["Documents", getFileNames().join(", ")]
+      ];
+      reviewGrid.innerHTML = items.map(([label, value]) => `<div class="review-item"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value || "Not provided")}</span></div>`).join("");
+    }
 
-  const uwP = body.insertParagraph(insertAt++, 'UW Offer: ' + (uwOffer || ''));
-  uwFix_styleParagraph_(uwP, 10, true);
+    function getFileNames() {
+      return Array.from(document.querySelectorAll('input[type="file"]')).flatMap(input => Array.from(input.files || []).map(file => `${input.dataset.fileKey}: ${file.name}`));
+    }
 
-  if (!entries.length) {
-    const p = body.insertParagraph(insertAt++, 'No Colonial products selected.');
-    uwFix_styleParagraph_(p, 10, false);
-    return;
-  }
+    async function readFiles() {
+      const fileInputs = Array.from(document.querySelectorAll('input[type="file"]'));
+      const all = [];
+      for (const input of fileInputs) {
+        for (const file of Array.from(input.files || [])) {
+          const dataUrl = await fileToDataUrl(file);
+          all.push({
+            key: input.dataset.fileKey || input.name || "File",
+            name: file.name,
+            mimeType: file.type || "application/octet-stream",
+            size: file.size,
+            data: dataUrl.split(",")[1]
+          });
+        }
+      }
+      return all;
+    }
 
-  const rows = entries.map(function(product) {
-    return [uwFix_productBoxText_(product)];
-  });
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
 
-  const table = body.insertTable(insertAt, rows);
-  uwFix_styleProductTable_(table);
-}
-
-function uwFix_entriesFromSubmittedJson_(data) {
-  const raw = uwFix_get_(data, ['colonial_product_json', 'guide__colonial_product_json']);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(Array.isArray(raw) ? raw[0] : raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(function(item) {
+    function buildPayload() {
+      const simple = getSimpleFields();
       return {
-        title: uwFix_display_(item.title),
-        taxStatus: uwFix_display_(item.taxStatus),
-        bullets: (item.bullets || []).map(function(b) {
-          return { label: uwFix_display_(b.label), value: uwFix_display_(b.value) };
-        }).filter(function(b) { return b.label || b.value; })
+        submittedAt: new Date().toISOString(),
+        source: "URS Group Intake GitHub Form",
+        account: simple.account_name || "Untitled Account",
+        simple,
+        products: collectProducts()
       };
-    }).filter(function(item) { return item.title; });
-  } catch (e) {
-    return [];
-  }
-}
-
-function uwFix_buildProductEntries_(data) {
-  const entries = [];
-  const dental = uwFix_get_(data, ['colonial_dental']);
-  const accident = uwFix_get_(data, ['colonial_accident']);
-  const disability = uwFix_get_(data, ['colonial_disability']);
-  const cancerCritical = uwFix_get_(data, ['colonial_cancer_critical']);
-  const medBridge = uwFix_get_(data, ['colonial_hospital_med_bridge']);
-  const individualLife = uwFix_get_(data, ['individual_life_offered']);
-  const groupTerm = uwFix_get_(data, ['group_term_life_offered']);
-
-  if (uwFix_selected_(dental, ['Individual Dental 8100'])) entries.push(uwFix_makeEntry_(data, 'Individual Dental 8100', 'Individual Dental 8100', 'individual_dental', 'individual_dental__tax_status', dental));
-  if (uwFix_selected_(accident, ['Individual Accident', 'IAC4000'])) entries.push(uwFix_makeEntry_(data, 'Individual Accident 4000', 'Individual Accident IAC4000', 'individual_accident', 'individual_accident__tax_status', accident));
-  if (uwFix_selected_(accident, ['Group Accident', 'GAC4100'])) entries.push(uwFix_makeEntry_(data, 'Group Accident 4100', 'Group Accident 4100', 'group_accident', 'group_accident__tax_status', accident));
-  if (uwFix_selected_(disability, ['Individual Disability'])) entries.push(uwFix_makeEntry_(data, 'Individual Disability', 'Individual Disability ISTD3000', 'individual_disability', 'individual_disability__tax_status', disability));
-  if (uwFix_selected_(disability, ['Group Disability'])) entries.push(uwFix_makeEntry_(data, 'Group Disability', 'Group Disability', 'group_disability', 'group_disability__tax_status', disability));
-  if (uwFix_selected_(cancerCritical, ['Cancer Assist'])) entries.push(uwFix_makeEntry_(data, 'Cancer Assist', 'Cancer Assist', 'cancer_assist', 'cancer_assist__tax_status', cancerCritical));
-  if (uwFix_selected_(cancerCritical, ['Individual Critical', 'ICI6000'])) entries.push(uwFix_makeEntry_(data, 'Individual Critical Illness 6000', 'Critical Illness 1.0', 'individual_critical', 'individual_critical__tax_status', cancerCritical));
-  if (uwFix_selected_(cancerCritical, ['Group Critical Illness', 'GCI6000'])) entries.push(uwFix_makeEntry_(data, 'Group Critical Illness 6000', 'Group Critical Illness 6000', 'group_critical_illness', 'group_critical_illness__tax_status', cancerCritical));
-  if (uwFix_selected_(medBridge, ['INDIVIDUAL MED BRIDGE', 'Individual Med Bridge'])) entries.push(uwFix_makeEntry_(data, 'Individual Medical Bridge', 'Individual Medical Bridge 7000', 'individual_med_bridge', 'individual_med_bridge__tax_status', medBridge));
-  if (uwFix_selected_(medBridge, ['GROUP MED BRIDGE', 'Group Med Bridge', 'Group Hospital'])) entries.push(uwFix_makeEntry_(data, 'Group Medical Bridge', 'Group Medical Bridge', 'group_medical_bridge', 'group_medical_bridge__tax_status', medBridge));
-  if (uwFix_selected_(individualLife, ['Term Life'])) entries.push(uwFix_makeEntry_(data, 'Individual Term Life', 'Term Life 5000', 'individual_term_life', 'individual_term_life__tax_status', 'Term Life'));
-  if (uwFix_selected_(individualLife, ['Whole Life'])) entries.push(uwFix_makeEntry_(data, 'Individual Whole Life', 'Whole Life Plus 5000', 'individual_whole_life', 'individual_whole_life__tax_status', 'Whole Life'));
-  if (uwFix_selected_(groupTerm, ['Group Term', 'Term Life'])) entries.push(uwFix_makeEntry_(data, 'Group Term Life', 'Group Term Life', 'group_term_life', 'group_term_life__tax_status', groupTerm));
-
-  return entries;
-}
-
-function uwFix_makeEntry_(data, key, title, detailKey, taxKey, fallbackSelection) {
-  const detail = uwFix_parseDetailBlock_(uwFix_get_(data, [detailKey]));
-  const bullets = uwFix_detailToBullets_(detail);
-  const tax = uwFix_get_(data, [taxKey, detailKey + '_tax_status']) || detail['Tax Status'] || detail.Tax || '';
-  if (!bullets.length && fallbackSelection) bullets.push({ label: 'Plan Design', value: fallbackSelection });
-  return { key: key, title: title, taxStatus: tax, bullets: bullets };
-}
-
-function uwFix_applyUwOfferRules_(entries, uwOffer) {
-  const uw = String(uwOffer || '').toLowerCase();
-  if (!uw || uw === 'none') return uwFix_applyDefaultRules_(entries);
-  if (/sce/.test(uw)) return uwFix_applySceRules_(entries);
-  if (/coverage accelerator/.test(uw)) return uwFix_applyCoverageAcceleratorRules_(entries);
-  if (/executive broker|executive partner/.test(uw)) return uwFix_applyExecutiveRules_(entries);
-  if (/diamond/.test(uw)) return uwFix_applyDiamondRules_(entries);
-  if (/full underwriting/.test(uw)) return uwFix_applyFullUnderwritingRules_(entries);
-  if (/gi|pegi/.test(uw)) return uwFix_applyGiPegiRules_(entries);
-  return uwFix_applyDefaultRules_(entries);
-}
-
-function uwFix_applyDefaultRules_(entries) {
-  const rules = {
-    'Individual Disability': { title: 'Individual Disability ISTD3000             RATE: AA', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','Off-Job Accident/Sickness'], ['Benefit Periods','All Available'], ['Elimination Periods','All Available'], ['Riders Available','Health Screening Rider'], ['UW','Full Underwriting, GI - need 5 apps or 15%, PEGI - 3 apps or 10%']] },
-    'Group Disability': { title: 'Group Disability                                    RATE: AAA', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','Off-Job Accident/Sickness'], ['Benefit Periods','6 month'], ['Elimination Periods','14/14'], ['UW','GI coverage up to 60% of income to $4k maximum benefit']] },
-    'Individual Accident 4000': { title: 'Individual Accident IAC4000', taxStatus: 'Employee Chooses', bullets: [['Plan Design','On/Off-Job, Preferred & Premier, with Active Lifestyles, $5k Gunshot Wound, $50 Standard Wellbeing Assistance'], ['Riders Available','Critical Illness all levels, SHC all levels, and On/Off-Job riders'], ['Spouse Riders','All spouse riders']] },
-    'Group Accident 4100': { title: 'Group Accident 4100', taxStatus: 'Pre-Tax Deduction', bullets: [['Plan Design','Premier, On/Off-Job, Wellbeing max 100; AD&D Premier'], ['UW','GI']] },
-    'Cancer Assist': { title: 'Cancer Assist', taxStatus: 'Employee Chooses', bullets: [['Plan Design','Levels 2 & 3'], ['Riders Available','All Available, $50 Health Screening'], ['UW','Full Underwriting']] },
-    'Individual Critical Illness 6000': { title: 'Critical Illness 1.0', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','Without Cancer; With Subsequent Diagnosis and Health Screening'], ['UW','Full Underwriting, PEGI - 3 apps or 10%']] },
-    'Group Critical Illness 6000': { title: 'Group Critical Illness 6000', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','Issue Age, Plan 2, Infectious Diseases & Progressive, $100 Wellbeing Assistance'], ['UW','GI coverage for employees up to $35k maximum benefit\nSpouse GI 50% of employee face value']] },
-    'Individual Medical Bridge': { title: 'Individual Medical Bridge 7000', taxStatus: 'Employee Chooses', bullets: [['Plan Design','Plan 2, Levels 1 & 2, Option 1'], ['UW','Full Underwriting, PEGI - 5 apps or 10%']] },
-    'Group Medical Bridge': { title: 'Group Medical Bridge', taxStatus: 'Employee Chooses', bullets: [['Plan Design','As selected on intake'], ['UW','Confirm group medical bridge offer rules before enrollment']] },
-    'Individual Dental 8100': { title: 'Individual Dental Fee Schedule', taxStatus: 'Employee Chooses', bullets: [['Plan Design','All levels'], ['Riders Available','All Available']] },
-    'Individual Term Life': { title: 'Term Life 5000', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','10/15/20/30 Year Term'], ['Riders Available','All Available'], ['UW','Full Underwriting']] },
-    'Individual Whole Life': { title: 'Whole Life Plus 5000', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','Paid-Up at 70 & 100'], ['Riders Available','All Available'], ['UW','GI for EE and Juvenile; limits vary by group size and age']] },
-    'Individual Life Plans': { title: 'Whole Life Plus 5000', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','Paid-Up at 70 & 100'], ['Riders Available','All Available'], ['UW','GI for EE and Juvenile; limits vary by group size and age']] },
-    'Group Term Life': { title: 'Term Life 5000', taxStatus: 'After-Tax Deduction', bullets: [['Plan Design','10/15/20/30 Year Term'], ['Riders Available','All Available'], ['UW','Full Underwriting']] }
-  };
-  return entries.map(function(entry) { return uwFix_mergeRule_(entry, rules[entry.key] || rules[entry.title]); });
-}
-
-function uwFix_applyExecutiveRules_(entries) {
-  if (!entries.length) entries = [
-    { key:'Group Term Life', title:'Group Term Life', bullets:[] },
-    { key:'Individual Whole Life', title:'Individual Whole Life', bullets:[] },
-    { key:'Group Accident 4100', title:'Group Accident 4100', bullets:[] },
-    { key:'Group Disability', title:'Group Disability', bullets:[] },
-    { key:'Group Critical Illness 6000', title:'Group Critical Illness 6000', bullets:[] }
-  ];
-  const result = uwFix_applyDefaultRules_(entries);
-  result.forEach(function(product) {
-    if (/term life/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Executive Partner; GI for employee Ages 16-50 $75k, Ages 51-60 $50k, Ages 61-75 $25k; Spouse $10k');
-    if (/whole life plus/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Executive Partner; GI for Employee Ages 18-50 $5,000-$200,000, Ages 51-79 $5,000-$75,000');
-  });
-  return result;
-}
-
-function uwFix_applyDiamondRules_(entries) {
-  const result = uwFix_applyDefaultRules_(entries);
-  result.forEach(function(product) {
-    if (/accident/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Diamond Underwriting Offer; Accident is required for the offer; GI/participation rules apply per package guidelines');
-    if (/group critical/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Diamond Underwriting Offer; GCI6000 Plans 1-3 GI for employees up to $35,000 maximum benefit; progressive and heart riders follow normal underwriting rules');
-    if (/critical illness 1\.0|individual critical/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Diamond Underwriting Offer; Individual CI PEGI/GI available up to $20,000 employee benefit when offer requirements are met');
-    if (/whole life plus|life/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Diamond Offer; Ages 18-50: $5,000-$150,000, Ages 51-60: $5,000-$75,000, Ages 61-79: $5,000-$25,000, Ages 0-17: $10,000-$25,000');
-  });
-  return result;
-}
-
-function uwFix_applyCoverageAcceleratorRules_(entries) {
-  const result = uwFix_applyDefaultRules_(entries);
-  result.forEach(function(product) {
-    if (/accident/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Coverage Accelerator Package; GI coverage on all Accident plans; GI on Critical Illness and Gunshot Wound riders under IAC4000');
-    if (/disability/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Coverage Accelerator Package; GI up to 60% of income to $4k maximum benefit with 12-month maximum benefit period; use PFML dovetail/overlap rules where applicable');
-    if (/group medical bridge/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Coverage Accelerator Package; GI up to $3,000 hospital confinement benefit, or $1,500 for health care, education, and local/city government markets');
-    if (/whole life plus/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Coverage Accelerator Package; GI for employee Ages 18-50 $5,000-$200,000, Ages 51-79 $5,000-$75,000; chronic care rider GI when provided at client level');
-    if (/group critical/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Coverage Accelerator Package; GCI6000 Plans 1-3 GI for employees up to $35,000 maximum benefit; GI/waiver do not apply to Progressive or Heart Events riders');
-    if (/critical illness 1\.0|individual critical/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Coverage Accelerator Package; Individual CI PEGI available with upfront participation requirements waived up to $20,000 employee benefit');
-    if (/term life/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Coverage Accelerator Package; Basic GTL $10,000 at $2 PEPM; voluntary GTL with Basic has employee GI up to $75,000 and spouse GI up to $25,000; clients over 500 lives require census and UW approval');
-  });
-  return result;
-}
-
-function uwFix_applySceRules_(entries) {
-  const result = uwFix_applyDefaultRules_(entries);
-  result.forEach(function(product) {
-    if (/group accident/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'SCE UW Offer; GI available for all base plans');
-    if (/group disability/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'SCE UW Offer; GI up to $4,000/month, benefit periods up to 12 months, limited to 60% of income; 14/14 required over $3,000; pre-ex waived during initial OE and for new hires');
-    if (/group critical/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'SCE UW Offer; GCI6000 Plans 1-3 GI up to $35,000, Plan 4 GI up to $10,000; pre-ex limitations still apply to heart/progressive riders and Plan 4');
-    if (/group medical bridge/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'SCE UW Offer; GI on employee and family coverage up to $3,000 hospital confinement amount; health care, education, and local/city government limited to $1,500; pre-ex waived as applicable');
-    if (/term life/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'SCE UW Offer; Basic GTL $10,000 at $2 PEPM, voluntary GTL GI up to $75,000 employee and $25,000 spouse; max 5x salary or $250,000');
-    if (/whole life plus/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'SCE UW Offer; perpetual GI for employees Ages 18-50 $200,000 and Ages 51-79 $75,000; spouse/juvenile base plans and riders follow standard underwriting');
-  });
-  return result;
-}
-
-function uwFix_applyFullUnderwritingRules_(entries) {
-  return uwFix_applyDefaultRules_(entries).map(function(product) {
-    product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'Full Underwriting');
-    return product;
-  });
-}
-
-function uwFix_applyGiPegiRules_(entries) {
-  return uwFix_applyDefaultRules_(entries).map(function(product) {
-    if (/group accident|group disability|group critical|group term/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'GI, subject to offer rules and participation requirements');
-    else if (/dental/i.test(product.title)) product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'No health underwriting unless otherwise noted');
-    else product.bullets = uwFix_replaceOrAddBullet_(product.bullets, 'UW', 'GI/PEGI per offer rules; confirm app count, participation requirements, and any EOI before enrollment');
-    return product;
-  });
-}
-
-function uwFix_mergeRule_(entry, rule) {
-  if (!rule) return entry;
-  const merged = {
-    key: entry.key || rule.key || entry.title,
-    title: rule.title || entry.title,
-    taxStatus: uwFix_display_(entry.taxStatus) || rule.taxStatus || '',
-    bullets: (rule.bullets || []).map(function(b) { return { label: b[0], value: b[1] }; })
-  };
-  (entry.bullets || []).forEach(function(b) {
-    merged.bullets = uwFix_replaceOrAddBullet_(merged.bullets, b.label, b.value);
-  });
-  return merged;
-}
-
-function uwFix_productBoxText_(product) {
-  const tax = uwFix_normalizeTax_(product.taxStatus) || 'Employee Chooses';
-  const deduction = /deduction|chooses/i.test(tax) ? tax : tax + ' Deduction';
-  const lines = [(product.title || '') + '  (' + deduction + ')'];
-  (product.bullets || []).forEach(function(b) {
-    if (!uwFix_isEmpty_(b.value)) lines.push('- ' + b.label + ':  ' + uwFix_display_(b.value));
-  });
-  return lines.join('\n');
-}
-
-function uwFix_styleProductTable_(table) {
-  try {
-    table.setBorderWidth(0.5).setBorderColor('#000000');
-    for (let r = 0; r < table.getNumRows(); r++) {
-      const cell = table.getRow(r).getCell(0);
-      cell.setPaddingTop(6).setPaddingBottom(6).setPaddingLeft(8).setPaddingRight(8);
-      const text = cell.editAsText();
-      text.setFontFamily('Arial').setFontSize(10).setBold(false);
-      const raw = text.getText();
-      const firstBreak = raw.indexOf('\n');
-      const endBold = firstBreak >= 0 ? firstBreak - 1 : raw.length - 1;
-      if (endBold >= 0) text.setBold(0, endBold, true);
     }
-  } catch (e) {}
-}
 
-function uwFix_detailToBullets_(detail) {
-  const labelMap = {
-    'Plan Design':'Plan Design', 'Benefit Levels':'Benefit Levels', 'Riders':'Riders Available', 'Riders/Additions':'Riders Available',
-    'Waiting Period':'Waiting Period', 'Wellbeing':'Wellbeing', 'Psych':'Psych', 'Max Amount':'Max Amount', 'Hospital':'Hospital',
-    'Table Rate':'Rate', 'Rate Table':'Rate', 'Rate':'Rate', 'Notes':'Notes', '3 Month Benefit':'3 Month Benefit Period',
-    '6 Month Benefit':'6 Month Benefit Period', '12 Month Benefit':'12 Month Benefit Period', '24 Month Benefit':'24 Month Benefit Period',
-    'Health Screening':'Health Screening', 'Age Tobacco':'Age / Tobacco', 'Age / Tobacco':'Age / Tobacco', 'Increments':'Increments',
-    'Max Face Amount':'Max Face Amount', 'Plan Type':'Plan Type', 'Levels':'Levels', 'Hospital Confinement Levels':'Levels',
-    'UW':'UW', 'Plan Level':'Plan Level', 'Face Amount':'Face Amount', 'Tobacco':'Tobacco', 'Tobacco Rating':'Tobacco',
-    'Term Options':'Plan Design', 'Whole Life Plan Design':'Plan Design', 'Paid-Up Options':'Plan Design',
-    'EOI Employee':'EOI Employee', 'EOI Spouse':'EOI Spouse', 'ADD':'AD&D', 'AD&D':'AD&D',
-    'Hospital Benefit':'Hospital Benefit', 'Employer Contribution':'Employer Contribution', 'Cap':'Cap', 'Risk':'Risk'
-  };
-  const skip = { 'Tax Status': true, Tax: true };
-  const bullets = [];
-  Object.keys(detail || {}).forEach(function(key) {
-    if (skip[key]) return;
-    const value = detail[key];
-    if (!uwFix_isEmpty_(value)) bullets.push({ label: labelMap[key] || key, value: value });
-  });
-  return bullets;
-}
+    backBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => { if (validateCurrentStep()) showStep(currentStep + 1); });
+    reviewBtn.addEventListener("click", buildReview);
 
-function uwFix_parseDetailBlock_(text) {
-  const result = {};
-  if (uwFix_isEmpty_(text)) return result;
-  String(text).split(/\r?\n/).forEach(function(line) {
-    const trimmed = line.trim();
-    if (!trimmed) return;
-    const idx = trimmed.indexOf(':');
-    if (idx < 0) {
-      result.Notes = uwFix_append_(result.Notes, trimmed);
-      return;
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      if (!validateCurrentStep()) return;
+      if (form.website && form.website.value) return;
+
+      const simple = getSimpleFields();
+      if (simple.send_copy === "Yes") {
+        if (!simple.copy_email) {
+          alert("Please add the email address for the editable Word copy.");
+          return;
+        }
+        if (simple.copy_email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          alert("The copy email cannot be the internal/admin inbox. Please enter a different recipient.");
+          return;
+        }
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+      try {
+        const payload = buildPayload();
+        payload.files = await readFiles();
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        form.reset();
+        toggleProductCards();
+        showStep(0);
+        successBox.style.display = "block";
+      } catch (err) {
+        console.error(err);
+        alert("Something went wrong while submitting. Please try again or send the details manually.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Intake";
+      }
+    });
+
+    function cssEscape(value) {
+      if (window.CSS && CSS.escape) return CSS.escape(value);
+      return String(value).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
     }
-    const key = trimmed.slice(0, idx).trim();
-    const value = trimmed.slice(idx + 1).trim();
-    result[key] = uwFix_append_(result[key], value);
-  });
-  return result;
-}
-
-function uwFix_replaceOrAddBullet_(bullets, label, value) {
-  bullets = bullets || [];
-  const target = uwFix_normalizeLabel_(label);
-  let found = false;
-  bullets = bullets.map(function(b) {
-    if (uwFix_normalizeLabel_(b.label) === target) {
-      found = true;
-      return { label: b.label || label, value: value };
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[ch]));
     }
-    return b;
-  });
-  if (!found) bullets.push({ label: label, value: value });
-  return bullets;
-}
-
-function uwFix_findHeadingIndex_(body, text) {
-  const needle = uwFix_normalizeLabel_(text);
-  for (let i = 0; i < body.getNumChildren(); i++) {
-    const child = body.getChild(i);
-    let childText = '';
-    try { childText = child.getText ? child.getText() : ''; } catch (e) {}
-    const clean = uwFix_normalizeLabel_(childText);
-    if (clean === needle || clean.indexOf(needle) >= 0) return i;
-  }
-  return -1;
-}
-
-function uwFix_findNextHeadingIndex_(body, start, headings) {
-  const targets = (headings || []).map(uwFix_normalizeLabel_);
-  for (let i = start; i < body.getNumChildren(); i++) {
-    const child = body.getChild(i);
-    let childText = '';
-    try { childText = child.getText ? child.getText() : ''; } catch (e) {}
-    const clean = uwFix_normalizeLabel_(childText);
-    if (targets.some(function(t) { return clean === t || clean.indexOf(t) >= 0; })) return i;
-  }
-  return body.getNumChildren();
-}
-
-function uwFix_removeChildrenBetween_(body, start, end) {
-  for (let i = end; i >= start; i--) {
-    if (i >= 0 && i < body.getNumChildren()) body.removeChild(body.getChild(i));
-  }
-}
-
-function uwFix_styleHeading_(p) {
-  try { p.setBold(true).setFontFamily('Arial').setFontSize(12).setSpacingBefore(10).setSpacingAfter(4); } catch (e) {}
-}
-
-function uwFix_styleParagraph_(p, size, bold) {
-  try { p.setFontFamily('Arial').setFontSize(size || 10).setBold(!!bold).setSpacingBefore(0).setSpacingAfter(4).setLineSpacing(1); } catch (e) {}
-}
-
-function uwFix_selected_(selection, matches) {
-  const text = uwFix_display_(selection);
-  if (!text || /none offered|not offered|no/i.test(text)) return false;
-  return (matches || []).some(function(match) { return text.toLowerCase().indexOf(String(match).toLowerCase()) >= 0; });
-}
-
-function uwFix_get_(data, keys) {
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (data && Object.prototype.hasOwnProperty.call(data, key) && !uwFix_isEmpty_(data[key])) return data[key];
-  }
-  return '';
-}
-
-function uwFix_display_(value) {
-  if (value === null || value === undefined) return '';
-  if (Array.isArray(value)) return value.filter(function(v) { return !uwFix_isEmpty_(v); }).join(', ');
-  return String(value).replace(/\u000b/g, '\n').trim();
-}
-
-function uwFix_isEmpty_(value) {
-  if (value === null || value === undefined) return true;
-  if (Array.isArray(value)) return value.length === 0 || value.every(uwFix_isEmpty_);
-  return String(value).trim() === '';
-}
-
-function uwFix_normalizeLabel_(text) {
-  return String(text || '').replace(/[:：]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
-}
-
-function uwFix_normalizeTax_(value) {
-  const text = uwFix_display_(value);
-  if (!text) return '';
-  if (/employee chooses/i.test(text)) return 'Employee Chooses';
-  if (/pre\s*-?\s*tax/i.test(text)) return 'Pre-Tax Deduction';
-  if (/post\s*-?\s*tax|after\s*-?\s*tax/i.test(text)) return 'After-Tax Deduction';
-  return text;
-}
-
-function uwFix_joinLines_(items) {
-  return (items || []).map(uwFix_display_).filter(Boolean).join('\n');
-}
-
-function uwFix_joinParts_(items, sep) {
-  return (items || []).map(uwFix_display_).filter(Boolean).join(sep || ' ');
-}
-
-function uwFix_append_(existing, value) {
-  existing = uwFix_display_(existing);
-  value = uwFix_display_(value);
-  if (!existing) return value;
-  if (!value) return existing;
-  return existing + '\n' + value;
-}
-
-function uwFix_formatDate_(value) {
-  const text = uwFix_display_(value);
-  if (!text) return '';
-  const d = new Date(text);
-  if (!isNaN(d.getTime())) {
-    return Utilities.formatDate(d, Session.getScriptTimeZone(), 'MM/dd/yyyy');
-  }
-  return text;
-}
-
-function uwFix_formatBrokerLine_(data) {
-  const associated = uwFix_get_(data, ['broker_associated']);
-  if (/^no$/i.test(uwFix_display_(associated))) return 'No broker associated';
-  return uwFix_joinLines_([
-    uwFix_get_(data, ['broker_name']),
-    uwFix_get_(data, ['broker_email']),
-    uwFix_get_(data, ['broker_code']),
-    uwFix_get_(data, ['broker_comp'])
-  ]);
-}
-
-function uwFix_collectTaxStatuses_(data) {
-  const keys = [
-    'individual_dental__tax_status', 'individual_accident__tax_status', 'group_accident__tax_status',
-    'individual_disability__tax_status', 'group_disability__tax_status', 'cancer_assist__tax_status',
-    'individual_critical__tax_status', 'group_critical_illness__tax_status', 'individual_med_bridge__tax_status',
-    'group_medical_bridge__tax_status', 'individual_term_life__tax_status', 'individual_whole_life__tax_status',
-    'group_term_life__tax_status'
-  ];
-  const statuses = keys.map(function(k) { return uwFix_normalizeTax_(uwFix_get_(data, [k])); }).filter(Boolean);
-  const unique = [];
-  statuses.forEach(function(s) { if (unique.indexOf(s) < 0) unique.push(s); });
-  return unique.join(' & ');
-}
-
-function uwFix_formatPlatform_(data) {
-  return uwFix_joinParts_([uwFix_get_(data, ['enrollment_platform', 'enrollmentPlatform']), uwFix_get_(data, ['platform_notes'])], ' - ');
-}
-
-function uwFix_formatEligibility_(data) {
-  const colonial = uwFix_joinParts_([uwFix_get_(data, ['colonial_days']), uwFix_get_(data, ['colonial_hours'])], ' / ');
-  const core = uwFix_joinParts_([uwFix_get_(data, ['core_days']), uwFix_get_(data, ['core_hours'])], ' / ');
-  if (colonial && core) return 'Colonial: ' + colonial + '\nCore: ' + core;
-  return colonial || core;
-}
-
-function uwFix_formatPayDed_(data) {
-  const pay = uwFix_get_(data, ['pay_periods']);
-  const ded = uwFix_get_(data, ['deductions']);
-  return pay || ded ? uwFix_joinParts_([pay, ded], '/') : '';
-}
-
-function uwFix_yesDetails_(data, yesKey, detailKey) {
-  return uwFix_joinParts_([uwFix_get_(data, [yesKey]), uwFix_get_(data, [detailKey])], ' - ');
-}
-
-function uwFix_buildEnrollmentLogisticsText_(data) {
-  const rows = [
-    ['Communication', uwFix_joinLines_([uwFix_get_(data, ['pre_enrollment_communication_methods']), uwFix_get_(data, ['pre_enrollment_communication_other'])])],
-    ['Packets', uwFix_yesDetails_(data, 'packets_needed', 'packet_details')],
-    ['Multilingual', uwFix_yesDetails_(data, 'multilingual_needs', 'multilingual_details')],
-    ['Special Shifts', uwFix_yesDetails_(data, 'special_shifts', 'special_shift_details')],
-    ['Weekend Enrollment', uwFix_yesDetails_(data, 'weekend_enrollment_needed', 'weekend_enrollment_details')],
-    ['Enrollers Needed', uwFix_get_(data, ['enrollers_needed'])]
-  ];
-  return rows.map(function(row) { return row[0] + ': ' + uwFix_display_(row[1]); }).filter(function(line) { return line.replace(/^[^:]+:\s*/, '').trim(); }).join('\n');
-}
-
-function uwFix_savedFileNames_(savedFiles, field) {
-  if (!savedFiles || !savedFiles.length) return '';
-  const names = savedFiles.filter(function(f) {
-    return String(f.field || '').toLowerCase().indexOf(String(field).toLowerCase()) >= 0;
-  }).map(function(f) {
-    return uwFix_joinLines_([f.name || 'Uploaded file', f.url || '']);
-  });
-  return names.join('\n');
-}
+    function escapeAttr(value) { return escapeHtml(value); }
+  </script>
+</body>
+</html>
