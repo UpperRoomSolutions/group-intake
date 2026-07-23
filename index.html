@@ -98,7 +98,7 @@
 
       <div class="edit-banner" id="editBanner" role="status"></div>
 
-      <form action="https://script.google.com/macros/s/AKfycbw5JfwHL5y2By3EVoEV4W1wiMKCSv8QbpewglkTGWyzAFXRK95mVnM2COLAW5deQYrJNQ/exec" id="intakeForm" method="POST" novalidate autocomplete="off">
+      <form action="https://script.google.com/macros/s/AKfycbyS80v7YHI4P0icVXQyTwnK3jLUdlS_QBvUdwPh-R66h1BbBbq86y7aAQ26o0KTF6FpeQ/exec" id="intakeForm" method="POST" novalidate autocomplete="off">
         <input aria-hidden="true" autocomplete="off" class="honeypot" name="_honey" tabindex="-1" type="text" />
         <input id="confirmation_id" name="confirmation_id" type="hidden" />
         <input id="notification_email" name="notification_email" type="hidden" value="tayshia.conner@coloniallifesales.com" />
@@ -347,7 +347,7 @@
           </div>
         </section>
 
-        <section class="step" id="final_review_step" data-name="Final Details">
+        <section class="step" id="final_details_step" data-name="Final Details">
           <div class="step-header"><div><h2 id="finalStepTitle">Final Details</h2><p id="finalStepDescription">Review, add logistics, upload additional files, and submit.</p></div><span class="pill" id="finalStepPill">Review & submit</span></div>
           <div class="grid">
             <div id="final_detail_questions" style="display:contents">
@@ -365,7 +365,13 @@
             <div class="field"><label for="weekend_enrollment_needed">Weekend Enrollment Needed?</label><select id="weekend_enrollment_needed" name="weekend_enrollment_needed"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><textarea name="weekend_enrollment_details" placeholder="Weekend details" style="margin-top:10px"></textarea></div>
             <div class="field full optional-note"><label for="additional_documents">Additional Documents</label><input data-file-key="additional_documents" id="additional_documents" multiple name="additional_documents" type="file" /></div>
             </div>
-            <div class="review-panel"><h3>Final Review</h3><p>Review the key details below before submitting.</p><div class="review-grid" id="reviewGrid"></div></div>
+          </div>
+        </section>
+
+        <section class="step" id="final_review_step" data-name="Final Review">
+          <div class="step-header"><div><h2>Final Review</h2><p>Review every detail below before submitting the intake.</p></div><span class="pill">Review before submit</span></div>
+          <div class="grid">
+            <div class="review-panel"><h3>Submission Summary</h3><p>Use Back to correct anything. Submit will send exactly what is shown below, along with the uploaded documents.</p><div class="review-grid" id="reviewGrid"></div></div>
           </div>
         </section>
 
@@ -376,7 +382,7 @@
   </main>
 
   <script>
-    const SUBMISSION_ENDPOINT = "https://script.google.com/macros/s/AKfycbw5JfwHL5y2By3EVoEV4W1wiMKCSv8QbpewglkTGWyzAFXRK95mVnM2COLAW5deQYrJNQ/exec";
+    const SUBMISSION_ENDPOINT = "https://script.google.com/macros/s/AKfycbyS80v7YHI4P0icVXQyTwnK3jLUdlS_QBvUdwPh-R66h1BbBbq86y7aAQ26o0KTF6FpeQ/exec";
     const form = document.getElementById("intakeForm");
     const steps = Array.from(document.querySelectorAll(".step"));
     const progressFill = document.getElementById("progressFill");
@@ -557,15 +563,15 @@
       // No-change renewals/open enrollments stop after the essential setup questions,
       // then proceed to a review-only final page.
       setPanelVisibility("no_change_setup_questions",!noChangesConfirmed,false);
-      setPanelVisibility("final_detail_questions",!noChangesConfirmed,false);
+      setStepVisibility("final_details_step",!noChangesConfirmed);
       const finalStepTitle=document.getElementById("finalStepTitle");
       const finalStepDescription=document.getElementById("finalStepDescription");
       const finalStepPill=document.getElementById("finalStepPill");
       const finalReviewStep=document.getElementById("final_review_step");
-      if(finalReviewStep)finalReviewStep.dataset.name=noChangesConfirmed?"Final Review":"Final Details";
-      if(finalStepTitle)finalStepTitle.textContent=noChangesConfirmed?"Final Review":"Final Details";
-      if(finalStepDescription)finalStepDescription.textContent=noChangesConfirmed?"Review the information below carefully before submitting.":"Review, add logistics, upload additional files, and submit.";
-      if(finalStepPill)finalStepPill.textContent=noChangesConfirmed?"Review before submit":"Review & submit";
+      if(finalReviewStep)finalReviewStep.dataset.name="Final Review";
+      if(finalStepTitle)finalStepTitle.textContent="Final Details";
+      if(finalStepDescription)finalStepDescription.textContent="Add logistics, communication details, and any additional documents.";
+      if(finalStepPill)finalStepPill.textContent="Final questions";
       updateProductSummaries();
       updateCoreProductSummaries();
     }
