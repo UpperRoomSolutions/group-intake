@@ -104,6 +104,7 @@
         <input id="notification_email" name="notification_email" type="hidden" value="tayshia.conner@coloniallifesales.com" />
         <input id="edit_token" name="edit_token" type="hidden" />
         <input id="form_page_url" name="form_page_url" type="hidden" />
+        <input id="submission_callback_token" name="submission_callback_token" type="hidden" />
 
         <section class="step active" data-name="Account & Contacts">
           <div class="step-header"><div><h2>Account & Contacts</h2><p>Start with the account, opener, HR contact, and broker information.</p></div><span class="pill">Required basics</span></div>
@@ -377,7 +378,7 @@
 
         <div class="actions"><div class="left-actions"><button class="btn-secondary" id="backBtn" type="button">Back</button><button class="btn-secondary" id="saveBtn" type="button">Save Progress</button></div><div class="right-actions"><button class="btn-primary" id="nextBtn" type="button">Next</button><button class="btn-gold" id="submitBtn" style="display:none" type="submit">Submit</button></div></div>
       </form>
-      <div class="success-box" id="successBox"><strong>Thank you. Your submission has been processed.</strong><span id="successMessage">Your form has been submitted.</span></div>
+      <div class="success-box" id="successBox"><strong id="successTitle">Submission status</strong><span id="successMessage">Your form has not been submitted yet.</span></div>
     </section>
   </main>
 
@@ -394,12 +395,15 @@
     const saveBtn = document.getElementById("saveBtn");
     const successBox = document.getElementById("successBox");
     const successMessage = document.getElementById("successMessage");
+    const successTitle = document.getElementById("successTitle");
     const confirmationInput = document.getElementById("confirmation_id");
     const reviewGrid = document.getElementById("reviewGrid");
     const editBanner = document.getElementById("editBanner");
     const editTokenInput = document.getElementById("edit_token");
     const formPageUrlInput = document.getElementById("form_page_url");
+    const submissionCallbackTokenInput = document.getElementById("submission_callback_token");
     let currentStep = 0;
+    let activeLoadRequestId = "";
     let editMode = false;
     let activeEditToken = "";
     let existingFiles = [];
@@ -949,14 +953,27 @@
       submitBtn.disabled=loading;
       if(loading){successBox.style.display="block";successMessage.textContent="Loading the saved intake securely...";}
     }
+    function createRequestToken_(){
+      try{
+        if(window.crypto&&typeof window.crypto.randomUUID==="function")return window.crypto.randomUUID();
+        if(window.crypto&&typeof window.crypto.getRandomValues==="function"){
+          const bytes=new Uint8Array(16);
+          window.crypto.getRandomValues(bytes);
+          return Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+        }
+      }catch(error){}
+      return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+    }
+
     function startSecureEditLoad_(token){
       editMode=true;
       activeEditToken=token;
+      activeLoadRequestId=createRequestToken_();
       editTokenInput.value=token;
       setEditLoadingState_(true);
       let frame=document.getElementById("ursEditLoader");
       if(!frame){frame=document.createElement("iframe");frame.id="ursEditLoader";frame.style.display="none";document.body.appendChild(frame);}
-      frame.src=`${SUBMISSION_ENDPOINT}?action=load&token=${encodeURIComponent(token)}`;
+      frame.src=`${SUBMISSION_ENDPOINT}?action=load&token=${encodeURIComponent(token)}&requestId=${encodeURIComponent(activeLoadRequestId)}`;
       try{window.history.replaceState({},document.title,getBaseFormUrl_());}catch(error){}
     }
 
@@ -969,7 +986,7 @@
       document.getElementById("testBanner")?.style.setProperty("display","block");
       let marker=document.getElementById("test_mode");
       if(!marker){marker=document.createElement("input");marker.type="hidden";marker.id="test_mode";marker.name="test_mode";form.appendChild(marker);}
-      marker.value="Prefilled Test Submission";
+      marker.value="LIVE PREFILLED TEST — SUBMISSION WILL BE SENT";
     }
     function setControlValue(name,value){
       const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));
@@ -1125,18 +1142,21 @@
       form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);
       submitBtn.disabled=false;
       submitBtn.textContent="Submit";
+      if(submissionCallbackTokenInput)submissionCallbackTokenInput.value="";
       saveBtn.disabled=false;
       successBox.style.display="block";
+      if(successTitle)successTitle.textContent="Submission not confirmed";
       successMessage.textContent=message||"The submission could not be confirmed. Please try again.";
       successBox.scrollIntoView({behavior:"smooth",block:"center"});
     }
     window.addEventListener("message",event=>{
       const data=event?.data;
       if(!data||!["urs-intake-response","urs-intake-load"].includes(data.source))return;
+      const trustedGoogleOrigin=/^https:\/\/([a-z0-9-]+\.)*(googleusercontent\.com|google\.com)$/i.test(String(event.origin||""));
+      if(!trustedGoogleOrigin)return;
 
       if(data.source==="urs-intake-load"){
-        const loader=document.getElementById("ursEditLoader");
-        if(loader&&event.source!==loader.contentWindow)return;
+        if(activeLoadRequestId&&data.requestId!==activeLoadRequestId)return;
         if(!data.ok){
           setEditLoadingState_(true);
           successBox.style.display="block";
@@ -1159,12 +1179,14 @@
         return;
       }
 
-      const submitFrame=document.getElementById("ursSubmitFrame");
-      if(submitFrame&&event.source!==submitFrame.contentWindow)return;
+      const expectedCallbackToken=String(submissionCallbackTokenInput?.value||"");
+      if(expectedCallbackToken&&data.callbackToken!==expectedCallbackToken)return;
       if(submitConfirmationTimer){clearTimeout(submitConfirmationTimer);submitConfirmationTimer=null;}
       if(!data.ok){restoreSubmitAfterFailure_(data.error||"The intake service returned an error. Please try again.");return;}
       localStorage.removeItem("urs_intake_progress");
+      if(submissionCallbackTokenInput)submissionCallbackTokenInput.value="";
       successBox.style.display="block";
+      if(successTitle)successTitle.textContent=data.isUpdate?"Changes saved":"Submission complete";
       const confirmationNote=data.confirmationEmailSent?" A confirmation email with the secure edit link was sent to the opener.":"";
       successMessage.textContent=data.isUpdate?`Your changes were saved to the existing intake. Confirmation: ${data.submissionId||confirmationInput.value||"Received"}.${confirmationNote}`:`Your Group Intake Form was submitted successfully. Confirmation: ${data.submissionId||confirmationInput.value||"Received"}.${confirmationNote}`;
       submitBtn.textContent=data.isUpdate?"Changes Saved":"Submitted";
@@ -1196,14 +1218,16 @@
         form.method="POST";
         form.action=SUBMISSION_ENDPOINT;
         form.target="ursSubmitFrame";
+        if(submissionCallbackTokenInput)submissionCallbackTokenInput.value=createRequestToken_();
         ensureSubmitIframe();
         HTMLFormElement.prototype.submit.call(form);
         successBox.style.display="block";
-        successMessage.textContent="Your submission is being processed. Keep this page open until confirmation appears.";
+        if(successTitle)successTitle.textContent="Submitting to Google...";
+        successMessage.textContent="Your submission is being processed by Google. Keep this page open. The confirmation normally appears within a minute.";
         successBox.scrollIntoView({behavior:"smooth",block:"center"});
         submitConfirmationTimer=setTimeout(()=>{
           restoreSubmitAfterFailure_("The form was sent, but the website did not receive confirmation from Google. Please check the submission email or try again.");
-        },120000);
+        },90000);
       }catch(error){
         restoreSubmitAfterFailure_("One or more files could not be prepared or submitted. Please try again or remove large files.");
       }
@@ -1213,11 +1237,10 @@
     const resetSavedProgress=["true","1","yes","y","reset"].includes(String(paramsForStartup.get("reset")||"").toLowerCase());
     if(resetSavedProgress)localStorage.removeItem("urs_intake_progress");
     const editTokenForStartup=String(paramsForStartup.get("edit")||"").trim();
-    const isTest=!editTokenForStartup && typeof isPrefillTestMode==="function" && isPrefillTestMode();
-    if(editTokenForStartup){startSecureEditLoad_(editTokenForStartup);}
-    else{
-      if(!isTest)loadProgress();
-      if(isTest)applyTestMode();
+    if(editTokenForStartup){
+      startSecureEditLoad_(editTokenForStartup);
+    }else{
+      applyTestMode(true);
       applyConditionalRules();
       updateReviewPanel();
       showStep(0);
