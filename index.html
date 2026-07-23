@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Group Intake Form</title>
   <style>
@@ -30,7 +29,7 @@
     .hero>*{position:relative;z-index:1}
     .brand-logo-wrap{display:inline-flex;align-items:center;justify-content:flex-start;width:min(720px,100%);margin-bottom:18px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
     .brand-logo{display:block;width:100%;height:auto;max-height:132px;object-fit:contain;filter:drop-shadow(0 12px 22px rgba(0,0,0,.22))}
-    .test-banner{display:none;margin:14px 0 0;border:1px solid #a7eded;background:var(--teal-soft);color:#07565d;border-radius:16px;padding:12px 14px;font-weight:700}.edit-banner{display:none;margin:18px 24px 0;border:1px solid #a7eded;background:linear-gradient(180deg,#f4ffff,#ffffff);color:#07565d;border-radius:16px;padding:14px 16px;line-height:1.5}.edit-banner strong{display:block;color:var(--navy);font-size:15px;margin-bottom:4px}.edit-file-list{margin:8px 0 0;padding-left:20px;color:var(--ink);font-size:13px}
+    .test-banner{display:none;margin:14px 0 0;border:1px solid #a7eded;background:var(--teal-soft);color:#07565d;border-radius:16px;padding:12px 14px;font-weight:700}
     .eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);color:#e6ffff;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:8px 12px;font-size:13px;letter-spacing:.02em;margin-bottom:14px}
     h1{margin:0;font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.04em}
     .hero p{margin:14px 0 0;max-width:760px;color:#dbe4f3;font-size:16px;line-height:1.6}
@@ -76,9 +75,7 @@
     .easy-details[open] summary::after{content:"Hide details"}
     .easy-details-inner{padding:14px}
     .quick-note{grid-column:1/-1;background:#f8fafc;border:1px dashed #b9c4cf;border-radius:16px;padding:12px 14px;color:var(--muted);font-size:13px;line-height:1.45}
-    .repeatable-contact-list{display:grid;gap:10px}.repeatable-contact-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:center}.repeatable-contact-row .remove-contact{padding:10px 13px;background:#eef2f7;color:var(--navy)}
-    .quick-note a{color:var(--teal-dark);font-weight:900;text-decoration:underline;text-underline-offset:2px}.quick-note a:hover{color:var(--navy)}
-    @media(max-width:760px){body{padding:14px 8px}.hero{padding:22px;border-radius:22px}.brand-logo-wrap{align-items:center;padding:0}.brand-logo{max-height:88px}.form-card{border-radius:22px}form{padding:18px}.progress-wrap{padding:18px 18px 0}.field,.field.third,.field.quarter{grid-column:1/-1}.step-header{flex-direction:column}.name-row,.inline-row,.inline-row.three,.product-grid,.repeatable-contact-row{grid-template-columns:1fr}.actions{flex-direction:column-reverse;align-items:stretch}.left-actions,.right-actions,button{width:100%}.review-grid{grid-template-columns:1fr}}
+    @media(max-width:760px){body{padding:14px 8px}.hero{padding:22px;border-radius:22px}.brand-logo-wrap{align-items:center;padding:0}.brand-logo{max-height:88px}.form-card{border-radius:22px}form{padding:18px}.progress-wrap{padding:18px 18px 0}.field,.field.third,.field.quarter{grid-column:1/-1}.step-header{flex-direction:column}.name-row,.inline-row,.inline-row.three,.product-grid{grid-template-columns:1fr}.actions{flex-direction:column-reverse;align-items:stretch}.left-actions,.right-actions,button{width:100%}.review-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -96,15 +93,9 @@
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       </div>
 
-      <div class="edit-banner" id="editBanner" role="status"></div>
-
-      <form action="https://script.google.com/macros/s/AKfycbyS80v7YHI4P0icVXQyTwnK3jLUdlS_QBvUdwPh-R66h1BbBbq86y7aAQ26o0KTF6FpeQ/exec" id="intakeForm" method="POST" novalidate autocomplete="off">
+      <form action="https://script.google.com/macros/s/AKfycbw5JfwHL5y2By3EVoEV4W1wiMKCSv8QbpewglkTGWyzAFXRK95mVnM2COLAW5deQYrJNQ/exec" id="intakeForm" method="POST" novalidate autocomplete="off">
         <input aria-hidden="true" autocomplete="off" class="honeypot" name="_honey" tabindex="-1" type="text" />
         <input id="confirmation_id" name="confirmation_id" type="hidden" />
-        <input id="notification_email" name="notification_email" type="hidden" value="tayshia.conner@coloniallifesales.com" />
-        <input id="edit_token" name="edit_token" type="hidden" />
-        <input id="form_page_url" name="form_page_url" type="hidden" />
-        <input id="submission_callback_token" name="submission_callback_token" type="hidden" />
 
         <section class="step active" data-name="Account & Contacts">
           <div class="step-header"><div><h2>Account & Contacts</h2><p>Start with the account, opener, HR contact, and broker information.</p></div><span class="pill">Required basics</span></div>
@@ -115,26 +106,23 @@
             <div class="field third" data-required="true"><label class="required" for="employee_count"># of Employees</label><input id="employee_count" name="employee_count" type="number" min="1" /><div class="error-text">Employee count is required.</div></div>
             <div class="field third optional-note"><label for="sic_code">SIC Code</label><input id="sic_code" name="sic_code" type="text" placeholder="Optional" /><div class="hint">Optional. Add if available.</div></div>
             <div class="field third" data-required="true"><label class="required" for="enrollers_needed">How many enrollers are needed?</label><input id="enrollers_needed" name="enrollers_needed" type="number" min="0" placeholder="Example: 3" /><div class="hint">Estimate how many enrollers should be scheduled for this account.</div><div class="error-text">Enter the number of enrollers needed.</div></div>
-            <div class="field third optional-note"><label for="preferred_enrollers">Preferred Enrollers</label><input id="preferred_enrollers" name="preferred_enrollers" type="text" placeholder="Names of preferred enrollers, if any" /><div class="hint">Optional. Leave blank if there is no preference.</div></div>
             <div class="field third" data-required="true"><label class="required" for="requested_build_completion_date">Requested Completion Date</label><input id="requested_build_completion_date" name="requested_build_completion_date" type="date" /><div class="error-text">Enter the requested completion date.</div></div>
-            <div class="field third optional-note"><label for="opener_agent_code">Opener Agent Code</label><input id="opener_agent_code" name="opener_agent_code" type="text" placeholder="Optional agent code" /><div class="hint">Optional. Add the opener's agent code if available.</div></div>
+            <input id="opener_agent_code" name="opener_agent_code" type="hidden" value="" />
             <div class="field third" data-required="true"><label class="required" for="opener_email">Opener Email</label><input id="opener_email" name="opener_email" type="email" /><div class="error-text">Enter a valid opener email.</div></div>
             <div class="field" data-required="true"><label class="required">Opener</label><div class="name-row"><input name="opener_first_name" placeholder="First Name" type="text" /><input name="opener_last_name" placeholder="Last Name" type="text" /></div><div class="error-text">Opener first and last name are required.</div></div>
-            <div class="field full" data-required="true" id="hr_contacts_field"><label class="required">Account Point of Contact (HR)</label><div class="repeatable-contact-list" id="hrContactsList"><div class="repeatable-contact-row" data-hr-contact-row><input name="hr_contact_name" placeholder="Primary HR Contact Name" type="text" /><input name="hr_contact_email" placeholder="Primary HR Contact Email" type="email" /><span aria-hidden="true"></span></div></div><div class="error-text">The primary HR contact name and email are required.</div><button class="btn-secondary" id="addHrContactBtn" type="button" style="margin-top:10px">Add Another HR Contact</button><div class="hint">Add additional account contacts only when the group has more than one HR point of contact.</div></div>
+            <div class="field" data-required="true"><label class="required">Account Point of Contact (HR)</label><div class="inline-row"><input name="hr_contact_name" placeholder="First/Last Name" type="text" /><input name="hr_contact_email" placeholder="Email" type="email" /></div><div class="error-text">HR contact name and email are required.</div></div>
             <div class="field full" data-required="true"><label class="required" for="broker_associated">Is a broker associated with this account?</label><select id="broker_associated" name="broker_associated"><option value="">Please Select</option><option>Yes</option><option>No</option></select><div class="error-text">Select whether a broker is associated with the account.</div></div>
             <div class="field conditional-hidden" id="broker_name_field" data-required="false"><label class="required" for="broker_name">Broker Name/Agency</label><input id="broker_name" name="broker_name" type="text" /><div class="error-text">Broker name or agency is required.</div></div>
             <div class="field conditional-hidden" id="broker_email_field" data-required="false"><label class="required" for="broker_email">Broker Email</label><input id="broker_email" name="broker_email" type="email" /><div class="error-text">Enter a valid broker email.</div></div>
             <div class="field full optional-note conditional-hidden" id="broker_info_field" data-required="false"><label>Broker Compensation</label><input name="broker_code" type="hidden" value="" /><div class="inline-row"><select id="broker_comp" name="broker_comp"><option value="">Broker Comp - Please Select</option><option>PIN LEVEL</option><option>PIN HEAPED</option><option>PEAK LEVEL</option><option>PEAK HEAPED</option><option>OTHER (TEXT BOX)</option></select><input id="broker_comp_other" name="broker_comp_other" placeholder="If other, describe broker comp" type="text" /></div></div>
-            <div class="field full" data-required="true"><label class="required" for="agent_comp">Agent Compensation</label><select id="agent_comp" name="agent_comp"><option value="">Agent Comp - Please Select</option><option>Advanced</option><option>As Earned</option><option>No Changes</option></select><div class="error-text">Select the agent compensation option.</div></div>
           </div>
         </section>
 
         <section class="step" data-name="Enrollment Setup">
           <div class="step-header"><div><h2>Enrollment Setup</h2><p>Enter timing, payroll, domestic partner rules, and enrollment type.</p></div><span class="pill">Dates & payroll</span></div>
           <div class="grid">
-            <div class="field full" data-required="true"><label class="required" for="case_type">Case Type</label><select id="case_type" name="case_type"><option value="">Please Select</option><option>New Group</option><option>Renewal - No Changes</option><option>Renewal - With Changes</option><option>Open Enrollment - No Changes</option><option>Open Enrollment - With Changes</option><option>Takeover</option><option>Platform Rebuild</option><option>Other</option></select><div class="error-text">Select the case type.</div></div>
-            <div class="quick-note conditional-hidden" id="agent_assist_account_reminder" data-output-exclude="true"><strong>Renewal / Open Enrollment reminder:</strong> Add or update the group information in <a href="https://apps2.coloniallife.com/AgentAssist/accounts/my" target="_blank" rel="noopener noreferrer">Agent Assist</a> before moving forward.</div>
-            <div class="field full conditional-hidden" id="renewal_no_changes_confirm_field" data-required="false"><label class="required" for="renewal_no_changes_confirm">Confirm there are no group changes</label><select id="renewal_no_changes_confirm" name="renewal_no_changes_confirm"><option value="">Please Select</option><option value="Yes">Yes</option></select><div class="error-text">Select Yes to confirm there are no group changes.</div></div>
+            <div class="field full" data-required="true"><label class="required" for="case_type">Case Type</label><select id="case_type" name="case_type"><option value="">Please Select</option><option>New Group</option><option>Renewal - No Changes</option><option>Renewal - With Changes</option><option>Takeover</option><option>Platform Rebuild</option><option>Other</option></select><div class="error-text">Select the case type.</div></div>
+            <div class="field full conditional-hidden" id="renewal_no_changes_confirm_field" data-required="false"><label for="renewal_no_changes_confirm">Renewal - No Changes Confirmation</label><select id="renewal_no_changes_confirm" name="renewal_no_changes_confirm"><option value="">Please Select</option><option>Confirmed - no plan, rate, eligibility, contribution, platform, payroll, or communication changes</option><option>Not sure</option></select><div class="hint">Use this only when the renewal is expected to mirror the prior enrollment.</div><div class="error-text">Confirm no changes or select Not sure.</div></div>
             <fieldset class="field full conditional-hidden" id="renewal_change_types_field" data-required="false"><legend>What changed from last year?</legend><div class="choice-group"><label class="choice"><input name="renewal_change_types" type="checkbox" value="Product changes" /> Product changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Rate changes" /> Rate changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Eligibility changes" /> Eligibility changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Employer contribution changes" /> Employer contribution changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Carrier changes" /> Carrier changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Platform changes" /> Platform changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Payroll/deduction changes" /> Payroll/deduction changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Employee communication changes" /> Employee communication changes</label><label class="choice"><input name="renewal_change_types" type="checkbox" value="Other" /> Other</label></div><div class="error-text">Select at least one renewal change type.</div></fieldset>
             <div class="field full conditional-hidden" id="renewal_changes_summary_field" data-required="false"><label for="renewal_changes_summary">Please describe the renewal changes</label><textarea id="renewal_changes_summary" name="renewal_changes_summary" placeholder="Describe only what changed: products, rates, eligibility, employer contributions, platform changes, payroll/deduction changes, employee communication, or other renewal updates."></textarea><div class="hint">This keeps renewals lighter while still capturing the operational changes.</div><div class="error-text">Describe the renewal changes.</div></div>
             <div class="field quarter" data-required="true"><label class="required" for="bcn">BCN</label><input id="bcn" name="bcn" type="text" /><div class="error-text">BCN is required.</div></div>
@@ -144,14 +132,14 @@
             <div class="field conditional-hidden" id="payday_weekly_field" data-required="false"><label for="payday_day_of_week">Payday - Day of Week</label><select id="payday_day_of_week" name="payday_day_of_week"><option value="">Select payday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select><div class="error-text">Select the payday.</div></div>
             <div class="field conditional-hidden" id="payday_monthly_field" data-required="false"><label for="monthly_payday_day">Monthly Payday - Day of Month</label><select id="monthly_payday_day" name="monthly_payday_day"><option value="">Select monthly payday</option><option>1st</option><option>5th</option><option>10th</option><option>15th</option><option>20th</option><option>25th</option><option>Last day of the month</option></select><div class="error-text">Select the monthly payday.</div></div>
             <div class="field full conditional-hidden" id="payday_semi_monthly_field" data-required="false"><label>Semi-monthly Payday Dates</label><div class="inline-row three"><input id="semi_monthly_payday_1" name="semi_monthly_payday_1" type="date" required /><input id="semi_monthly_payday_2" name="semi_monthly_payday_2" type="date" required /><input id="semi_monthly_payday_notes" name="semi_monthly_payday_notes" placeholder="Optional notes" type="text" data-optional="true" /></div><div class="hint">Choose both semi-monthly payroll dates from the calendar picker.</div><div class="error-text"></div></div>
-            <fieldset class="field full" id="domestic_partners_field" data-required="true"><legend class="required">Does the group recognize domestic partners?</legend><div class="choice-group"><label class="choice"><input name="domestic_partners" type="radio" value="Yes - Same & Opposite" /> Yes - Same & Opposite</label><label class="choice"><input name="domestic_partners" type="radio" value="No" /> No</label><label class="choice"><input name="domestic_partners" type="radio" value="Yes - Same only" /> Yes - Same only</label><label class="choice"><input name="domestic_partners" type="radio" value="Yes - Opposite Only" /> Yes - Opposite Only</label></div><div class="error-text">Select a domestic partner option.</div></fieldset>
+            <fieldset class="field full" data-required="true"><legend class="required">Does the group recognize domestic partners?</legend><div class="choice-group"><label class="choice"><input name="domestic_partners" type="radio" value="Yes - Same & Opposite" /> Yes - Same & Opposite</label><label class="choice"><input name="domestic_partners" type="radio" value="No" /> No</label><label class="choice"><input name="domestic_partners" type="radio" value="Yes - Same only" /> Yes - Same only</label></div><div class="error-text">Select a domestic partner option.</div></fieldset>
             <div class="field quarter" data-required="true"><label class="required" for="enrollment_start_date">Enrollment Start Date</label><input id="enrollment_start_date" name="enrollment_start_date" type="date" /><div class="error-text">Start date is required.</div></div>
             <div class="field quarter" data-required="true"><label class="required" for="enrollment_end_date">Enrollment End Date</label><input id="enrollment_end_date" name="enrollment_end_date" type="date" /><div class="error-text">End date is required.</div></div>
             <div class="field quarter" data-required="true"><label class="required" for="ced">CED - Coverage Effective Date</label><input id="ced" name="ced" type="date" /><div class="error-text">CED is required.</div></div>
             <div class="field quarter" data-required="true"><label class="required" for="ped">PED - Payroll Effective Date</label><input id="ped" name="ped" type="date" /><div class="error-text">PED is required.</div></div>
             <fieldset class="field full" data-required="true"><legend class="required">Enrollment Type</legend><div class="choice-group"><label class="choice"><input name="enrollment_type" type="checkbox" value="Colonial Life" /> Colonial Life</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Communication" /> Core Communication</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Enrollment" /> Core Enrollment</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Mandatory 1-1" /> Mandatory 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Voluntary 1-1" /> Voluntary 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Other" /> Other</label></div><div class="error-text">Select at least one enrollment type.</div></fieldset>
-            <div class="field" data-required="true"><label class="required" for="enrollment_platform">Enrollment Platform</label><select id="enrollment_platform" name="enrollment_platform"><option value="">Please Select</option><option>Gathr</option><option>Harmony only</option><option>Employee Navigator</option><option>Selerix</option><option>Paylocity</option></select><div class="error-text">Enrollment platform is required.</div></div>
-            <div id="no_change_setup_questions" style="display:contents">
+            <div class="field" data-required="true"><label class="required" for="enrollment_platform">Enrollment Platform</label><select id="enrollment_platform" name="enrollment_platform"><option value="">Please Select</option><option>Gathr</option><option>Harmony only</option><option>Employee Navigator</option></select><div class="error-text">Enrollment platform is required.</div></div>
+            <div class="field full conditional-hidden" id="en_build_notice_field" data-required="false"><label>Employee Navigator Details</label><div class="hint">This section only appears when Enrollment Platform is Employee Navigator. It stays hidden for Gathr or Harmony only builds.</div></div>
             <fieldset class="field full conditional-hidden" id="en_employee_classes_field" data-required="true"><legend class="required">Employee Classes</legend><div class="choice-group"><label class="choice"><input name="en_employee_classes" type="checkbox" value="All Employees" /> All Employees</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Full-Time" /> Full-Time</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Part-Time" /> Part-Time</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Salaried" /> Salaried</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Hourly" /> Hourly</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Union" /> Union</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Non-Union" /> Non-Union</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Location-Based" /> Location-Based</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Other" /> Other</label></div><div class="error-text">Select at least one employee class for the EN build.</div></fieldset>
             <div class="field conditional-hidden" id="en_benefits_differ_by_class_field" data-required="true"><label class="required" for="en_benefits_differ_by_class">Are benefits offered differently by class?</label><select id="en_benefits_differ_by_class" name="en_benefits_differ_by_class"><option value="">Please Select</option><option>Yes</option><option>No</option></select><div class="error-text">Select whether benefits differ by class.</div></div>
             <div class="field full conditional-hidden" id="en_class_rules_field" data-required="false"><label for="en_class_rules">Class Rules / Differences</label><textarea id="en_class_rules" name="en_class_rules" placeholder="Example: Full-time employees are eligible for all benefits. Part-time employees are Colonial only. Location A has different contribution rules."></textarea><div class="hint">Required only if benefits are offered differently by class.</div><div class="error-text">Describe the class rules or differences.</div></div>
@@ -165,25 +153,23 @@
             <div class="field full conditional-hidden" id="en_plan_rate_build_details_field" data-required="true"><label class="required" for="en_plan_rate_build_details">Plan / Rate Details</label><textarea id="en_plan_rate_build_details" name="en_plan_rate_build_details" placeholder="Carrier:\nPlan Name:\nPlan Year:\nEffective Date:\nRate Type: Age-banded, Composite, Tiered, Volume-based\nRequired Forms or Attachments:"></textarea><div class="error-text">Enter the plan/rate details, or note where they are attached.</div></div>
             <div class="field conditional-hidden" id="en_carrier_feeds_required_field" data-required="true"><label class="required" for="en_carrier_feeds_required">Carrier Feeds Required?</label><select id="en_carrier_feeds_required" name="en_carrier_feeds_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><div class="error-text">Select whether carrier feeds are required.</div></div>
             <div class="field full conditional-hidden" id="en_carrier_feed_notes_field" data-required="false"><label for="en_carrier_feed_notes">Carrier Feed Notes</label><textarea id="en_carrier_feed_notes" name="en_carrier_feed_notes" placeholder="List carriers needing feeds, known vendor/EDI notes, or questions for opener follow-up."></textarea></div>
-            <div class="field optional-note full"><label for="employer_paid_benefits_details">Colonial Products Only: Employer-Paid Benefits / Employer Contributions</label><textarea id="employer_paid_benefits_details" name="employer_paid_benefits_details" placeholder="Colonial product:\nWho is eligible:\nContribution amount or percentage:\nEmployee-only or all tiers:\nAny notes:"></textarea><div class="hint"><strong>Colonial products only.</strong> Enter Colonial employer-paid benefit and contribution details here. Core product contributions are entered separately under each core plan on the next page.</div></div>
-            <div class="quick-note" data-output-exclude="true"><strong>Colonial contribution reminder:</strong> If the employer contributes toward a Colonial product, complete the <a href="https://www.my.coloniallife.com/Producers/Clients-and-Brokers/Direct-Sales/Complete-the-New-Account-Paperwork/New-Account-Service-Center/Employer-Contribution-Data-Form" target="_blank" rel="noopener noreferrer">Employer Contribution Data Form</a>.</div>
-            </div>
+            <div class="field optional-note full"><label for="employer_paid_benefits_details">Employer-Paid Benefits / Employer Contributions</label><textarea id="employer_paid_benefits_details" name="employer_paid_benefits_details" placeholder="Plan:\nWho is eligible:\nContribution amount or percentage:\nEmployee-only or all tiers:\nAny notes:"></textarea><div class="hint">Use this for employer-paid benefits, contribution rules, and any tier/class differences.</div></div>
           </div>
         </section>
 
-        <section class="step" id="eligibility_benefits_step" data-name="Eligibility & Benefits" data-skip-when-no-changes="true">
+        <section class="step" data-name="Eligibility & Benefits">
           <div class="step-header"><div><h2>Eligibility & Benefits</h2><p>Add eligibility rules, required documents, and enrollment goals.</p></div><span class="pill">Plans & files</span></div>
           <div class="grid">
-            <div class="field" id="aif_file_field" data-required="false"><label class="required" for="aif_file">Attach AIF Here</label><input data-file-key="aif" id="aif_file" multiple name="aif_file" type="file" /><div class="error-text">AIF attachment is required when Colonial Life is selected.</div></div>
-            <div class="field" id="flex_file_field" data-required="false"><label class="required" for="flex_file">Attach FLEX Here</label><input data-file-key="flex" id="flex_file" multiple name="flex_file" type="file" /><div class="error-text">FLEX attachment is required when Colonial Life is selected.</div></div>
-            <div class="field optional-note" id="gmapp_file_field" data-required="false"><label for="gmapp_file">Attach Group Master Application Here</label><input data-file-key="gmapp" id="gmapp_file" multiple name="gmapp_file" type="file" /><div class="hint">Optional. Upload the Group Master Application if available.</div></div>
+            <div class="field" id="aif_file_field" data-required="false"><label class="required" for="aif_file">Attach AIF Here</label><input data-file-key="aif" id="aif_file" multiple name="aif_file" type="file" /><div class="hint">Required when Enrollment Type includes Colonial Life.</div><div class="error-text">AIF attachment is required when Colonial Life is selected.</div></div>
+            <div class="field" id="flex_file_field" data-required="false"><label class="required" for="flex_file">Attach FLEX Here</label><input data-file-key="flex" id="flex_file" multiple name="flex_file" type="file" /><div class="hint">Required when Enrollment Type includes Colonial Life.</div><div class="error-text">FLEX attachment is required when Colonial Life is selected.</div></div>
+            <div class="field optional-note" id="gmapp_file_field" data-required="false"><label for="gmapp_file">Attach GMAPP Here</label><input data-file-key="gmapp" id="gmapp_file" multiple name="gmapp_file" type="file" /><div class="hint">Optional. Upload GMAPP if available.</div></div>
             <div class="field optional-note"><label for="census">Attach Census Here</label><input data-file-key="census" id="census" multiple name="census" type="file" /><label class="choice not-needed-choice"><input name="census_not_needed" type="checkbox" value="Not Needed" /> Not needed / not applicable</label></div>
             <div class="field" id="colonial_days_field"><label for="colonial_days">Colonial Eligibility Days</label><select id="colonial_days" name="colonial_days"><option value="">Please Select</option><option>FOMF DOH</option><option>FOMF 30 DAYS</option><option>FOMF 60 DAYS</option><option>FOMF 90 DAYS</option></select></div>
             <div class="field" id="colonial_hours_field"><label for="colonial_hours">Colonial Eligibility Hours</label><input id="colonial_hours" name="colonial_hours" placeholder="Example: 30 hours/week" type="text" /></div>
             <div class="field" id="core_days_field"><label for="core_days">Core Eligibility Days</label><select id="core_days" name="core_days"><option value="">Please Select</option><option>FOMF DOH</option><option>FOMF 30 DAYS</option><option>FOMF 60 DAYS</option><option>FOMF 90 DAYS</option></select></div>
             <div class="field" id="core_hours_field"><label for="core_hours">Core Eligibility Hours</label><input id="core_hours" name="core_hours" placeholder="Example: 30 hours/week" type="text" /></div>
             <div class="field full optional-note"><label for="class_product_eligibility_differences">Class / Product Eligibility Differences</label><textarea id="class_product_eligibility_differences" name="class_product_eligibility_differences" placeholder="Example: Salaried vs hourly, executives only, location-based benefits, union/non-union, products limited to specific classes, waived/ineligible groups."></textarea><div class="hint">Add any differences by class, division, location, employee type, or product eligibility.</div></div>
-            <div class="field" id="uw_offer_field" data-required="true"><label class="required" for="uw_offer">UW Offer</label><select id="uw_offer" name="uw_offer"><option value="">Please Select</option><option value="None">None</option><option value="Standard Colonial UW Offer">Standard Colonial UW Offer</option><option value="Top Producer Offer">Top Producer Offer</option><option value="2026 Coverage Accelerator Package">2026 Coverage Accelerator Package</option><option value="2026 Diamond Underwriting Offer">2026 Diamond Underwriting Offer</option><option value="2025 Coverage Accelerator Package">2025 Coverage Accelerator Package</option><option value="2025 Executive Broker Partner UW Offer">2025 Executive Broker Partner UW Offer</option><option value="SCE UW Offer">SCE UW Offer</option><option value="Executive Partner">Executive Partner</option><option value="Diamond Offer">Diamond Offer</option><option value="Full Underwriting Only">Full Underwriting Only</option><option value="GI / PEGI Offer">GI / PEGI Offer</option><option value="Custom / Special UW Offer">Custom / Special UW Offer</option></select><div class="error-text">UW offer is required when Colonial Life is selected.</div></div>
+            <div class="field" id="uw_offer_field" data-required="true"><label class="required" for="uw_offer">UW Offer</label><select id="uw_offer" name="uw_offer"><option value="">Please Select</option><option value="None">None</option><option value="Standard Colonial UW Offer">Standard Colonial UW Offer</option><option value="2026 Coverage Accelerator Package">2026 Coverage Accelerator Package</option><option value="2026 Diamond Underwriting Offer">2026 Diamond Underwriting Offer</option><option value="2025 Coverage Accelerator Package">2025 Coverage Accelerator Package</option><option value="2025 Executive Broker Partner UW Offer">2025 Executive Broker Partner UW Offer</option><option value="SCE UW Offer">SCE UW Offer</option><option value="Executive Partner">Executive Partner</option><option value="Diamond Offer">Diamond Offer</option><option value="Full Underwriting Only">Full Underwriting Only</option><option value="GI / PEGI Offer">GI / PEGI Offer</option><option value="Custom / Special UW Offer">Custom / Special UW Offer</option></select><div class="hint">This selection controls the UW language that appears under each Colonial product line in the Enrollment Guide.</div><div class="error-text">UW offer is required when Colonial Life is selected.</div></div>
             <div class="field optional-note"><label for="eoi_underwriting_required">EOI / Underwriting Required</label><textarea id="eoi_underwriting_required" name="eoi_underwriting_required" placeholder="Which products require EOI, underwriting, GI limits, health questions, or special underwriting notes?"></textarea></div>
             <div class="field optional-note"><label for="beneficiaries_required">Are beneficiaries required?</label><select id="beneficiaries_required" name="beneficiaries_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>By product</option><option>Unknown</option></select><textarea name="beneficiaries_required_details" placeholder="If yes or by product, list which products and any notes." style="margin-top:10px"></textarea></div>
             <div class="field optional-note"><label for="tobacco_questions_required">Are tobacco questions required?</label><select id="tobacco_questions_required" name="tobacco_questions_required"><option value="">Please Select</option><option>Yes</option><option>No</option><option>By product</option><option>Unknown</option></select><textarea name="tobacco_questions_required_details" placeholder="If yes or by product, list which products and any notes." style="margin-top:10px"></textarea></div>
@@ -201,7 +187,6 @@
                 <label class="choice"><input name="value_added_benefits" type="checkbox" value="Other" /> Other</label>
               </div>
               <div class="hint">Select all programs or special offers being provided.</div>
-              <div class="quick-note" style="margin-top:12px" data-output-exclude="true"><strong>PROPR reminder:</strong> Complete the <a href="https://www.my.coloniallife.com/Producers/External-Sites/Marketing/Marketing-Programs/Program-Request-Form" target="_blank" rel="noopener noreferrer">Program Request Form</a> for any selected value-added benefit.</div>
               <textarea id="value_added_benefits_other" name="value_added_benefits_other" placeholder="Other value-added benefits or special offer notes" style="margin-top:10px"></textarea>
             </fieldset>
             <input id="enrollable_core_products" name="enrollable_core_products" type="hidden" />
@@ -273,14 +258,14 @@
                 <div class="product-subfield"><span class="product-subfield-label">Notes</span><textarea class="product-control" name="core_life__notes"></textarea></div>
               </div>
             </div>
-            <div class="field optional-note full conditional-hidden" id="core_sbc_rates_field" data-required="false"><label for="core_sbc_rates">Core Plan Documents / SBCs / Rates</label><input data-file-key="core_sbc_rates" id="core_sbc_rates" multiple name="core_sbc_rates" type="file" /><div class="hint">Shown only when Core Enrollment is selected.</div></div>
+            <div class="field optional-note full"><label for="core_sbc_rates">Core Plan Documents / SBCs / Rates</label><input data-file-key="core_sbc_rates" id="core_sbc_rates" multiple name="core_sbc_rates" type="file" /></div>
             <div class="field optional-note"><label for="enrollable_unum_products">Enrollable UNUM Products</label><textarea id="enrollable_unum_products" name="enrollable_unum_products"></textarea></div>
             <div class="field optional-note"><label for="unum_sbc_rates">UNUM SBCs/Rates/RFP/Plan Info</label><input data-file-key="unum_sbc_rates" id="unum_sbc_rates" multiple name="unum_sbc_rates" type="file" /></div>
             <div class="field optional-note full"><label for="enrollment_goals">Enrollment Goals / Commitments</label><textarea id="enrollment_goals" name="enrollment_goals"></textarea></div>
           </div>
         </section>
 
-        <section class="step" id="colonial_products_step" data-name="Colonial Products" data-skip-when-no-changes="true">
+        <section class="step" data-name="Colonial Products">
           <div class="step-header"><div><h2>Colonial Products</h2><p>Select a product, then complete the drop-down/multi-choice options that open underneath. Tax status is a dropdown only, no extra text box.</p></div><span class="pill">Product detail</span></div>
           <div class="grid">
             <div class="field"><label for="colonial_dental">Colonial Individual Dental</label><select id="colonial_dental" name="colonial_dental"><option>None Offered</option><option>Individual Dental 8100</option></select></div>
@@ -298,7 +283,7 @@
             <div class="field"><label for="colonial_cancer_critical">Colonial Cancer/Critical</label><select id="colonial_cancer_critical" name="colonial_cancer_critical"><option>None Offered</option><option>Cancer Assist</option><option>Group Critical Illness (GCI6000)</option><option>Critical Illness (ICI6000)</option></select></div>
             <div class="field full product-widget conditional-hidden" id="cancer_assist_field" data-summary-target="cancer_assist" data-required="false"><label>Cancer Assist</label><input type="hidden" id="cancer_assist" name="cancer_assist" value="" /><div class="product-grid"><div class="product-subfield"><span class="product-subfield-label">Tax Status</span><select class="product-control" name="cancer_assist__tax_status"><option value="">Select Pre or Post</option><option>Pre-Tax</option><option>Post-Tax</option></select></div><div class="product-subfield"><span class="product-subfield-label">Plan Level</span><select class="product-control" name="cancer_assist__plan_design"><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div><div class="product-subfield full"><span class="product-subfield-label">Riders</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="None"> None</label><label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Progressive"> Progressive</label><label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Specified Disease"> Specified Disease</label><label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Initial Diagnosis"> Initial Diagnosis</label><label class="choice"><input class="product-control" type="checkbox" name="cancer_assist__riders" value="Health Screening"> Health Screening</label></div></div><div class="product-subfield"><span class="product-subfield-label">Health Screening</span><select class="product-control" name="cancer_assist__health_screening"><option value="">Select</option><option>None</option><option>$25</option><option>$50</option><option>$75</option><option>$100</option></select></div></div></div>
             <div class="field full product-widget conditional-hidden" id="individual_critical_field" data-summary-target="individual_critical" data-required="false"><label>Individual Critical Illness 6000</label><input type="hidden" id="individual_critical" name="individual_critical" value="" /><div class="product-grid"><div class="product-subfield" ><span class="product-subfield-label">Tax Status</span><select class="product-control" name="individual_critical__tax_status"><option value="">Select Pre or Post</option><option>Pre-Tax</option><option>Post-Tax</option><option>Employee Chooses</option></select></div><div class="product-subfield" ><span class="product-subfield-label">Min Hours / Week</span><input class="product-control" name="individual_critical__min_hours" type="text" placeholder="Example: 20"></div><div class="product-subfield" ><span class="product-subfield-label">New Hire Waiting Period</span><input class="product-control" name="individual_critical__new_hire_waiting" type="text" placeholder="Example: 0 days"></div><div class="product-subfield full" ><span class="product-subfield-label">Plan Type</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__plan_design" value="Critical Illness"> Critical Illness</label><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__plan_design" value="Critical Illness &amp; Cancer"> Critical Illness & Cancer</label></div></div><div class="product-subfield full" ><span class="product-subfield-label">Coverage Options</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__coverage_options" value="Named Insured"> Named Insured</label><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__coverage_options" value="Named Insured and Spouse"> Named Insured and Spouse</label><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__coverage_options" value="Named Insured and Dependent Child(ren)"> Named Insured and Dependent Child(ren)</label><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__coverage_options" value="Named Insured, Spouse and Dependent Child(ren)"> Named Insured, Spouse and Dependent Child(ren)</label></div></div><div class="product-subfield" ><span class="product-subfield-label">Minimum Face Amount</span><input class="product-control" name="individual_critical__minimum_face_amount" type="text" placeholder="Example: $5,000"></div><div class="product-subfield" ><span class="product-subfield-label">Maximum Face Amount</span><input class="product-control" name="individual_critical__maximum_face_amount" type="text" placeholder="Example: $75,000"></div><div class="product-subfield" ><span class="product-subfield-label">Maximum GI Amount</span><input class="product-control" name="individual_critical__maximum_gi_amount" type="text" placeholder="Example: $20,000"></div><details class="easy-details"><summary>Harmony Details / Riders</summary><div class="easy-details-inner"><div class="product-grid"><div class="product-subfield" ><span class="product-subfield-label">New Hire Eligibility Period</span><input class="product-control" name="individual_critical__new_hire_eligibility" type="text" placeholder="Example: 365 days"></div><div class="product-subfield full" ><span class="product-subfield-label">Wellbeing Assistance</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="radio" name="individual_critical__wellbeing" value="Standard - $50"> Standard - $50</label><label class="choice"><input class="product-control" type="radio" name="individual_critical__wellbeing" value="Standard - $75"> Standard - $75</label><label class="choice"><input class="product-control" type="radio" name="individual_critical__wellbeing" value="Standard - $100"> Standard - $100</label><label class="choice"><input class="product-control" type="radio" name="individual_critical__wellbeing" value="Max - $50"> Max - $50</label><label class="choice"><input class="product-control" type="radio" name="individual_critical__wellbeing" value="Max - $75"> Max - $75</label><label class="choice"><input class="product-control" type="radio" name="individual_critical__wellbeing" value="Max - $100"> Max - $100</label></div></div><div class="product-subfield full" ><span class="product-subfield-label">Employee Optional Riders</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="Infectious Diseases Rider"> Infectious Diseases Rider</label><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="Progressive Diseases Rider"> Progressive Diseases Rider</label><label class="choice"><input class="product-control" type="checkbox" name="individual_critical__riders" value="Supplemental Conditions Rider"> Supplemental Conditions Rider</label></div></div><div class="product-subfield full" ><span class="product-subfield-label">Notes</span><textarea class="product-control" name="individual_critical__notes" placeholder="Cancer product conflict, wellbeing amount, rider details, or UW notes."></textarea></div></div></div></details></div><div class="error-text">Complete the Individual Critical Illness details.</div></div>
-            <div class="field full product-widget conditional-hidden" id="group_critical_illness_field" data-summary-target="group_critical_illness" data-required="false"><label>Group Critical Illness 6000</label><input type="hidden" id="group_critical_illness" name="group_critical_illness" value="" /><div class="product-grid"><div class="product-subfield" ><span class="product-subfield-label">Overall Tax Status</span><select class="product-control" name="group_critical_illness__tax_status"><option value="">Select Pre or Post</option><option>Pre-Tax</option><option>Post-Tax</option><option>Employee Chooses</option></select></div><div class="product-subfield" ><span class="product-subfield-label">Eligible Employees</span><input class="product-control" name="group_critical_illness__eligible_employees" type="text" placeholder="Example: 430"></div><div class="product-subfield" ><span class="product-subfield-label">Rate Structure for Plans 1, 2 & 3</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="radio" name="group_critical_illness__rate_structure" value="Issue Age"> Issue Age</label><label class="choice"><input class="product-control" type="radio" name="group_critical_illness__rate_structure" value="Attained Age"> Attained Age</label></div></div><div class="product-subfield" ><span class="product-subfield-label">Min Hours / Week</span><input class="product-control" name="group_critical_illness__min_hours" type="text" placeholder="Example: 20"></div><div class="product-subfield" ><span class="product-subfield-label">New Hire Waiting Period</span><input class="product-control" name="group_critical_illness__new_hire_waiting" type="text" placeholder="Example: 0 days"></div><div class="product-subfield" ><span class="product-subfield-label">New Hire Eligibility Period</span><input class="product-control" name="group_critical_illness__new_hire_eligibility" type="text" placeholder="Example: 365 days"></div><div class="product-subfield full" ><span class="product-subfield-label">Coverage Options</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured"> Named Insured</label><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured and Spouse"> Named Insured and Spouse</label><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured and Dependent Child(ren)"> Named Insured and Dependent Child(ren)</label><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured, Spouse and Dependent Child(ren)"> Named Insured, Spouse and Dependent Child(ren)</label></div></div><div class="product-subfield" ><span class="product-subfield-label">How many GCI plan options?</span><select class="product-control" name="group_critical_illness__plan_count"><option value="">Select</option><option>1 Plan</option><option>2 Plans</option><option>3 Plans</option></select></div><div class="quick-note" data-output-exclude="true">Use separate plan blocks when the group is offering multiple choices, such as Plan 1: Critical Illness and Plan 2: Critical Illness & Cancer.</div><details class="easy-details"><summary>Harmony Details / Plan Options</summary><div class="easy-details-inner"><div class="product-grid"><div class="plan-block" data-plan-index="1"><div class="plan-block-title">Plan 1<span>Leave blank if not used</span></div><div class="product-grid">
+            <div class="field full product-widget conditional-hidden" id="group_critical_illness_field" data-summary-target="group_critical_illness" data-required="false"><label>Group Critical Illness 6000</label><input type="hidden" id="group_critical_illness" name="group_critical_illness" value="" /><div class="product-grid"><div class="product-subfield" ><span class="product-subfield-label">Overall Tax Status</span><select class="product-control" name="group_critical_illness__tax_status"><option value="">Select Pre or Post</option><option>Pre-Tax</option><option>Post-Tax</option><option>Employee Chooses</option></select></div><div class="product-subfield" ><span class="product-subfield-label">Eligible Employees</span><input class="product-control" name="group_critical_illness__eligible_employees" type="text" placeholder="Example: 430"></div><div class="product-subfield" ><span class="product-subfield-label">Rate Structure for Plans 1, 2 & 3</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="radio" name="group_critical_illness__rate_structure" value="Issue Age"> Issue Age</label><label class="choice"><input class="product-control" type="radio" name="group_critical_illness__rate_structure" value="Attained Age"> Attained Age</label></div></div><div class="product-subfield" ><span class="product-subfield-label">Min Hours / Week</span><input class="product-control" name="group_critical_illness__min_hours" type="text" placeholder="Example: 20"></div><div class="product-subfield" ><span class="product-subfield-label">New Hire Waiting Period</span><input class="product-control" name="group_critical_illness__new_hire_waiting" type="text" placeholder="Example: 0 days"></div><div class="product-subfield" ><span class="product-subfield-label">New Hire Eligibility Period</span><input class="product-control" name="group_critical_illness__new_hire_eligibility" type="text" placeholder="Example: 365 days"></div><div class="product-subfield full" ><span class="product-subfield-label">Coverage Options</span><div class="choice-group tight"><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured"> Named Insured</label><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured and Spouse"> Named Insured and Spouse</label><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured and Dependent Child(ren)"> Named Insured and Dependent Child(ren)</label><label class="choice"><input class="product-control" type="checkbox" name="group_critical_illness__coverage_options" value="Named Insured, Spouse and Dependent Child(ren)"> Named Insured, Spouse and Dependent Child(ren)</label></div></div><div class="product-subfield" ><span class="product-subfield-label">How many GCI plan options?</span><select class="product-control" name="group_critical_illness__plan_count"><option value="">Select</option><option>1 Plan</option><option>2 Plans</option><option>3 Plans</option></select></div><div class="quick-note">Use separate plan blocks when the group is offering multiple choices, such as Plan 1: Critical Illness and Plan 2: Critical Illness & Cancer.</div><details class="easy-details"><summary>Harmony Details / Plan Options</summary><div class="easy-details-inner"><div class="product-grid"><div class="plan-block" data-plan-index="1"><div class="plan-block-title">Plan 1<span>Leave blank if not used</span></div><div class="product-grid">
     <div class="product-subfield" ><span class="product-subfield-label">Plan 1 Name</span><input class="product-control" name="group_critical_illness__plan_1_name" type="text" placeholder="Example: Plan 1 - Critical Illness & Cancer"></div>
     <div class="product-subfield" ><span class="product-subfield-label">Plan 1 Type</span><select class="product-control" name="group_critical_illness__plan_1_type"><option value="">Select</option><option>Critical Illness</option><option>Critical Illness & Cancer</option><option>Cancer</option></select></div>
     <div class="product-subfield" ><span class="product-subfield-label">Plan 1 Employer Contributions</span><select class="product-control" name="group_critical_illness__plan_1_employer_contribution"><option value="">Select</option><option>No</option><option>Yes</option><option>Varies by class</option></select></div>
@@ -348,42 +333,29 @@
           </div>
         </section>
 
-        <section class="step" id="final_details_step" data-name="Final Details">
-          <div class="step-header"><div><h2 id="finalStepTitle">Final Details</h2><p id="finalStepDescription">Review, add logistics, upload additional files, and submit.</p></div><span class="pill" id="finalStepPill">Review & submit</span></div>
+        <section class="step" data-name="Final Details">
+          <div class="step-header"><div><h2>Final Details</h2><p>Review, add logistics, upload additional files, and submit.</p></div><span class="pill">Review & submit</span></div>
           <div class="grid">
-            <div id="final_detail_questions" style="display:contents">
-            <fieldset class="field full optional-note"><legend>Accountability Checklist</legend><div class="choice-group"><label class="choice"><input name="accountability_checklist" type="checkbox" value="Program request completed" /> Program request completed</label><label class="choice"><input name="accountability_checklist" type="checkbox" value="Employer contribution request completed" /> Employer contribution request completed</label><label class="choice"><input name="accountability_checklist" type="checkbox" value="Agent Assist controls completed" /> Agent Assist controls completed</label></div></fieldset>
+            <fieldset class="field full optional-note"><legend>Accountability Checklist</legend><div class="choice-group"><label class="choice"><input name="accountability_checklist" type="checkbox" value="Program request completed" /> Program request completed</label><label class="choice"><input name="accountability_checklist" type="checkbox" value="Employer contribution request completed" /> Employer contribution request completed</label><label class="choice"><input name="accountability_checklist" type="checkbox" value="CASSHM done" /> CASSHM done</label><label class="choice"><input name="accountability_checklist" type="checkbox" value="NASC email received" /> NASC email received</label><label class="choice"><input name="accountability_checklist" type="checkbox" value="Agent Assist controls completed" /> Agent Assist controls completed</label></div></fieldset>
             <fieldset class="field full optional-note"><legend>Pre-enrollment Communication Methods</legend><div class="choice-group"><label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Email" /> Email</label><label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Text" /> Text</label><label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Flyers" /> Flyers</label><label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Payroll stuffer" /> Payroll stuffer</label><label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Employer meeting" /> Employer meeting</label><label class="choice"><input name="pre_enrollment_communication_methods" type="checkbox" value="Other" /> Other</label></div><input name="pre_enrollment_communication_other" placeholder="Other communication method details" style="margin-top:10px" type="text" /></fieldset>
-            <div class="field full conditional-hidden" id="pre_enrollment_sender_field" data-required="false"><label class="required" for="pre_enrollment_sender">Who is sending the Email/Text pre-enrollment communications?</label><select id="pre_enrollment_sender" name="pre_enrollment_sender"><option value="">Please Select</option><option>HR</option><option>Coordinator</option></select><div class="quick-note" style="margin-top:12px" data-output-exclude="true"><strong>Census reminder:</strong> Confirm the census includes employee email addresses when Email is selected and mobile phone numbers when Text is selected.</div><div class="error-text">Select whether HR or the Coordinator is sending the communications.</div></div>
-            <div class="field full conditional-hidden" id="truagent_information_field" data-required="false"><label class="required" for="truagent_information_completed">Has the TruAgent information been completed for Text communications?</label><select id="truagent_information_completed" name="truagent_information_completed"><option value="">Please Select</option><option>Yes</option><option>No</option><option>In Progress</option><option>Unknown</option></select><div class="quick-note" style="margin-top:12px" data-output-exclude="true"><strong>Text communication reminder:</strong> Complete the TruAgent information before using Text pre-enrollment communications. <a href="https://www.my.coloniallife.com/producers/enrollment/benefits-communication-education/pre-enrollment-communications/communications-delivery-platform" target="_blank" rel="noopener noreferrer">Learn more here</a>.</div><div class="error-text">Select the TruAgent completion status.</div></div>
-            <div class="field full optional-note" id="digital_postcard_field"><label for="digital_postcard_option">Is the group utilizing a Digital Postcard?</label><select id="digital_postcard_option" name="digital_postcard_option"><option value="">Please Select</option><option>No Digital Postcard</option><option>Automatic Digital Postcard - Any Employee Count</option><option>Customized Digital Postcard - 50+ Employees Only</option><option>Both Automatic and Customized Digital Postcards</option><option>Unknown / Needs Discussion</option></select><textarea id="digital_postcard_notes" name="digital_postcard_notes" placeholder="Digital postcard timing, audience, customization, or other notes" style="margin-top:10px"></textarea><div class="quick-note" style="margin-top:12px" data-output-exclude="true"><strong>Automatic Digital Postcard:</strong> Available for groups with any number of employees. <a href="https://apps2.coloniallife.com/digitalpostcard" target="_blank" rel="noopener noreferrer">Create or access the automatic postcard</a>.<br><br><strong>Customized Digital Postcard:</strong> Available only for groups with 50+ employees. <a href="https://www.my.coloniallife.com/Producers/Enrollment/Benefits-Communication-Education/Pre-Enrollment-Communications/Custom-Digital-Postcard-and-BLE-Request-Form" target="_blank" rel="noopener noreferrer">Open the customized postcard request form</a>.<br><br><a href="https://www.my.coloniallife.com/Producers/Enrollment/Benefits-Communication-Education/Pre-Enrollment-Communications/Digital-Postcard-Overview" target="_blank" rel="noopener noreferrer">Learn more about the two Digital Postcard options</a>.</div><div class="quick-note conditional-hidden" id="custom_postcard_employee_warning" style="margin-top:12px" data-output-exclude="true"><strong>Employee-count check:</strong> Customized Digital Postcards are limited to groups with 50 or more employees. Confirm the group qualifies or use the automatic option.</div></div>
-            <div class="field"><label for="multiple_locations">Locations</label><select id="multiple_locations" name="multiple_locations"><option value="">Please Select</option><option>Single Location</option><option>Multiple Locations</option><option>Virtual / Remote</option><option>Hybrid</option></select><textarea name="location_details" placeholder="List each enrollment location, address, employee population, and any location-specific notes" style="margin-top:10px"></textarea></div>
-            <div class="field"><label for="onsite_enrollment">Will enrollers be onsite?</label><select id="onsite_enrollment" name="onsite_enrollment"><option value="">Please Select</option><option>Yes - All Enrollment Days</option><option>Yes - Some Enrollment Days</option><option>No - Virtual Only</option><option>Unknown</option></select></div>
-            <fieldset class="field full conditional-hidden" id="onsite_days_field" data-required="false"><legend class="required">Which days will enrollers be onsite?</legend><div class="choice-group"><label class="choice"><input name="onsite_days" type="checkbox" value="Monday" /> Monday</label><label class="choice"><input name="onsite_days" type="checkbox" value="Tuesday" /> Tuesday</label><label class="choice"><input name="onsite_days" type="checkbox" value="Wednesday" /> Wednesday</label><label class="choice"><input name="onsite_days" type="checkbox" value="Thursday" /> Thursday</label><label class="choice"><input name="onsite_days" type="checkbox" value="Friday" /> Friday</label><label class="choice"><input name="onsite_days" type="checkbox" value="Saturday" /> Saturday</label><label class="choice"><input name="onsite_days" type="checkbox" value="Sunday" /> Sunday</label><label class="choice"><input name="onsite_days" type="checkbox" value="Specific Dates / See Notes" /> Specific Dates / See Notes</label></div><textarea id="onsite_days_notes" name="onsite_days_notes" placeholder="List onsite dates, hours, and which location applies to each day" style="margin-top:10px"></textarea><div class="error-text">Select at least one onsite day.</div></fieldset>
+            <div class="field"><label for="multiple_locations">Locations</label><select id="multiple_locations" name="multiple_locations"><option value="">Please Select</option><option>Single Location</option><option>Multiple Locations</option><option>Virtual / Remote</option><option>Hybrid</option></select><textarea name="location_details" placeholder="Location details" style="margin-top:10px"></textarea></div>
             <div class="field"><label for="packets_needed">Packets Needed?</label><select id="packets_needed" name="packets_needed"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Digital Only</option><option>Unknown</option></select><textarea name="packet_details" placeholder="Packet details" style="margin-top:10px"></textarea></div>
             <div class="field"><label for="multilingual_needs">Multilingual Needs</label><select id="multilingual_needs" name="multilingual_needs"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><textarea name="multilingual_details" placeholder="Languages/details" style="margin-top:10px"></textarea></div>
             <div class="field"><label for="special_shifts">Special Shifts</label><select id="special_shifts" name="special_shifts"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><textarea name="special_shift_details" placeholder="Shift details" style="margin-top:10px"></textarea></div>
             <div class="field"><label for="weekend_enrollment_needed">Weekend Enrollment Needed?</label><select id="weekend_enrollment_needed" name="weekend_enrollment_needed"><option value="">Please Select</option><option>Yes</option><option>No</option><option>Unknown</option></select><textarea name="weekend_enrollment_details" placeholder="Weekend details" style="margin-top:10px"></textarea></div>
             <div class="field full optional-note"><label for="additional_documents">Additional Documents</label><input data-file-key="additional_documents" id="additional_documents" multiple name="additional_documents" type="file" /></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="step" id="final_review_step" data-name="Final Review">
-          <div class="step-header"><div><h2>Final Review</h2><p>Review every detail below before submitting the intake.</p></div><span class="pill">Review before submit</span></div>
-          <div class="grid">
-            <div class="review-panel"><h3>Submission Summary</h3><p>Use Back to correct anything. Submit will send exactly what is shown below, along with the uploaded documents.</p><div class="review-grid" id="reviewGrid"></div></div>
+            <div class="review-panel"><h3>Final Review</h3><p>Review the key details below before submitting.</p><div class="review-grid" id="reviewGrid"></div></div>
           </div>
         </section>
 
         <div class="actions"><div class="left-actions"><button class="btn-secondary" id="backBtn" type="button">Back</button><button class="btn-secondary" id="saveBtn" type="button">Save Progress</button></div><div class="right-actions"><button class="btn-primary" id="nextBtn" type="button">Next</button><button class="btn-gold" id="submitBtn" style="display:none" type="submit">Submit</button></div></div>
       </form>
-      <div class="success-box" id="successBox"><strong id="successTitle">Submission status</strong><span id="successMessage">Your form has not been submitted yet.</span></div>
+      <div class="success-box" id="successBox"><strong>Thank you. Your submission has been processed.</strong><span id="successMessage">Your form has been submitted.</span></div>
     </section>
   </main>
 
   <script>
-    const SUBMISSION_ENDPOINT = "https://script.google.com/macros/s/AKfycbyS80v7YHI4P0icVXQyTwnK3jLUdlS_QBvUdwPh-R66h1BbBbq86y7aAQ26o0KTF6FpeQ/exec";
+    const SUBMISSION_ENDPOINT = "https://script.google.com/macros/s/AKfycbw5JfwHL5y2By3EVoEV4W1wiMKCSv8QbpewglkTGWyzAFXRK95mVnM2COLAW5deQYrJNQ/exec";
     const form = document.getElementById("intakeForm");
     const steps = Array.from(document.querySelectorAll(".step"));
     const progressFill = document.getElementById("progressFill");
@@ -395,22 +367,11 @@
     const saveBtn = document.getElementById("saveBtn");
     const successBox = document.getElementById("successBox");
     const successMessage = document.getElementById("successMessage");
-    const successTitle = document.getElementById("successTitle");
     const confirmationInput = document.getElementById("confirmation_id");
     const reviewGrid = document.getElementById("reviewGrid");
-    const editBanner = document.getElementById("editBanner");
-    const editTokenInput = document.getElementById("edit_token");
-    const formPageUrlInput = document.getElementById("form_page_url");
-    const submissionCallbackTokenInput = document.getElementById("submission_callback_token");
     let currentStep = 0;
-    let activeLoadRequestId = "";
-    let editMode = false;
-    let activeEditToken = "";
-    let existingFiles = [];
-    let existingFileCategories = new Set();
 
-    function getActiveSteps(){return steps.filter(step=>!step.classList.contains("conditional-hidden"));}
-    function showStep(index){applyConditionalRules();const activeSteps=getActiveSteps();if(!activeSteps.length)return;currentStep=Math.max(0,Math.min(index,activeSteps.length-1));steps.forEach(step=>step.classList.remove("active"));const activeStep=activeSteps[currentStep];activeStep.classList.add("active");progressFill.style.width=`${((currentStep+1)/activeSteps.length)*100}%`;stepLabel.textContent=`Step ${currentStep+1} of ${activeSteps.length}`;stepName.textContent=activeStep.dataset.name;backBtn.disabled=currentStep===0;nextBtn.style.display=currentStep===activeSteps.length-1?"none":"inline-flex";submitBtn.style.display=currentStep===activeSteps.length-1?"inline-flex":"none";updateReviewPanel();window.scrollTo({top:0,behavior:"smooth"});}
+    function showStep(index){applyConditionalRules();currentStep=index;steps.forEach((s,i)=>s.classList.toggle("active",i===index));progressFill.style.width=`${((index+1)/steps.length)*100}%`;stepLabel.textContent=`Step ${index+1} of ${steps.length}`;stepName.textContent=steps[index].dataset.name;backBtn.disabled=index===0;nextBtn.style.display=index===steps.length-1?"none":"inline-flex";submitBtn.style.display=index===steps.length-1?"inline-flex":"none";updateReviewPanel();window.scrollTo({top:0,behavior:"smooth"});}
     function isFieldGroupValid(field){
       const controls=Array.from(field.querySelectorAll("input,select,textarea")).filter(c=>!c.disabled);
       if(field.classList.contains("conditional-hidden"))return true;
@@ -426,13 +387,12 @@
       }
       const checkboxes=controls.filter(c=>c.type==="checkbox");const radios=controls.filter(c=>c.type==="radio");const files=controls.filter(c=>c.type==="file");
       if(checkboxes.length)return checkboxes.some(c=>c.checked);if(radios.length)return radios.some(c=>c.checked);
-      if(files.length){return files.some(c=>c.files&&c.files.length>0) || files.some(c=>{const key=c.dataset.fileKey||c.name;return !!form.querySelector(`[name^="file__${CSS.escape(key)}__"][name$="__data"]`) || existingFileCategories.has(key);});}
+      if(files.length){return files.some(c=>c.files&&c.files.length>0) || files.some(c=>{const key=c.dataset.fileKey||c.name;return !!form.querySelector(`[name^="file__${CSS.escape(key)}__"][name$="__data"]`);});}
       return controls.filter(c=>c.type!=="hidden" && c.dataset.optional!=="true").every(c=>String(c.value||"").trim().length>0 && (c.type!=="email" || c.checkValidity()));
     }
-    function validateStep(index){const step=getActiveSteps()[index];if(!step)return true;let valid=true;step.querySelectorAll(".field").forEach(field=>{const ok=isFieldGroupValid(field);field.classList.toggle("error",!ok);if(!ok)valid=false;});if(!valid)step.querySelector(".field.error")?.scrollIntoView({behavior:"smooth",block:"center"});return valid;}
-    function validateAllSteps(){const activeSteps=getActiveSteps();for(let i=0;i<activeSteps.length;i++){if(!validateStep(i)){showStep(i);return false;}}return true;}
+    function validateStep(index){let valid=true;steps[index].querySelectorAll(".field").forEach(field=>{const ok=isFieldGroupValid(field);field.classList.toggle("error",!ok);if(!ok)valid=false;});if(!valid)steps[index].querySelector(".field.error")?.scrollIntoView({behavior:"smooth",block:"center"});return valid;}
+    function validateAllSteps(){for(let i=0;i<steps.length;i++){if(!validateStep(i)){showStep(i);return false;}}return true;}
     function setPanelVisibility(id, visible, required=false){const field=document.getElementById(id);if(!field)return;field.classList.toggle("conditional-hidden",!visible);field.dataset.required=visible&&required?"true":"false";field.querySelectorAll("input,select,textarea").forEach(c=>{c.disabled=!visible;if(!visible){if(c.type==="checkbox"||c.type==="radio")c.checked=false;else c.value="";}});if(!visible)field.classList.remove("error");}
-    function setStepVisibility(id,visible){const step=document.getElementById(id);if(!step)return;step.classList.toggle("conditional-hidden",!visible);step.querySelectorAll("input,select,textarea").forEach(control=>{control.disabled=!visible;});if(!visible){step.classList.remove("active");step.querySelectorAll(".field.error").forEach(field=>field.classList.remove("error"));}}
     function updateProductSummaries(){
       document.querySelectorAll(".product-widget").forEach(widget=>{
         const targetId=widget.dataset.summaryTarget;const target=targetId?document.getElementById(targetId):null;if(!target)return;
@@ -486,22 +446,16 @@
       setPanelVisibility("broker_info_field",hasBroker,false);
 
       const caseType=document.getElementById("case_type")?.value||"";
-      const isRenewalNoChanges=["Renewal - No Changes","Open Enrollment - No Changes"].includes(caseType);const isRenewalWithChanges=["Renewal - With Changes","Open Enrollment - With Changes"].includes(caseType);const isRenewal=isRenewalNoChanges||isRenewalWithChanges;
-      const noChangesConfirmed=isRenewalNoChanges&&document.getElementById("renewal_no_changes_confirm")?.value==="Yes";
-      setStepVisibility("eligibility_benefits_step",!noChangesConfirmed);
-      setStepVisibility("colonial_products_step",!noChangesConfirmed);
+      const isRenewalNoChanges=caseType==="Renewal - No Changes";const isRenewalWithChanges=caseType==="Renewal - With Changes";const isRenewal=isRenewalNoChanges||isRenewalWithChanges;
       setPanelVisibility("renewal_no_changes_confirm_field",isRenewalNoChanges,isRenewalNoChanges);
       setPanelVisibility("renewal_change_types_field",isRenewalWithChanges,isRenewalWithChanges);
       setPanelVisibility("renewal_changes_summary_field",isRenewalWithChanges,isRenewalWithChanges);
-      setPanelVisibility("agent_assist_account_reminder",isRenewal,false);
-      setPanelVisibility("domestic_partners_field",!isRenewalNoChanges,!isRenewalNoChanges);
 
       const enrollmentTypes=Array.from(form.querySelectorAll('input[name="enrollment_type"]')).filter(input=>input.checked).map(input=>input.value);
       const hasColonialEnrollment=enrollmentTypes.includes("Colonial Life");
-      const hasCoreEnrollment=enrollmentTypes.includes("Core Enrollment");
       const enrollmentPlatform=document.getElementById("enrollment_platform")?.value||"";
       const isEmployeeNavigatorBuild=enrollmentPlatform==="Employee Navigator";
-      const showCarrierFeedQuestions=isEmployeeNavigatorBuild;
+      setPanelVisibility("en_build_notice_field",isEmployeeNavigatorBuild,false);
       setPanelVisibility("en_employee_classes_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
       setPanelVisibility("en_benefits_differ_by_class_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
       setPanelVisibility("en_class_rules_field",isEmployeeNavigatorBuild&&document.getElementById("en_benefits_differ_by_class")?.value==="Yes",isEmployeeNavigatorBuild&&document.getElementById("en_benefits_differ_by_class")?.value==="Yes");
@@ -513,13 +467,12 @@
       setPanelVisibility("en_contribution_type_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
       setPanelVisibility("en_contribution_tier_details_field",isEmployeeNavigatorBuild&&!["","No employer contribution"].includes(document.getElementById("en_contribution_type")?.value||""),false);
       setPanelVisibility("en_plan_rate_build_details_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
-      setPanelVisibility("en_carrier_feeds_required_field",showCarrierFeedQuestions,showCarrierFeedQuestions);
-      setPanelVisibility("en_carrier_feed_notes_field",showCarrierFeedQuestions&&["Yes","Unknown"].includes(document.getElementById("en_carrier_feeds_required")?.value||""),false);
+      setPanelVisibility("en_carrier_feeds_required_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
+      setPanelVisibility("en_carrier_feed_notes_field",isEmployeeNavigatorBuild&&["Yes","Unknown"].includes(document.getElementById("en_carrier_feeds_required")?.value||""),false);
 
       setPanelVisibility("aif_file_field",hasColonialEnrollment,hasColonialEnrollment);
       setPanelVisibility("flex_file_field",hasColonialEnrollment,hasColonialEnrollment);
       setPanelVisibility("gmapp_file_field",hasColonialEnrollment,false);
-      setPanelVisibility("core_sbc_rates_field",hasCoreEnrollment,false);
       setPanelVisibility("uw_offer_field",hasColonialEnrollment,hasColonialEnrollment);
       setPanelVisibility("colonial_days_field",hasColonialEnrollment,false);
       setPanelVisibility("colonial_hours_field",hasColonialEnrollment,false);
@@ -530,22 +483,6 @@
       const telemedicineSelected=valueAddSelections.some(value=>/telemedicine/i.test(value));
       const telemedicineReminder=document.getElementById("telemedicine_propr_reminder");
       if(telemedicineReminder)telemedicineReminder.classList.toggle("conditional-hidden",!telemedicineSelected);
-
-      const selectedCommunicationMethods=Array.from(form.querySelectorAll('input[name="pre_enrollment_communication_methods"]')).filter(input=>input.checked).map(input=>input.value);
-      const textCommunicationSelected=selectedCommunicationMethods.includes("Text");
-      const emailOrTextSelected=selectedCommunicationMethods.some(value=>value==="Email"||value==="Text");
-      setPanelVisibility("pre_enrollment_sender_field",emailOrTextSelected&&!noChangesConfirmed,emailOrTextSelected&&!noChangesConfirmed);
-      setPanelVisibility("truagent_information_field",textCommunicationSelected&&!noChangesConfirmed,textCommunicationSelected&&!noChangesConfirmed);
-
-      const onsiteEnrollment=document.getElementById("onsite_enrollment")?.value||"";
-      const hasOnsiteDays=onsiteEnrollment.startsWith("Yes");
-      setPanelVisibility("onsite_days_field",hasOnsiteDays,hasOnsiteDays);
-
-      const digitalPostcardOption=document.getElementById("digital_postcard_option")?.value||"";
-      const employeeCount=Number(document.getElementById("employee_count")?.value||0);
-      const customizedPostcardSelected=/Customized|Both/.test(digitalPostcardOption);
-      const customPostcardWarning=document.getElementById("custom_postcard_employee_warning");
-      if(customPostcardWarning)customPostcardWarning.classList.toggle("conditional-hidden",!(customizedPostcardSelected&&employeeCount>0&&employeeCount<50));
 
       const dental=document.getElementById("colonial_dental")?.value||"None Offered";setPanelVisibility("individual_dental_field",dental==="Individual Dental 8100",dental==="Individual Dental 8100");
       const accident=document.getElementById("colonial_accident")?.value||"None Offered";setPanelVisibility("individual_accident_field",accident==="Individual Accident (IAC4000)",accident==="Individual Accident (IAC4000)");setPanelVisibility("group_accident_field",accident==="Group Accident (GAC4100)",accident==="Group Accident (GAC4100)");
@@ -563,23 +500,10 @@
         ["core_life_offered","core_life_field","Life Offered"]
       ];
       coreProducts.forEach(([selectId,fieldId,offeredValue])=>setPanelVisibility(fieldId,document.getElementById(selectId)?.value===offeredValue,false));
-
-      // No-change renewals/open enrollments stop after the essential setup questions,
-      // then proceed to a review-only final page.
-      setPanelVisibility("no_change_setup_questions",!noChangesConfirmed,false);
-      setStepVisibility("final_details_step",!noChangesConfirmed);
-      const finalStepTitle=document.getElementById("finalStepTitle");
-      const finalStepDescription=document.getElementById("finalStepDescription");
-      const finalStepPill=document.getElementById("finalStepPill");
-      const finalReviewStep=document.getElementById("final_review_step");
-      if(finalReviewStep)finalReviewStep.dataset.name="Final Review";
-      if(finalStepTitle)finalStepTitle.textContent="Final Details";
-      if(finalStepDescription)finalStepDescription.textContent="Add logistics, communication details, and any additional documents.";
-      if(finalStepPill)finalStepPill.textContent="Final questions";
       updateProductSummaries();
       updateCoreProductSummaries();
     }
-    function fieldValue(name){const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`)).filter(control=>!control.disabled);if(!controls.length)return"";const first=controls[0];if(first.type==="checkbox"||first.type==="radio")return controls.filter(c=>c.checked).map(c=>c.value).join(", ");if(first.type==="file"){const uploaded=Array.from(first.files||[]).map(f=>f.name).join(", ");if(uploaded)return uploaded;const key=first.dataset.fileKey||first.name;const prepared=Array.from(form.querySelectorAll(`[name^="file__${CSS.escape(key)}__"][name$="__name"]`)).map(c=>c.value).join(", ");if(prepared)return prepared;return existingFiles.filter(file=>file.category===key).map(file=>file.name).join(", ");}if(first.tagName==="SELECT")return first.options[first.selectedIndex]?.text||first.value||"";const values=controls.map(c=>String(c.value||"").trim()).filter(Boolean);return controls.length>1?values.join(", "):(values[0]||"");}
+    function fieldValue(name){const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));if(!controls.length)return"";const first=controls[0];if(first.type==="checkbox"||first.type==="radio")return controls.filter(c=>c.checked).map(c=>c.value).join(", ");if(first.type==="file"){const uploaded=Array.from(first.files||[]).map(f=>f.name).join(", ");if(uploaded)return uploaded;const key=first.dataset.fileKey||first.name;return Array.from(form.querySelectorAll(`[name^="file__${CSS.escape(key)}__"][name$="__name"]`)).map(c=>c.value).join(", ");}if(first.tagName==="SELECT")return first.options[first.selectedIndex]?.text||first.value||"";return first.value||"";}
     function enforceChoiceLimits(changedControl=null){
       let allValid=true;
       form.querySelectorAll("[data-max-checks]").forEach(group=>{
@@ -600,34 +524,21 @@
     }
     function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
     function ensureConfirmationId(){if(confirmationInput.value)return confirmationInput.value;const account=(fieldValue("account_name")||"ACCOUNT").replace(/[^A-Za-z0-9]/g,"").slice(0,10).toUpperCase()||"ACCOUNT";const d=new Date();const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;const rand=Math.random().toString(36).slice(2,6).toUpperCase();confirmationInput.value=`URS-${stamp}-${account}-${rand}`;return confirmationInput.value;}
-    function addHrContactRow(name="",email=""){
-      const list=document.getElementById("hrContactsList");if(!list)return;
-      const row=document.createElement("div");row.className="repeatable-contact-row";row.dataset.hrContactRow="additional";
-      row.innerHTML=`<input name="additional_hr_contact_name" placeholder="Additional HR Contact Name" type="text" value="${escapeHtml(name)}" /><input name="additional_hr_contact_email" placeholder="Additional HR Contact Email" type="email" value="${escapeHtml(email)}" /><button class="remove-contact" type="button" aria-label="Remove additional HR contact">Remove</button>`;
-      list.appendChild(row);
-    }
-    function additionalHrContactsSummary(){
-      return Array.from(document.querySelectorAll('#hrContactsList [data-hr-contact-row="additional"]')).map(row=>{const name=row.querySelector('[name="additional_hr_contact_name"]')?.value?.trim()||"";const email=row.querySelector('[name="additional_hr_contact_email"]')?.value?.trim()||"";return [name,email].filter(Boolean).join(" | ");}).filter(Boolean).join("\n");
-    }
     function updateReviewPanel(){
       if(!reviewGrid)return;ensureConfirmationId();updateProductSummaries();updateCoreProductSummaries();
       const rows=[
-        ["Account",fieldValue("account_name")],["Account Address",fieldValue("account_address")],["EIN",fieldValue("ein_number")],["Case Type",fieldValue("case_type")],["Renewal No-Changes Confirmation",fieldValue("renewal_no_changes_confirm")],["Renewal Change Types",fieldValue("renewal_change_types")],["Renewal Changes",fieldValue("renewal_changes_summary")],["Employees",fieldValue("employee_count")],["SIC Code",fieldValue("sic_code")],["Enrollers Needed",fieldValue("enrollers_needed")],["Preferred Enrollers",fieldValue("preferred_enrollers")],["Requested Completion Date",fieldValue("requested_build_completion_date")],["Opener Agent Code",fieldValue("opener_agent_code")],["Class / Product Eligibility Differences",fieldValue("class_product_eligibility_differences")],["Employer-Paid Benefits",fieldValue("employer_paid_benefits_details")],
+        ["Account",fieldValue("account_name")],["Account Address",fieldValue("account_address")],["EIN",fieldValue("ein_number")],["Case Type",fieldValue("case_type")],["Renewal No-Changes Confirmation",fieldValue("renewal_no_changes_confirm")],["Renewal Change Types",fieldValue("renewal_change_types")],["Renewal Changes",fieldValue("renewal_changes_summary")],["Employees",fieldValue("employee_count")],["SIC Code",fieldValue("sic_code")],["Enrollers Needed",fieldValue("enrollers_needed")],["Requested Completion Date",fieldValue("requested_build_completion_date")],["Class / Product Eligibility Differences",fieldValue("class_product_eligibility_differences")],["Employer-Paid Benefits",fieldValue("employer_paid_benefits_details")],
         ["Value Added Benefits / POPS Programs",[fieldValue("value_added_benefits"),fieldValue("value_added_benefits_other")].filter(Boolean).join(" | ")],
-        ["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["UW Offer",fieldValue("uw_offer")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Additional HR Contacts",additionalHrContactsSummary()],["Broker",fieldValue("broker_associated")==="Yes" ? `${fieldValue("broker_name")} | ${fieldValue("broker_email")}` : fieldValue("broker_associated")],["Broker Compensation",[fieldValue("broker_comp"),fieldValue("broker_comp_other")].filter(Boolean).join(" | ")],["Agent Compensation",fieldValue("agent_comp")],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],
+        ["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["UW Offer",fieldValue("uw_offer")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Broker",fieldValue("broker_associated")==="Yes" ? `${fieldValue("broker_name")} | ${fieldValue("broker_email")}` : fieldValue("broker_associated")],["Enrollment Type",fieldValue("enrollment_type")],["Platform",fieldValue("enrollment_platform")],
         ["Employee Navigator Details", fieldValue("enrollment_platform")==="Employee Navigator" ? ["Classes: "+fieldValue("en_employee_classes"),"Benefits Differ By Class: "+fieldValue("en_benefits_differ_by_class"),fieldValue("en_class_rules")?"Class Rules: "+fieldValue("en_class_rules"):"","Eligibility Same All Benefits: "+fieldValue("en_eligibility_same_all_benefits"),fieldValue("en_eligibility_differences")?"Eligibility Differences: "+fieldValue("en_eligibility_differences"):"","Waiting Period: "+fieldValue("en_waiting_period_type"),"Waiting Period Varies: "+fieldValue("en_waiting_period_varies"),fieldValue("en_waiting_period_details")?"Waiting Details: "+fieldValue("en_waiting_period_details"):"","Contribution Type: "+fieldValue("en_contribution_type"),fieldValue("en_contribution_tier_details")?"Contribution Details: "+fieldValue("en_contribution_tier_details"):"","Plan/Rate Details: "+fieldValue("en_plan_rate_build_details"),"Carrier Feeds: "+fieldValue("en_carrier_feeds_required"),fieldValue("en_carrier_feed_notes")?"Carrier Feed Notes: "+fieldValue("en_carrier_feed_notes"):""].filter(Boolean).join("\n") : "Not applicable"],
-        ["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["Enrollment Period",[fieldValue("enrollment_start_date"),fieldValue("enrollment_end_date")].filter(Boolean).join(" to ")],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],
-        ["Pre-Enrollment Communications",[fieldValue("pre_enrollment_communication_methods"),fieldValue("pre_enrollment_communication_other")].filter(Boolean).join(" | ")],["Communications Sent By",fieldValue("pre_enrollment_sender")],["TruAgent Information",fieldValue("truagent_information_completed")],["Digital Postcard",[fieldValue("digital_postcard_option"),fieldValue("digital_postcard_notes")].filter(Boolean).join(" | ")],["Locations",[fieldValue("multiple_locations"),fieldValue("location_details")].filter(Boolean).join("\n")],["Onsite Enrollment",[fieldValue("onsite_enrollment"),fieldValue("onsite_days")?"Days: "+fieldValue("onsite_days"):"",fieldValue("onsite_days_notes")].filter(Boolean).join("\n")],
-        ["Domestic Partners",fieldValue("domestic_partners")],["Payroll Details",["Pay Periods: "+fieldValue("pay_periods"),fieldValue("payday_day_of_week")?"Payday: "+fieldValue("payday_day_of_week"):"",fieldValue("monthly_payday_day")?"Monthly Payday: "+fieldValue("monthly_payday_day"):"",fieldValue("semi_monthly_payday_1")?"Semi-monthly Payday 1: "+fieldValue("semi_monthly_payday_1"):"",fieldValue("semi_monthly_payday_2")?"Semi-monthly Payday 2: "+fieldValue("semi_monthly_payday_2"):"",fieldValue("semi_monthly_payday_notes")?"Semi-monthly Notes: "+fieldValue("semi_monthly_payday_notes"):""].filter(Boolean).join("\n")],
-        ["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["Group Master Application",fieldValue("gmapp_file")||"No file uploaded"],["Core Products",fieldValue("enrollable_core_products")],["Core Product Details",fieldValue("core_benefits_overview")],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")],["Colonial Product Details",[fieldValue("individual_dental"),fieldValue("individual_accident"),fieldValue("group_accident"),fieldValue("individual_disability"),fieldValue("group_disability"),fieldValue("cancer_assist"),fieldValue("individual_critical"),fieldValue("group_critical_illness"),fieldValue("individual_med_bridge"),fieldValue("group_medical_bridge"),fieldValue("individual_term_life"),fieldValue("individual_whole_life"),fieldValue("group_term_life")].filter(Boolean).join("\n\n")],["Enrollment Guide Template",fieldValue("account_name")?"Will auto-generate and attach a populated Enrollment Guide .doc on submit":"Pending account name"]
+        ["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],
+        ["Payroll Details",["Pay Periods: "+fieldValue("pay_periods"),fieldValue("payday_day_of_week")?"Payday: "+fieldValue("payday_day_of_week"):"",fieldValue("monthly_payday_day")?"Monthly Payday: "+fieldValue("monthly_payday_day"):"",fieldValue("semi_monthly_payday_1")?"Semi-monthly Payday 1: "+fieldValue("semi_monthly_payday_1"):"",fieldValue("semi_monthly_payday_2")?"Semi-monthly Payday 2: "+fieldValue("semi_monthly_payday_2"):"",fieldValue("semi_monthly_payday_notes")?"Semi-monthly Notes: "+fieldValue("semi_monthly_payday_notes"):""].filter(Boolean).join("\n")],
+        ["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["GMAPP",fieldValue("gmapp_file")||"No file uploaded"],["Core Products",fieldValue("enrollable_core_products")],["Core Product Details",fieldValue("core_benefits_overview")],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")],["Colonial Product Details",[fieldValue("individual_dental"),fieldValue("individual_accident"),fieldValue("group_accident"),fieldValue("individual_disability"),fieldValue("group_disability"),fieldValue("cancer_assist"),fieldValue("individual_critical"),fieldValue("group_critical_illness"),fieldValue("individual_med_bridge"),fieldValue("group_medical_bridge"),fieldValue("individual_term_life"),fieldValue("individual_whole_life"),fieldValue("group_term_life")].filter(Boolean).join("\n\n")],["Enrollment Guide Template",fieldValue("account_name")?"Will auto-generate and attach a populated Enrollment Guide .doc on submit":"Pending account name"]
       ];
-      const noChangesConfirmed=["Renewal - No Changes","Open Enrollment - No Changes"].includes(fieldValue("case_type"))&&fieldValue("renewal_no_changes_confirm")==="Yes";
-      const noChangeReviewLabels=new Set(["Account","Account Address","EIN","Case Type","Renewal No-Changes Confirmation","Employees","SIC Code","Enrollers Needed","Preferred Enrollers","Requested Completion Date","Opener Agent Code","Opener","HR Contact","Additional HR Contacts","Broker","Broker Compensation","Agent Compensation","Enrollment Type","Platform","BCN / CAN","Enrollment Period","CED / PED","Payroll Details","Enrollment Guide Template"]);
-      const visibleRows=noChangesConfirmed?rows.filter(([label])=>noChangeReviewLabels.has(label)):rows;
-      reviewGrid.innerHTML=visibleRows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");
+      reviewGrid.innerHTML=rows.map(([l,v])=>`<div class="review-item"><strong>${escapeHtml(l)}</strong><span>${escapeHtml(v||"Not answered")}</span></div>`).join("");
     }
-    function saveProgress(){const data={};new FormData(form).forEach((v,k)=>{if(v instanceof File)return;if(["edit_token","form_page_url","notification_email"].includes(k))return;if(data[k])data[k]=Array.isArray(data[k])?[...data[k],v]:[data[k],v];else data[k]=v;});localStorage.setItem("urs_intake_progress",JSON.stringify(data));successBox.style.display="block";successMessage.textContent="Progress saved in this browser. File uploads cannot be saved until final submission.";}
-    function loadProgress(){const saved=localStorage.getItem("urs_intake_progress");if(!saved)return;try{const data=JSON.parse(saved);const extraNames=Array.isArray(data.additional_hr_contact_name)?data.additional_hr_contact_name:(data.additional_hr_contact_name?[data.additional_hr_contact_name]:[]);const extraEmails=Array.isArray(data.additional_hr_contact_email)?data.additional_hr_contact_email:(data.additional_hr_contact_email?[data.additional_hr_contact_email]:[]);for(let i=0;i<Math.max(extraNames.length,extraEmails.length);i++)addHrContactRow(extraNames[i]||"",extraEmails[i]||"");delete data.additional_hr_contact_name;delete data.additional_hr_contact_email;Object.entries(data).forEach(([k,v])=>{Array.from(form.querySelectorAll(`[name="${CSS.escape(k)}"]`)).forEach(c=>{const vals=Array.isArray(v)?v:[v];if(c.type==="checkbox"||c.type==="radio")c.checked=vals.includes(c.value);else if(c.type!=="file")c.value=Array.isArray(v)?(v[0]||""):v;});});}catch(e){}}
+    function saveProgress(){const data={};new FormData(form).forEach((v,k)=>{if(v instanceof File)return;if(data[k])data[k]=Array.isArray(data[k])?[...data[k],v]:[data[k],v];else data[k]=v;});localStorage.setItem("urs_intake_progress",JSON.stringify(data));successBox.style.display="block";successMessage.textContent="Progress saved in this browser. File uploads cannot be saved until final submission.";}
+    function loadProgress(){const saved=localStorage.getItem("urs_intake_progress");if(!saved)return;try{const data=JSON.parse(saved);Object.entries(data).forEach(([k,v])=>{Array.from(form.querySelectorAll(`[name="${CSS.escape(k)}"]`)).forEach(c=>{const vals=Array.isArray(v)?v:[v];if(c.type==="checkbox"||c.type==="radio")c.checked=vals.includes(c.value);else if(c.type!=="file")c.value=v;});});}catch(e){}}
     function safeFilename(value){return String(value||"Group").replace(/[^A-Za-z0-9 _.-]/g,"").trim().slice(0,80)||"Group";}
     function encodeBase64Unicode(value){return btoa(unescape(encodeURIComponent(value)));}
     function normalizeDeductionClient(value){
@@ -834,24 +745,9 @@
       return lines.join("\n");
     }
     function validateUwOfferLogicClient(){
-      const uw=String(fieldValue("uw_offer")||"").toLowerCase();
-      const hasColonial=fieldValue("enrollment_type").toLowerCase().includes("colonial life");
-      if(!hasColonial)return true;
-      const selected=selectedColonialEntriesClient();
-      const selectedCount=selected.length;
-      const hasAccident=selected.some(p=>/accident/i.test(p.title));
-      const eeCount=Number(String(fieldValue("employee_count")||"").replace(/[^0-9.]/g,""));
-      const messages=[];
-      if(/diamond/.test(uw)&&(!hasAccident||selectedCount<3))messages.push("Diamond Underwriting Offer requires Accident plus at least two additional Colonial products.");
-      if(/executive broker|executive partner|\bsce\b/.test(uw)){
-        if(eeCount&&(eeCount<5||eeCount>99))messages.push("Executive/SCE UW Offer is intended for 5-99 eligible employees.");
-        if(/executive broker|executive partner/.test(uw)&&(!hasAccident||selectedCount<3))messages.push("Executive Broker Partner UW Offer requires Accident plus at least two additional eligible products.");
-      }
-      if(/coverage accelerator/.test(uw)&&eeCount&&eeCount<100)messages.push("Coverage Accelerator is generally for larger cases. Confirm eligibility if under 100 eligible lives.");
-      if(!messages.length)return true;
-      successBox.style.display="block";
-      successMessage.textContent=messages.join(" ");
-      return false;
+      // UW Offer selection controls output language only.
+      // Do not block submission based on product count or employee count.
+      return true;
     }
     function upsertHiddenPayload(name,value,className="generated-template-payload"){
       let hidden=form.querySelector(`input[name="${CSS.escape(name)}"]`);
@@ -865,8 +761,6 @@
       const colonialProductText=colonialProductTextClient(colonialEntries,fieldValue("uw_offer"));
       return {
         title:`${accountName||"Group"} Enrollment Guide`,
-        case_type:fieldValue("case_type"),
-        no_changes_confirmed:["Renewal - No Changes","Open Enrollment - No Changes"].includes(fieldValue("case_type"))&&fieldValue("renewal_no_changes_confirm")==="Yes",
         account_name:accountName,
         account_address:fieldValue("account_address"),
         city_state_zip:fieldValue("account_address").split("\n").slice(-1)[0]||"",
@@ -874,29 +768,19 @@
         bcn:fieldValue("bcn"),
         can:fieldValue("can"),
         employee_count:fieldValue("employee_count"),
-        preferred_enrollers:fieldValue("preferred_enrollers"),
-        opener_agent_code:fieldValue("opener_agent_code"),
         ced:fieldValue("ced"),
         ped:fieldValue("ped"),
         enrollment_dates:[fieldValue("enrollment_start_date"),fieldValue("enrollment_end_date")].filter(Boolean).join(" to "),
         renewal_year:(fieldValue("ced")||"").slice(0,4),
         hr_contact:fieldValue("hr_contact_name"),
         hr_email:fieldValue("hr_contact_email"),
-        additional_hr_contacts:additionalHrContactsSummary(),
         broker:fieldValue("broker_name"),
         broker_email:fieldValue("broker_email"),
-        broker_comp:[fieldValue("broker_comp"),fieldValue("broker_comp_other")].filter(Boolean).join(" | "),
-        agent_comp:fieldValue("agent_comp"),
         opener:`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim(),
         opener_email:fieldValue("opener_email"),
         enrollment_platform:fieldValue("enrollment_platform"),
         enrollment_type:fieldValue("enrollment_type"),
         uw_offer:fieldValue("uw_offer"),
-        pre_enrollment_communications:[fieldValue("pre_enrollment_communication_methods"),fieldValue("pre_enrollment_communication_other")].filter(Boolean).join(" | "),
-        pre_enrollment_sender:fieldValue("pre_enrollment_sender"),
-        truagent_information:fieldValue("truagent_information_completed"),
-        digital_postcard:[fieldValue("digital_postcard_option"),fieldValue("digital_postcard_notes")].filter(Boolean).join(" | "),
-        location_logistics:[fieldValue("multiple_locations"),fieldValue("location_details"),fieldValue("onsite_enrollment"),fieldValue("onsite_days")?`Onsite days: ${fieldValue("onsite_days")}`:"",fieldValue("onsite_days_notes")].filter(Boolean).join("\n"),
         eligibility:[fieldValue("colonial_days")?`Colonial waiting period: ${fieldValue("colonial_days")}`:"",fieldValue("colonial_hours")?`Colonial hours: ${fieldValue("colonial_hours")}`:"",fieldValue("core_days")?`Core waiting period: ${fieldValue("core_days")}`:"",fieldValue("core_hours")?`Core hours: ${fieldValue("core_hours")}`:""].filter(Boolean).join("\n"),
         core_products:fieldValue("core_benefits_overview"),
         colonial_products:colonialProductText,
@@ -906,9 +790,7 @@
       };
     }
     function buildEnrollmentGuideDocHtml(data){
-      const rows=[["Account Name",data.account_name],["Address",data.account_address],["EIN",data.ein],["Case Type",data.case_type],["BCN",data.bcn],["CAN",data.can],["# Employees",data.employee_count],["Preferred Enrollers",data.preferred_enrollers],["Opener Agent Code",data.opener_agent_code],["Enrollment Period",data.enrollment_dates],["CED",data.ced],["PED",data.ped],["HR Contact",[data.hr_contact,data.hr_email].filter(Boolean).join(" | ")],["Additional HR Contacts",data.additional_hr_contacts],["Broker Name/Email",[data.broker,data.broker_email].filter(Boolean).join(" | ")],["Broker Compensation",data.broker_comp],["Agent Compensation",data.agent_comp],["Opener",[data.opener,data.opener_email].filter(Boolean).join(" | ")],["Enrollment Platform",data.enrollment_platform],["Type of Enrollment",data.enrollment_type]];
-      if(!data.no_changes_confirmed){rows.push(["Pre-Enrollment Communications",data.pre_enrollment_communications],["Communications Sent By",data.pre_enrollment_sender],["TruAgent Information",data.truagent_information],["Digital Postcard",data.digital_postcard],["Location / Onsite Logistics",data.location_logistics],["Eligibility",data.eligibility],["Core Products",data.core_products],["Colonial Product Information",data.colonial_products]);}
-      rows.push(["Notes",data.notes]);
+      const rows=[["Account Name",data.account_name],["Address",data.account_address],["EIN",data.ein],["BCN",data.bcn],["CAN",data.can],["# Employees",data.employee_count],["Enrollment Period",data.enrollment_dates],["CED",data.ced],["PED",data.ped],["HR Contact",[data.hr_contact,data.hr_email].filter(Boolean).join(" | ")],["Broker Name/Email",[data.broker,data.broker_email].filter(Boolean).join(" | ")],["Opener",[data.opener,data.opener_email].filter(Boolean).join(" | ")],["Enrollment Platform",data.enrollment_platform],["Type of Enrollment",data.enrollment_type],["Eligibility",data.eligibility],["Core Products",data.core_products],["Colonial Product Information",data.colonial_products],["Notes",data.notes]];
       const tableRows=rows.map(([label,value])=>`<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value||"").replace(/\n/g,"<br>")}</td></tr>`).join("");
       return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(data.title)}</title><style>body{font-family:Arial,sans-serif;color:#1f2937}h1{color:#183f47;margin-bottom:4px}.sub{color:#667085;margin-top:0}table{border-collapse:collapse;width:100%;margin-top:18px}th,td{border:1px solid #d8e3e8;padding:10px;vertical-align:top;text-align:left}th{width:28%;background:#e8fbfb;color:#183f47}.product{white-space:pre-wrap}</style></head><body><h1>${escapeHtml(data.title)}</h1><p class="sub">Auto-populated from the Group Intake Form before being added to the intake/group file.</p><table>${tableRows}</table></body></html>`;
     }
@@ -918,64 +800,15 @@
       updateCoreProductSummaries();
       const data=buildEnrollmentGuideData();
       Object.entries(data).forEach(([key,value])=>upsertHiddenPayload(`guide__${key}`,value));
+      const docHtml=buildEnrollmentGuideDocHtml(data);
+      const fileName=`Enrollment Guide - ${safeFilename(data.account_name)}.doc`;
+      upsertHiddenPayload("file__enrollment_guide__0__name",fileName);
+      upsertHiddenPayload("file__enrollment_guide__0__type","application/msword");
+      upsertHiddenPayload("file__enrollment_guide__0__data",encodeBase64Unicode(docHtml));
     }
     function readFileAsBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=reject;reader.readAsDataURL(file);});}
     async function prepareFilePayloads(){document.querySelectorAll(".generated-file-payload").forEach(el=>el.remove());const fileInputs=Array.from(form.querySelectorAll('input[type="file"]'));for(const input of fileInputs){const fieldKey=input.dataset.fileKey||input.name;const files=Array.from(input.files||[]);for(let index=0;index<files.length;index++){const file=files[index];const base64=await readFileAsBase64(file);const payloads={[`file__${fieldKey}__${index}__name`]:file.name,[`file__${fieldKey}__${index}__type`]:file.type||"application/octet-stream",[`file__${fieldKey}__${index}__data`]:base64};Object.entries(payloads).forEach(([name,value])=>{const hidden=document.createElement("input");hidden.type="hidden";hidden.name=name;hidden.value=value;hidden.className="generated-file-payload";form.appendChild(hidden);});}input.disabled=true;}}
     function updateColonialTaxStatusSummaries(){const taxMap={individual_dental_tax_status:"individual_dental__tax_status",individual_accident_tax_status:"individual_accident__tax_status",group_accident_tax_status:"group_accident__tax_status",individual_disability_tax_status:"individual_disability__tax_status",group_disability_tax_status:"group_disability__tax_status",cancer_assist_tax_status:"cancer_assist__tax_status",individual_critical_tax_status:"individual_critical__tax_status",group_critical_illness_tax_status:"group_critical_illness__tax_status",individual_med_bridge_tax_status:"individual_med_bridge__tax_status",group_medical_bridge_tax_status:"group_medical_bridge__tax_status",individual_term_life_tax_status:"individual_term_life__tax_status",individual_whole_life_tax_status:"individual_whole_life__tax_status",group_term_life_tax_status:"group_term_life__tax_status"};Object.entries(taxMap).forEach(([summaryName,detailName])=>{let hidden=form.querySelector(`input[name="${CSS.escape(summaryName)}"]`);if(!hidden){hidden=document.createElement("input");hidden.type="hidden";hidden.name=summaryName;hidden.id=summaryName;hidden.className="tax-summary-payload";form.appendChild(hidden);}hidden.value=fieldValue(detailName);});let combined=form.querySelector(`input[name="individual_life_plans_tax_status"]`);if(!combined){combined=document.createElement("input");combined.type="hidden";combined.name="individual_life_plans_tax_status";combined.id="individual_life_plans_tax_status";combined.className="tax-summary-payload";form.appendChild(combined);}combined.value=[fieldValue("individual_term_life__tax_status")?"Term: "+fieldValue("individual_term_life__tax_status"):"",fieldValue("individual_whole_life__tax_status")?"Whole: "+fieldValue("individual_whole_life__tax_status"):""].filter(Boolean).join(" | ");}
-
-
-    function getBaseFormUrl_(){return String(window.location.href||"").split("#")[0].split("?")[0];}
-    function ensureFormPageUrl_(){if(formPageUrlInput)formPageUrlInput.value=/^https?:\/\//i.test(getBaseFormUrl_())?getBaseFormUrl_():"";}
-    function formatEditDate_(value){if(!value)return"";const date=new Date(value);return Number.isNaN(date.getTime())?String(value):date.toLocaleString();}
-    function resetAdditionalHrContacts_(){document.querySelectorAll('#hrContactsList [data-hr-contact-row="additional"]').forEach(row=>row.remove());}
-    function populateFormFromEdit_(payload){
-      form.reset();
-      resetAdditionalHrContacts_();
-      document.querySelectorAll(".generated-file-payload,.generated-template-payload,.test-file-payload").forEach(el=>el.remove());
-      const data=payload&&typeof payload==="object"?{...payload}:{};
-      const extraNames=Array.isArray(data.additional_hr_contact_name)?data.additional_hr_contact_name:(data.additional_hr_contact_name?[data.additional_hr_contact_name]:[]);
-      const extraEmails=Array.isArray(data.additional_hr_contact_email)?data.additional_hr_contact_email:(data.additional_hr_contact_email?[data.additional_hr_contact_email]:[]);
-      for(let i=0;i<Math.max(extraNames.length,extraEmails.length);i++)addHrContactRow(extraNames[i]||"",extraEmails[i]||"");
-      delete data.additional_hr_contact_name;
-      delete data.additional_hr_contact_email;
-      Object.entries(data).forEach(([name,value])=>setControlValue(name,value));
-    }
-    function renderEditBanner_(details){
-      if(!editBanner)return;
-      const fileItems=existingFiles.length?`<ul class="edit-file-list">${existingFiles.map(file=>`<li>${escapeHtml(file.categoryLabel||"Document")}: ${escapeHtml(file.name||"Uploaded file")}</li>`).join("")}</ul>`:"<div style=\"margin-top:6px\">No documents were previously uploaded.</div>";
-      editBanner.innerHTML=`<strong>Editing an existing intake</strong>Submission ${escapeHtml(details.submissionId||"")} · Status: ${escapeHtml(details.status||"New")} · Revision ${escapeHtml(details.revision||1)}${details.lastUpdated?` · Last updated ${escapeHtml(formatEditDate_(details.lastUpdated))}`:""}<div style="margin-top:7px">Previously uploaded files are retained. Upload a file only when adding or replacing information.</div>${fileItems}`;
-      editBanner.style.display="block";
-    }
-    function setEditLoadingState_(loading){
-      backBtn.disabled=loading;
-      nextBtn.disabled=loading;
-      saveBtn.disabled=loading;
-      submitBtn.disabled=loading;
-      if(loading){successBox.style.display="block";successMessage.textContent="Loading the saved intake securely...";}
-    }
-    function createRequestToken_(){
-      try{
-        if(window.crypto&&typeof window.crypto.randomUUID==="function")return window.crypto.randomUUID();
-        if(window.crypto&&typeof window.crypto.getRandomValues==="function"){
-          const bytes=new Uint8Array(16);
-          window.crypto.getRandomValues(bytes);
-          return Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
-        }
-      }catch(error){}
-      return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
-    }
-
-    function startSecureEditLoad_(token){
-      editMode=true;
-      activeEditToken=token;
-      activeLoadRequestId=createRequestToken_();
-      editTokenInput.value=token;
-      setEditLoadingState_(true);
-      let frame=document.getElementById("ursEditLoader");
-      if(!frame){frame=document.createElement("iframe");frame.id="ursEditLoader";frame.style.display="none";document.body.appendChild(frame);}
-      frame.src=`${SUBMISSION_ENDPOINT}?action=load&token=${encodeURIComponent(token)}&requestId=${encodeURIComponent(activeLoadRequestId)}`;
-      try{window.history.replaceState({},document.title,getBaseFormUrl_());}catch(error){}
-    }
 
     function isPrefillTestMode(){
       const params=new URLSearchParams(window.location.search);
@@ -986,7 +819,7 @@
       document.getElementById("testBanner")?.style.setProperty("display","block");
       let marker=document.getElementById("test_mode");
       if(!marker){marker=document.createElement("input");marker.type="hidden";marker.id="test_mode";marker.name="test_mode";form.appendChild(marker);}
-      marker.value="LIVE PREFILLED TEST — SUBMISSION WILL BE SENT";
+      marker.value="Prefilled Test Submission";
     }
     function setControlValue(name,value){
       const controls=Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));
@@ -1023,9 +856,7 @@
         employee_count:"113",
         sic_code:"6411",
         enrollers_needed:"3",
-        preferred_enrollers:"Jordan Smith or Taylor Reed",
         requested_build_completion_date:plusDays(10),
-        opener_agent_code:"A12345",
         opener_email:"tayshia.conner@coloniallifesales.com",
         opener_first_name:"Tayshia",
         opener_last_name:"Conner",
@@ -1035,7 +866,6 @@
         broker_name:"Upper Room Solutions Test Broker",
         broker_email:"testbroker@example.com",
         broker_comp:"PIN LEVEL",
-        agent_comp:"Advanced",
         case_type:"New Group",
         bcn:"BTEST123",
         can:"CTEST123",
@@ -1101,23 +931,14 @@
         individual_life_offered:"None Offered",
         group_term_life_offered:"None Offered",
         accountability_checklist:["Program request completed"],
-        pre_enrollment_communication_methods:["Email","Text"],
-        pre_enrollment_sender:"Coordinator",
-        truagent_information_completed:"Yes",
-        digital_postcard_option:"Automatic Digital Postcard - Any Employee Count",
-        digital_postcard_notes:"Automatic postcard will be sent before enrollment begins.",
+        pre_enrollment_communication_methods:["Email"],
         multilingual_needs:"No",
         special_shifts:"No",
         multiple_locations:"Single Location",
-        location_details:"Main office - 123 Test Street, Cleveland, OH 44114",
-        onsite_enrollment:"Yes - Some Enrollment Days",
-        onsite_days:["Tuesday","Wednesday"],
-        onsite_days_notes:"Onsite at the main office from 9:00 AM to 4:00 PM.",
         weekend_enrollment_needed:"No",
         packets_needed:"Digital Only"
       };
       Object.entries(testData).forEach(([key,value])=>setControlValue(key,value));
-      if(!document.querySelector('#hrContactsList [data-hr-contact-row="additional"]'))addHrContactRow("Secondary HR Contact","secondary.hr@example.com");
       applyConditionalRules();
       updateColonialTaxStatusSummaries();
       if(typeof updateCoreProductSummaries==="function")updateCoreProductSummaries();
@@ -1127,8 +948,6 @@
       return true;
     }
 
-    document.getElementById("addHrContactBtn")?.addEventListener("click",()=>addHrContactRow());
-    document.getElementById("hrContactsList")?.addEventListener("click",event=>{const button=event.target.closest(".remove-contact");if(!button)return;button.closest('[data-hr-contact-row="additional"]')?.remove();updateReviewPanel();});
     nextBtn.addEventListener("click",()=>{applyConditionalRules();if(!validateStep(currentStep))return;showStep(Math.min(currentStep+1,steps.length-1));});
     backBtn.addEventListener("click",()=>showStep(Math.max(currentStep-1,0)));
     saveBtn.addEventListener("click",saveProgress);
@@ -1136,115 +955,16 @@
     form.addEventListener("change",e=>{e.target.closest(".field")?.classList.remove("error");applyConditionalRules();if(e.target?.matches?.('input[type="checkbox"]'))enforceChoiceLimits(e.target);updateReviewPanel();});
     function isDebugSubmitMode(){return false;}
     function ensureSubmitIframe(){let frame=document.getElementById("ursSubmitFrame");if(!frame){frame=document.createElement("iframe");frame.id="ursSubmitFrame";frame.name="ursSubmitFrame";frame.style.display="none";document.body.appendChild(frame);}return frame;}
-    let submitConfirmationTimer=null;
-    function restoreSubmitAfterFailure_(message){
-      if(submitConfirmationTimer){clearTimeout(submitConfirmationTimer);submitConfirmationTimer=null;}
-      form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);
-      submitBtn.disabled=false;
-      submitBtn.textContent="Submit";
-      if(submissionCallbackTokenInput)submissionCallbackTokenInput.value="";
-      saveBtn.disabled=false;
-      successBox.style.display="block";
-      if(successTitle)successTitle.textContent="Submission not confirmed";
-      successMessage.textContent=message||"The submission could not be confirmed. Please try again.";
-      successBox.scrollIntoView({behavior:"smooth",block:"center"});
-    }
-    window.addEventListener("message",event=>{
-      const data=event?.data;
-      if(!data||!["urs-intake-response","urs-intake-load"].includes(data.source))return;
-      const trustedGoogleOrigin=/^https:\/\/([a-z0-9-]+\.)*(googleusercontent\.com|google\.com)$/i.test(String(event.origin||""));
-      if(!trustedGoogleOrigin)return;
-
-      if(data.source==="urs-intake-load"){
-        if(activeLoadRequestId&&data.requestId!==activeLoadRequestId)return;
-        if(!data.ok){
-          setEditLoadingState_(true);
-          successBox.style.display="block";
-          successMessage.textContent=data.error||"The saved intake could not be loaded.";
-          return;
-        }
-        populateFormFromEdit_(data.fields||{});
-        editTokenInput.value=activeEditToken;
-        confirmationInput.value=data.submissionId||confirmationInput.value;
-        existingFiles=Array.isArray(data.existingFiles)?data.existingFiles:[];
-        existingFileCategories=new Set(existingFiles.map(file=>file.category).filter(Boolean));
-        renderEditBanner_(data);
-        ensureFormPageUrl_();
-        applyConditionalRules();
-        updateReviewPanel();
-        showStep(0);
-        setEditLoadingState_(false);
-        submitBtn.textContent="Save Changes";
-        successBox.style.display="none";
-        return;
-      }
-
-      const expectedCallbackToken=String(submissionCallbackTokenInput?.value||"");
-      if(expectedCallbackToken&&data.callbackToken!==expectedCallbackToken)return;
-      if(submitConfirmationTimer){clearTimeout(submitConfirmationTimer);submitConfirmationTimer=null;}
-      if(!data.ok){restoreSubmitAfterFailure_(data.error||"The intake service returned an error. Please try again.");return;}
-      localStorage.removeItem("urs_intake_progress");
-      if(submissionCallbackTokenInput)submissionCallbackTokenInput.value="";
-      successBox.style.display="block";
-      if(successTitle)successTitle.textContent=data.isUpdate?"Changes saved":"Submission complete";
-      const confirmationNote=data.confirmationEmailSent?" A confirmation email with the secure edit link was sent to the opener.":"";
-      successMessage.textContent=data.isUpdate?`Your changes were saved to the existing intake. Confirmation: ${data.submissionId||confirmationInput.value||"Received"}.${confirmationNote}`:`Your Group Intake Form was submitted successfully. Confirmation: ${data.submissionId||confirmationInput.value||"Received"}.${confirmationNote}`;
-      submitBtn.textContent=data.isUpdate?"Changes Saved":"Submitted";
-      submitBtn.disabled=true;
-      saveBtn.disabled=true;
-      backBtn.style.display="none";
-      nextBtn.style.display="none";
-      successBox.scrollIntoView({behavior:"smooth",block:"center"});
-    });
-    form.addEventListener("submit",async event=>{
-      event.preventDefault();
-      successBox.style.display="none";
-      if(form.querySelector('[name="_honey"]')?.value)return;
-      applyConditionalRules();
-      updateColonialTaxStatusSummaries();
-      updateCoreProductSummaries();
-      ensureConfirmationId();
-      if(!validateAllSteps()||!enforceChoiceLimits()||!validateUwOfferLogicClient()){
-        successBox.style.display="block";
-        if(!successMessage.textContent)successMessage.textContent="Submit is blocked because one or more required fields are missing or a selection limit was exceeded. I moved you to the first field that needs attention.";
-        return;
-      }
-      submitBtn.disabled=true;
-      submitBtn.textContent="Preparing files...";
-      try{
-        await prepareFilePayloads();
-        prepareGeneratedTemplatePayloads();
-        submitBtn.textContent="Submitting...";
-        form.method="POST";
-        form.action=SUBMISSION_ENDPOINT;
-        form.target="ursSubmitFrame";
-        if(submissionCallbackTokenInput)submissionCallbackTokenInput.value=createRequestToken_();
-        ensureSubmitIframe();
-        HTMLFormElement.prototype.submit.call(form);
-        successBox.style.display="block";
-        if(successTitle)successTitle.textContent="Submitting to Google...";
-        successMessage.textContent="Your submission is being processed by Google. Keep this page open. The confirmation normally appears within a minute.";
-        successBox.scrollIntoView({behavior:"smooth",block:"center"});
-        submitConfirmationTimer=setTimeout(()=>{
-          restoreSubmitAfterFailure_("The form was sent, but the website did not receive confirmation from Google. Please check the submission email or try again.");
-        },90000);
-      }catch(error){
-        restoreSubmitAfterFailure_("One or more files could not be prepared or submitted. Please try again or remove large files.");
-      }
-    });
+    form.addEventListener("submit",async event=>{event.preventDefault();successBox.style.display="none";if(form.querySelector('[name="_honey"]')?.value)return;applyConditionalRules();updateColonialTaxStatusSummaries();updateCoreProductSummaries();ensureConfirmationId();if(!validateAllSteps()||!enforceChoiceLimits()){successBox.style.display="block";if(!successMessage.textContent)successMessage.textContent="Please complete the required fields or correct a selection limit. I moved you to the first item that needs attention.";return;}localStorage.removeItem("urs_intake_progress");submitBtn.disabled=true;submitBtn.textContent="Preparing files...";try{await prepareFilePayloads();prepareGeneratedTemplatePayloads();submitBtn.textContent="Submitting...";const debugMode=isDebugSubmitMode();form.method="POST";form.action=SUBMISSION_ENDPOINT;form.target=debugMode?"_blank":"ursSubmitFrame";if(!debugMode)ensureSubmitIframe();HTMLFormElement.prototype.submit.call(form);successBox.style.display="block";successMessage.textContent="Your Group Intake Form has been submitted successfully. You may now close this page.";submitBtn.textContent="Submitted";submitBtn.disabled=true;saveBtn.disabled=true;backBtn.style.display="none";nextBtn.style.display="none";successBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(error){form.querySelectorAll('input[type="file"]').forEach(input=>input.disabled=false);submitBtn.disabled=false;submitBtn.textContent="Submit";successBox.style.display="block";successMessage.textContent="One or more files could not be prepared or submitted. Please try again or remove large files.";}});
     const paramsForStartup=new URLSearchParams(window.location.search);
-    ensureFormPageUrl_();
     const resetSavedProgress=["true","1","yes","y","reset"].includes(String(paramsForStartup.get("reset")||"").toLowerCase());
     if(resetSavedProgress)localStorage.removeItem("urs_intake_progress");
-    const editTokenForStartup=String(paramsForStartup.get("edit")||"").trim();
-    if(editTokenForStartup){
-      startSecureEditLoad_(editTokenForStartup);
-    }else{
-      applyTestMode(true);
-      applyConditionalRules();
-      updateReviewPanel();
-      showStep(0);
-    }
+    const isTest=typeof isPrefillTestMode==="function" && isPrefillTestMode();
+    if(!isTest)loadProgress();
+    if(isTest)applyTestMode();
+    applyConditionalRules();
+    updateReviewPanel();
+    showStep(0);
   </script>
 </body>
 </html>
