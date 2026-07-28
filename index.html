@@ -123,7 +123,7 @@
 <div class="grid">
 <div class="field full" data-required="true"><label class="required" for="account_name">Account Name</label><input id="account_name" name="account_name" type="text"/><div class="error-text" id="form_error_1" role="alert">Account name is required.</div></div>
 <div class="field full" data-required="true"><label class="required" for="account_address">Account Address</label><textarea id="account_address" name="account_address" placeholder="Street address, city, state, ZIP"></textarea><div class="error-text" id="form_error_2" role="alert">Account address is required.</div></div>
-<div class="field third" data-required="true"><label class="required" for="ein_number">EIN Number</label><input autocomplete="off" id="ein_number" inputmode="numeric" name="ein_number" pattern="\d{2}-\d{7}" placeholder="XX-XXXXXXX" title="Enter the EIN in XX-XXXXXXX format." type="text"/><div class="hint">Required. Use the employer Federal EIN.</div><div class="error-text" id="form_error_3" role="alert">EIN number is required.</div></div>
+<div class="field third" data-required="true"><label class="required" for="ein_number">EIN Number</label><input autocomplete="off" id="ein_number" name="ein_number" placeholder="Enter EIN" type="text"/><div class="hint">Required. Use the employer Federal EIN.</div><div class="error-text" id="form_error_3" role="alert">EIN number is required.</div></div>
 <div class="field third" data-required="true"><label class="required" for="employee_count"># of Employees</label><input id="employee_count" min="1" name="employee_count" step="1" type="number"/><div class="error-text" id="form_error_4" role="alert">Employee count is required.</div></div>
 <div class="field third optional-note"><label for="sic_code">SIC Code</label><input id="sic_code" name="sic_code" placeholder="Optional" type="text"/><div class="hint">Optional. Add if available.</div></div>
 <div class="field third" data-required="true"><label class="required" for="enrollers_needed">How many enrollers are needed?</label><input id="enrollers_needed" min="0" name="enrollers_needed" placeholder="Example: 3" step="1" type="number"/><div class="hint">Estimate how many enrollers should be scheduled for this account.</div><div class="error-text" id="form_error_5" role="alert">Enter the number of enrollers needed.</div></div>
@@ -523,8 +523,6 @@
       ids.forEach(id=>setCustomFieldError(id,""));
       const start=document.getElementById("enrollment_start_date")?.value||"";const end=document.getElementById("enrollment_end_date")?.value||"";
       if(start&&end&&end<start)setCustomFieldError("enrollment_end_date","Enrollment end date cannot be before the start date.");
-      const requested=document.getElementById("requested_build_completion_date")?.value||"";
-      if(requested&&start&&requested>start)setCustomFieldError("requested_build_completion_date","Requested completion date must be on or before enrollment begins.");
       const ced=document.getElementById("ced")?.value||"";const ped=document.getElementById("ped")?.value||"";
       if(ced&&ped&&ped<ced)setCustomFieldError("ped","Payroll effective date cannot be before the coverage effective date.");
       const semi1=document.getElementById("semi_monthly_payday_1")?.value||"";const semi2=document.getElementById("semi_monthly_payday_2")?.value||"";
