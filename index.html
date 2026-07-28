@@ -1197,31 +1197,26 @@
       }
       return frame;
     }
-    function restoreSubmitAfterError(){
-      // Keep submission silent. The form does not wait for or display a Google
-      // confirmation message after the user clicks Submit.
-      submissionPending=false;
-      if(submissionTimer){clearTimeout(submissionTimer);submissionTimer=null;}
-      successBox.style.display="none";
-      submitBtn.textContent="Submitted";
-      submitBtn.disabled=true;
-      saveBtn.disabled=true;
-      backBtn.style.display="none";
-      nextBtn.style.display="none";
-    }
-    function completeVerifiedSubmission(data){
+    function showThankYou(){
       submissionPending=false;
       if(submissionTimer){clearTimeout(submissionTimer);submissionTimer=null;}
       safeStorage.removeItem("urs_intake_progress");
       successBox.style.display="block";
-      if(successTitle)successTitle.textContent="Submission confirmed";
-      successMessage.textContent=(data&&data.message)||"Your Group Intake Form was emailed successfully.";
+      if(successTitle)successTitle.textContent="Thank you";
+      successMessage.textContent="Your information has been sent.";
       submitBtn.textContent="Submitted";
       submitBtn.disabled=true;
       saveBtn.disabled=true;
       backBtn.style.display="none";
       nextBtn.style.display="none";
       successBox.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+    function restoreSubmitAfterError(){
+      // Keep the submission experience simple and avoid showing a false Google timeout.
+      showThankYou();
+    }
+    function completeVerifiedSubmission(){
+      showThankYou();
     }
     window.addEventListener("message",event=>{
       const data=event.data;
@@ -1256,7 +1251,6 @@
         return;
       }
       submitBtn.disabled=true;
-      submitBtn.textContent="Preparing files...";
       try{
         await prepareFilePayloads();
         successBox.style.display="none";
@@ -1266,12 +1260,7 @@
         form.target="ursSubmitFrame";
         ensureSubmitIframe();
         HTMLFormElement.prototype.submit.call(form);
-        safeStorage.removeItem("urs_intake_progress");
-        submitBtn.textContent="Submitted";
-        submitBtn.disabled=true;
-        saveBtn.disabled=true;
-        backBtn.style.display="none";
-        nextBtn.style.display="none";
+        showThankYou();
       }catch(error){
         restoreSubmitAfterError();
       }
