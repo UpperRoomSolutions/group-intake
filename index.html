@@ -1474,25 +1474,32 @@
         });
       });
     }
+    function ensureDraftLoadIframe(){
+      let frame=document.getElementById("ursDraftLoadFrame");
+      if(!frame){
+        frame=document.createElement("iframe");
+        frame.id="ursDraftLoadFrame";
+        frame.name="ursDraftLoadFrame";
+        frame.style.display="none";
+        document.body.appendChild(frame);
+      }
+      return frame;
+    }
     async function loadProgress(){
       const draftId=String(startupParams.get("draft")||"").trim();
       if(!draftId)return;
       document.getElementById("draft_id").value=draftId;
       setSubmissionStatus("Opening saved group draft…","Loading the saved information for this group.");
-      try{
-        const url=`${SUBMISSION_ENDPOINT}${SUBMISSION_ENDPOINT.includes("?")?"&":"?"}action=loadDraft&draft_id=${encodeURIComponent(draftId)}&_=${Date.now()}`;
-        const response=await fetch(url,{method:"GET",redirect:"follow",cache:"no-store"});
-        if(!response.ok)throw new Error(`Draft service returned ${response.status}.`);
-        const data=await response.json();
-        if(!data.ok)throw new Error(data.message||"This draft could not be opened.");
-        applyDraftData(data);
-        showDraftLink(makeDraftLink(draftId));
-        applyConditionalRules();
-        updateReviewPanel();
-        setSubmissionStatus("Saved group draft opened",`You are continuing the saved intake for ${fieldValue("account_name")||"this group"}.`);
-      }catch(error){
-        setSubmissionStatus("Draft could not be opened",error?.message||"The saved group information could not be loaded.");
-      }
+      const frame=ensureDraftLoadIframe();
+      const url=`${SUBMISSION_ENDPOINT}${SUBMISSION_ENDPOINT.includes("?")?"&":"?"}action=loadDraft&draft_id=${encodeURIComponent(draftId)}&_=${Date.now()}`;
+      draftLoadPending=true;
+      frame.src=url;
+      if(draftLoadTimer)clearTimeout(draftLoadTimer);
+      draftLoadTimer=setTimeout(()=>{
+        if(!draftLoadPending)return;
+        draftLoadPending=false;
+        setSubmissionStatus("Draft could not be opened","The saved draft did not return from Apps Script. Confirm the HTML and Code.gs use the same current /exec deployment URL.");
+      },30000);
     }
     function normalizeDeductionClient(value){
       const raw=String(value||"").trim();
@@ -1881,6 +1888,8 @@
     const SUBMIT_LABEL="Submit Final Intake";
     let submissionPending=false;
     let submissionTimer=null;
+    let draftLoadPending=false;
+    let draftLoadTimer=null;
     function ensureSubmitIframe(){
       let frame=document.getElementById("ursSubmitFrame");
       if(!frame){
@@ -1932,7 +1941,27 @@
     }
     window.addEventListener("message",event=>{
       const data=event.data;
-      if(!submissionPending||!data||typeof data!=="object"||data.source!=="urs-intake-response")return;
+      if(!data||typeof data!=="object")return;
+
+      if(data.source==="urs-draft-load-response"){
+        if(!draftLoadPending)return;
+        draftLoadPending=false;
+        if(draftLoadTimer){clearTimeout(draftLoadTimer);draftLoadTimer=null;}
+        if(!data.ok){
+          setSubmissionStatus("Draft could not be opened",data.message||"This draft could not be found or has expired.");
+          return;
+        }
+        applyDraftData(data);
+        showDraftLink(makeDraftLink(data.draftId||fieldValue("draft_id")));
+        applyConditionalRules();
+        updateColonialTaxStatusSummaries();
+        updateCoreProductSummaries();
+        updateReviewPanel();
+        setSubmissionStatus("Saved group draft opened",`You are continuing the saved intake for ${fieldValue("account_name")||"this group"}.`);
+        return;
+      }
+
+      if(!submissionPending||data.source!=="urs-intake-response")return;
       if(data.ok)completeVerifiedSubmission(data);
       else restoreSubmitAfterError(data.message);
     });
