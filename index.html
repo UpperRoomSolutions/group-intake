@@ -172,6 +172,7 @@
 <div class="quick-note conditional-hidden" data-output-exclude="true" id="self_enroll_contact_reminder"><strong>Self-enroll information needed:</strong> Please provide a phone number and email address for each employee.</div>
 <div class="quick-note conditional-hidden" data-output-exclude="true" id="self_enroll_en_new_group_reminder"><strong>New Employee Navigator group:</strong> Please also provide each employee’s first name, last name, date of birth, and Social Security number.</div>
 <input id="draft_id" name="draft_id" type="hidden"/>
+<input id="form_action" name="action" type="hidden" value="submitFinal"/>
 <div id="no_change_setup_questions" style="display:contents">
 <fieldset class="field full conditional-hidden" data-required="true" id="en_employee_classes_field"><legend class="required">Employee Classes</legend><div class="choice-group"><label class="choice"><input name="en_employee_classes" type="checkbox" value="All Employees"/> All Employees</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Full-Time"/> Full-Time</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Part-Time"/> Part-Time</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Salaried"/> Salaried</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Hourly"/> Hourly</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Union"/> Union</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Non-Union"/> Non-Union</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Location-Based"/> Location-Based</label><label class="choice"><input name="en_employee_classes" type="checkbox" value="Other"/> Other</label></div><div class="error-text" id="form_error_35" role="alert">Select at least one employee class for the EN build.</div></fieldset><div class="field full conditional-hidden" data-required="false" id="en_employee_classes_other_field"><label class="required" for="en_employee_classes_other">Other Employee Class</label><input id="en_employee_classes_other" name="en_employee_classes_other" placeholder="Describe the employee class" type="text"/><div class="error-text" id="form_error_36" role="alert">Describe the other employee class.</div></div>
 <div class="field conditional-hidden" data-required="true" id="en_benefits_differ_by_class_field"><label class="required" for="en_benefits_differ_by_class">Are benefits offered differently by class?</label><select id="en_benefits_differ_by_class" name="en_benefits_differ_by_class"><option value="">Please Select</option><option>Yes</option><option>No</option></select><div class="error-text" id="form_error_37" role="alert">Select whether benefits differ by class.</div></div>
@@ -795,11 +796,6 @@
         const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();return ok;
       }
     }
-    function openDraftEmail(openerEmail,accountName,link){
-      const subject=`Continue ${accountName||"Group"} Intake`;
-      const body=[`Your intake draft for ${accountName||"this group"} has been saved.`,``,`Use this private link anytime to continue where you left off:`,link,``,`Please keep this link for this group only.`].join("\n");
-      window.location.href=`mailto:${encodeURIComponent(openerEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }
 
     document.querySelectorAll(".field").forEach((field,index)=>{const error=field.querySelector(".error-text");if(error){if(!error.id)error.id=`field_error_${index}`;field.querySelectorAll("input,select,textarea").forEach(c=>{const ids=new Set(String(c.getAttribute("aria-describedby")||"").split(/\s+/).filter(Boolean));ids.add(error.id);c.setAttribute("aria-describedby",Array.from(ids).join(" "));});}});
 
@@ -1413,50 +1409,90 @@
       visibleRows=visibleRows.filter(([,value])=>String(value||"").trim()&&!/^\s*\|\s*$/.test(String(value)));
       reviewGrid.innerHTML=visibleRows.map(([l,v])=>{const value=String(v||"Not answered");const rendered=`<span>${escapeHtml(value)}</span>`;return `<div class="review-item"><strong>${escapeHtml(l)}</strong>${rendered}</div>`;}).join("");
     }
+    function setSubmissionStatus(title,message){
+      successBox.style.display="block";
+      if(successTitle)successTitle.textContent=title;
+      successMessage.textContent=message;
+      successBox.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+    function restoreFileInputsAfterPost(){
+      form.querySelectorAll('input[type="file"]').forEach(input=>{input.disabled=false;});
+      form.querySelectorAll('.generated-file-payload').forEach(el=>el.remove());
+    }
+    function submitFormToBackend(action){
+      document.getElementById("form_action").value=action;
+      form.method="POST";
+      form.action=SUBMISSION_ENDPOINT;
+      form.target="ursSubmitFrame";
+      ensureSubmitIframe();
+      HTMLFormElement.prototype.submit.call(form);
+    }
     async function saveProgress(){
       const openerEmail=fieldValue("opener_email").trim();
       const accountName=fieldValue("account_name").trim();
       if(!accountName||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(openerEmail)){
-        successBox.style.display="block";
-        if(successTitle)successTitle.textContent="Add the group and opener first";
-        successMessage.textContent="Enter the Account Name and a valid Opener Email before saving the private group link.";
+        setSubmissionStatus("Add the group and opener first","Enter the Account Name and a valid Opener Email before saving the private group link.");
         return;
       }
+      applyConditionalRules();
+      updateColonialTaxStatusSummaries();
+      updateCoreProductSummaries();
       const draftId=getDraftId();
-      const data={};
-      new FormData(form).forEach((v,k)=>{if(v instanceof File)return;if(data[k])data[k]=Array.isArray(data[k])?[...data[k],v]:[data[k],v];else data[k]=v;});
-      data.draft_id=draftId;
-      data.saved_at=new Date().toISOString();
-      safeStorage.setItem(draftStorageKey(draftId),JSON.stringify(data));
-      const link=makeDraftLink(draftId);
-      showDraftLink(link);
+      document.getElementById("draft_id").value=draftId;
       saveBtn.disabled=true;
-      successBox.style.display="block";
-      if(successTitle)successTitle.textContent="Group draft saved";
-      successMessage.textContent=`The private link for ${accountName} was copied. A ready-to-send email is opening for ${openerEmail}.`;
-      try{await saveDraftFiles();}catch(error){}
-      await copyText(link);
-      setTimeout(()=>openDraftEmail(openerEmail,accountName,link),250);
-      saveBtn.disabled=false;
+      setSubmissionStatus("Saving group draft…",`Saving ${accountName} and emailing the private continuation link to ${openerEmail}.`);
+      try{
+        await prepareFilePayloads();
+        submissionPending="draft";
+        submitFormToBackend("saveDraft");
+        if(submissionTimer)clearTimeout(submissionTimer);
+        submissionTimer=setTimeout(()=>{
+          if(submissionPending==="draft"){
+            submissionPending=false;
+            restoreFileInputsAfterPost();
+            saveBtn.disabled=false;
+            setSubmissionStatus("Draft email not confirmed","The server did not confirm the draft email. Check the Apps Script execution log before trying again.");
+          }
+        },45000);
+      }catch(error){
+        submissionPending=false;
+        restoreFileInputsAfterPost();
+        saveBtn.disabled=false;
+        setSubmissionStatus("Draft could not be saved",error?.message||"The draft request could not be prepared.");
+      }
+    }
+    function applyDraftData(data){
+      const fields=data&&data.fields?data.fields:{};
+      const extraNames=Array.isArray(fields.additional_hr_contact_name)?fields.additional_hr_contact_name:[];
+      const extraEmails=Array.isArray(fields.additional_hr_contact_email)?fields.additional_hr_contact_email:[];
+      for(let i=0;i<Math.max(extraNames.length,extraEmails.length);i++)addHrContactRow(extraNames[i]||"",extraEmails[i]||"");
+      Object.entries(fields).forEach(([k,v])=>{
+        Array.from(form.querySelectorAll(`[name="${CSS.escape(k)}"]`)).forEach(c=>{
+          const vals=Array.isArray(v)?v:[v];
+          if(c.type==="checkbox"||c.type==="radio")c.checked=vals.includes(c.value);
+          else if(c.type!=="file")c.value=vals[0]||"";
+        });
+      });
     }
     async function loadProgress(){
-      const draftId=getDraftId();
-      const saved=safeStorage.getItem(draftStorageKey(draftId));
-      if(saved){
-        try{
-          const data=JSON.parse(saved);
-          const extraNames=Array.isArray(data.additional_hr_contact_name)?data.additional_hr_contact_name:(data.additional_hr_contact_name?[data.additional_hr_contact_name]:[]);
-          const extraEmails=Array.isArray(data.additional_hr_contact_email)?data.additional_hr_contact_email:(data.additional_hr_contact_email?[data.additional_hr_contact_email]:[]);
-          for(let i=0;i<Math.max(extraNames.length,extraEmails.length);i++)addHrContactRow(extraNames[i]||"",extraEmails[i]||"");
-          delete data.additional_hr_contact_name;delete data.additional_hr_contact_email;
-          Object.entries(data).forEach(([k,v])=>{Array.from(form.querySelectorAll(`[name="${CSS.escape(k)}"]`)).forEach(c=>{const vals=Array.isArray(v)?v:[v];if(c.type==="checkbox"||c.type==="radio")c.checked=vals.includes(c.value);else if(c.type!=="file")c.value=Array.isArray(v)?(v[0]||""):v;});});
-          showDraftLink(makeDraftLink(draftId));
-          successBox.style.display="block";
-          if(successTitle)successTitle.textContent="Saved group draft opened";
-          successMessage.textContent=`You are continuing the saved intake for ${fieldValue("account_name")||"this group"}.`;
-        }catch(error){}
+      const draftId=String(startupParams.get("draft")||"").trim();
+      if(!draftId)return;
+      document.getElementById("draft_id").value=draftId;
+      setSubmissionStatus("Opening saved group draft…","Loading the saved information for this group.");
+      try{
+        const url=`${SUBMISSION_ENDPOINT}${SUBMISSION_ENDPOINT.includes("?")?"&":"?"}action=loadDraft&draft_id=${encodeURIComponent(draftId)}&_=${Date.now()}`;
+        const response=await fetch(url,{method:"GET",redirect:"follow",cache:"no-store"});
+        if(!response.ok)throw new Error(`Draft service returned ${response.status}.`);
+        const data=await response.json();
+        if(!data.ok)throw new Error(data.message||"This draft could not be opened.");
+        applyDraftData(data);
+        showDraftLink(makeDraftLink(draftId));
+        applyConditionalRules();
+        updateReviewPanel();
+        setSubmissionStatus("Saved group draft opened",`You are continuing the saved intake for ${fieldValue("account_name")||"this group"}.`);
+      }catch(error){
+        setSubmissionStatus("Draft could not be opened",error?.message||"The saved group information could not be loaded.");
       }
-      try{await loadDraftFiles();}catch(error){}
     }
     function normalizeDeductionClient(value){
       const raw=String(value||"").trim();
@@ -1871,21 +1907,34 @@
       nextBtn.style.display="none";
       successBox.scrollIntoView({behavior:"smooth",block:"center"});
     }
-    function restoreSubmitAfterError(){
-      // Keep the submission experience simple and avoid showing a false Google timeout.
-      showThankYou();
+    function restoreSubmitAfterError(message){
+      const pendingType=submissionPending;
+      submissionPending=false;
+      if(submissionTimer){clearTimeout(submissionTimer);submissionTimer=null;}
+      restoreFileInputsAfterPost();
+      submitBtn.disabled=false;
+      saveBtn.disabled=false;
+      setSubmissionStatus(pendingType==="draft"?"Draft email failed":"Final submission failed",message||"Apps Script reported that the request could not be completed.");
     }
-    function completeVerifiedSubmission(){
+    function completeVerifiedSubmission(data){
+      const pendingType=submissionPending;
+      submissionPending=false;
+      if(submissionTimer){clearTimeout(submissionTimer);submissionTimer=null;}
+      restoreFileInputsAfterPost();
+      if(pendingType==="draft"){
+        saveBtn.disabled=false;
+        if(data.draftId)document.getElementById("draft_id").value=data.draftId;
+        if(data.draftLink)showDraftLink(data.draftLink);
+        setSubmissionStatus("Draft saved and emailed",data.message||`The private draft link was emailed to ${fieldValue("opener_email")}.`);
+        return;
+      }
       showThankYou();
     }
     window.addEventListener("message",event=>{
       const data=event.data;
       if(!submissionPending||!data||typeof data!=="object"||data.source!=="urs-intake-response")return;
-      // Google Apps Script may deliver its HtmlService response through a nested
-      // googleusercontent iframe, so event.source may not equal the outer submit
-      // iframe. The unique response marker below is the reliable check.
       if(data.ok)completeVerifiedSubmission(data);
-      else restoreSubmitAfterError();
+      else restoreSubmitAfterError(data.message);
     });
     form.addEventListener("submit",async event=>{
       event.preventDefault();
@@ -1914,15 +1963,14 @@
       try{
         await prepareFilePayloads();
         successBox.style.display="none";
-        submissionPending=false;
-        form.method="POST";
-        form.action=SUBMISSION_ENDPOINT;
-        form.target="ursSubmitFrame";
-        ensureSubmitIframe();
-        HTMLFormElement.prototype.submit.call(form);
-        showThankYou();
+        submissionPending="final";
+        submitFormToBackend("submitFinal");
+        if(submissionTimer)clearTimeout(submissionTimer);
+        submissionTimer=setTimeout(()=>{
+          if(submissionPending==="final")restoreSubmitAfterError("The server did not confirm the final email within 45 seconds. Check the Apps Script execution log before resubmitting.");
+        },45000);
       }catch(error){
-        restoreSubmitAfterError();
+        restoreSubmitAfterError(error?.message);
       }
     });
     const paramsForStartup=startupParams;
