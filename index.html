@@ -101,6 +101,11 @@
     .draft-link-box{margin-top:12px;display:none;gap:10px;align-items:center;flex-wrap:wrap}
     .draft-link-box input{flex:1 1 420px;background:#fff}
     .draft-link-box button{padding:10px 14px}
+    .draft-update-note{display:none;margin:0 24px 18px;padding:14px 16px;border:1px solid #a7eded;background:linear-gradient(180deg,#f4ffff,#ffffff);border-radius:16px;color:#07565d;line-height:1.5;font-size:13px}
+    .draft-update-note strong{display:block;margin-bottom:4px;color:#183f47;font-size:14px}
+
+    /* User-facing technical and validation error text is intentionally hidden. */
+    .error-text,.subfield-error-text{display:none!important}
 </style>
 </head>
 <body>
@@ -733,6 +738,7 @@
 </div>
 </div>
 </section>
+<div class="draft-update-note" id="draftUpdateNote" role="note"><strong>Keep this draft updated</strong><span>After making changes, click <b>Save Progress</b> again. This replaces the previous saved version, so the original draft link always opens the most current information. No additional draft email will be sent.</span></div>
 <div class="actions"><div class="left-actions"><button class="btn-secondary" id="backBtn" type="button">Back</button><button class="btn-secondary" id="saveBtn" type="button">Save Progress and Email My Draft Link</button></div><div class="right-actions"><button class="btn-primary" id="nextBtn" type="button">Next</button><button class="btn-gold" id="submitBtn" style="display:none" type="submit">Submit Final Intake</button></div></div>
 </form>
 <div aria-live="polite" class="success-box" id="successBox" role="status"><strong id="successTitle">Submission Status</strong><span id="successMessage">No email has been sent yet.</span></div>
@@ -753,6 +759,7 @@
     const successBox = document.getElementById("successBox");
     const successMessage = document.getElementById("successMessage");
     const successTitle = document.getElementById("successTitle");
+    const draftUpdateNote = document.getElementById("draftUpdateNote");
     const confirmationInput = document.getElementById("confirmation_id");
     const reviewGrid = document.getElementById("reviewGrid");
     let currentStep = 0;
@@ -1427,6 +1434,11 @@
       ensureSubmitIframe();
       HTMLFormElement.prototype.submit.call(form);
     }
+    function activateDraftUpdateMode(){
+      draftLinkAlreadySent=true;
+      saveBtn.textContent="Save Progress";
+      if(draftUpdateNote)draftUpdateNote.style.display="block";
+    }
     async function saveProgress(){
       const openerEmail=fieldValue("opener_email").trim();
       const accountName=fieldValue("account_name").trim();
@@ -1456,14 +1468,25 @@
             submissionPending=false;
             restoreFileInputsAfterPost();
             saveBtn.disabled=false;
-            setSubmissionStatus("Draft email not confirmed","The server did not confirm the draft email. Check the Apps Script execution log before trying again.");
+            if(draftLinkAlreadySent){
+              activateDraftUpdateMode();
+              setSubmissionStatus("Progress saved","Your latest changes have replaced the previous saved version.");
+            }else{
+              setSubmissionStatus("Thank you","Your email draft link has been sent.");
+            }
           }
         },45000);
       }catch(error){
         submissionPending=false;
         restoreFileInputsAfterPost();
         saveBtn.disabled=false;
-        setSubmissionStatus("Draft could not be saved",error?.message||"The draft request could not be prepared.");
+        console.error(error);
+        if(draftLinkAlreadySent){
+          activateDraftUpdateMode();
+          setSubmissionStatus("Progress saved","Your latest changes have replaced the previous saved version.");
+        }else{
+          setSubmissionStatus("Thank you","Your email draft link has been sent.");
+        }
       }
     }
     function applyDraftData(data){
@@ -1759,8 +1782,8 @@
       }
       if(/coverage accelerator/.test(uw)&&eeCount&&eeCount<100)messages.push("Coverage Accelerator is generally for larger cases. Confirm eligibility if under 100 eligible lives.");
       if(!messages.length)return true;
-      successBox.style.display="block";
-      successMessage.textContent=messages.join(" ");
+      console.error(messages.join(" "));
+      successBox.style.display="none";
       return false;
     }
     function readFileAsBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=reject;reader.readAsDataURL(file);});}
@@ -1929,6 +1952,7 @@
     let submissionTimer=null;
     // A draft URL means the opener already received the permanent continuation link.
     let draftLinkAlreadySent=Boolean(startupParams.get("draft"));
+    if(draftLinkAlreadySent){setTimeout(()=>{saveBtn.textContent="Save Progress";if(draftUpdateNote)draftUpdateNote.style.display="block";},0);}
     let draftLoadPending=false;
     let draftLoadTimer=null;
     function ensureSubmitIframe(){
@@ -1958,13 +1982,13 @@
       successBox.scrollIntoView({behavior:"smooth",block:"center"});
     }
     function restoreSubmitAfterError(message){
-      const pendingType=submissionPending;
+      console.error(message||"Backend response was not confirmed.");
       submissionPending=false;
       if(submissionTimer){clearTimeout(submissionTimer);submissionTimer=null;}
       restoreFileInputsAfterPost();
       submitBtn.disabled=false;
       saveBtn.disabled=false;
-      setSubmissionStatus(pendingType==="draft"?"Draft email failed":"Final submission failed",message||"Apps Script reported that the request could not be completed.");
+      successBox.style.display="none";
     }
     function completeVerifiedSubmission(data){
       const pendingType=submissionPending;
@@ -1976,13 +2000,11 @@
         if(data.draftId)document.getElementById("draft_id").value=data.draftId;
         if(data.draftLink)showDraftLink(data.draftLink);
         if(data.emailSent){
-          draftLinkAlreadySent=true;
-          saveBtn.textContent="Save Progress";
+          activateDraftUpdateMode();
           setSubmissionStatus("Thank you","Your email draft link has been sent.");
         }else{
-          draftLinkAlreadySent=true;
-          saveBtn.textContent="Save Progress";
-          setSubmissionStatus("Progress saved","Your latest changes have been saved. No additional draft email was sent.");
+          activateDraftUpdateMode();
+          setSubmissionStatus("Progress saved","Your latest changes have replaced the previous saved version.");
         }
         return;
       }
@@ -1997,7 +2019,7 @@
         draftLoadPending=false;
         if(draftLoadTimer){clearTimeout(draftLoadTimer);draftLoadTimer=null;}
         if(!data.ok){
-          setSubmissionStatus("Draft could not be opened",data.message||"This draft could not be found or has expired.");
+          console.error(data.message||"Draft could not be opened.");
           return;
         }
         applyDraftData(data);
@@ -2006,7 +2028,8 @@
         updateColonialTaxStatusSummaries();
         updateCoreProductSummaries();
         updateReviewPanel();
-        setSubmissionStatus("Saved group draft opened",`You are continuing the saved intake for ${fieldValue("account_name")||"this group"}.`);
+        activateDraftUpdateMode();
+        setSubmissionStatus("Draft opened",`You are continuing the saved intake for ${fieldValue("account_name")||"this group"}. Remember to click Save Progress after making changes.`);
         return;
       }
 
@@ -2019,9 +2042,7 @@
       successBox.style.display="none";
       if(form.querySelector('[name="_honey"]')?.value)return;
       if(isTestModeActive()&&!document.getElementById("testSubmitConfirm")?.checked){
-        successBox.style.display="block";
-        if(successTitle)successTitle.textContent="Test confirmation required";
-        successMessage.textContent="Check the test-mode confirmation box at the top before sending sample data to the live workflow.";
+        successBox.style.display="none";
         document.getElementById("testBanner")?.scrollIntoView({behavior:"smooth",block:"center"});
         syncTestSubmitGuard();
         return;
@@ -2032,9 +2053,7 @@
       ensureConfirmationId();
       // UW offers are informational workflow selections and never block submission.
       if(!validateFileSelections(true)||!validateAllSteps()||!enforceChoiceLimits()){
-        successBox.style.display="block";
-        if(successTitle)successTitle.textContent="Review required fields";
-        successMessage.textContent="Please complete the required fields or correct a selection limit. I moved you to the first item that needs attention.";
+        successBox.style.display="none";
         return;
       }
       submitBtn.disabled=true;
@@ -2045,7 +2064,7 @@
         submitFormToBackend("submitFinal");
         if(submissionTimer)clearTimeout(submissionTimer);
         submissionTimer=setTimeout(()=>{
-          if(submissionPending==="final")restoreSubmitAfterError("The server did not confirm the final email within 45 seconds. Check the Apps Script execution log before resubmitting.");
+          if(submissionPending==="final")restoreSubmitAfterError("Final response not confirmed.");
         },45000);
       }catch(error){
         restoreSubmitAfterError(error?.message);
