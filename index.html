@@ -103,9 +103,6 @@
     .draft-link-box button{padding:10px 14px}
     .draft-update-note{display:none;margin:0 24px 18px;padding:14px 16px;border:1px solid #a7eded;background:linear-gradient(180deg,#f4ffff,#ffffff);border-radius:16px;color:#07565d;line-height:1.5;font-size:13px}
     .draft-update-note strong{display:block;margin-bottom:4px;color:#183f47;font-size:14px}
-
-    /* User-facing technical and validation error text is intentionally hidden. */
-    .error-text,.subfield-error-text{display:none!important}
 </style>
 </head>
 <body>
@@ -1437,56 +1434,42 @@
     function activateDraftUpdateMode(){
       draftLinkAlreadySent=true;
       saveBtn.textContent="Save Progress";
+      saveBtn.style.display="";
+      saveBtn.disabled=false;
       if(draftUpdateNote)draftUpdateNote.style.display="block";
     }
     async function saveProgress(){
+      if(saveBtn.dataset.saving==="true")return;
+
       const openerEmail=fieldValue("opener_email").trim();
       const accountName=fieldValue("account_name").trim();
-      if(!accountName||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(openerEmail)){
-        setSubmissionStatus("Add the group and opener first","Enter the Account Name and a valid Opener Email before saving the private group link.");
-        return;
-      }
+      if(!accountName||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(openerEmail))return;
+
+      saveBtn.dataset.saving="true";
       applyConditionalRules();
       updateColonialTaxStatusSummaries();
       updateCoreProductSummaries();
+
       const draftId=getDraftId();
       document.getElementById("draft_id").value=draftId;
-      saveBtn.disabled=true;
-      setSubmissionStatus(
-        "Saving…",
-        draftLinkAlreadySent
-          ? "Saving your latest progress."
-          : "Saving your progress and emailing the private draft link."
-      );
+
       try{
         await prepareFilePayloads();
         submissionPending="draft";
         submitFormToBackend("saveDraft");
-        if(submissionTimer)clearTimeout(submissionTimer);
-        submissionTimer=setTimeout(()=>{
-          if(submissionPending==="draft"){
-            submissionPending=false;
-            restoreFileInputsAfterPost();
-            saveBtn.disabled=false;
-            if(draftLinkAlreadySent){
-              activateDraftUpdateMode();
-              setSubmissionStatus("Progress saved","Your latest changes have replaced the previous saved version.");
-            }else{
-              setSubmissionStatus("Thank you","Your email draft link has been sent.");
-            }
-          }
-        },45000);
+
+        // Keep the button visible and immediately switch it to the quiet update action.
+        activateDraftUpdateMode();
       }catch(error){
+        console.error("Draft save error:",error);
         submissionPending=false;
         restoreFileInputsAfterPost();
-        saveBtn.disabled=false;
-        console.error(error);
-        if(draftLinkAlreadySent){
-          activateDraftUpdateMode();
-          setSubmissionStatus("Progress saved","Your latest changes have replaced the previous saved version.");
-        }else{
-          setSubmissionStatus("Thank you","Your email draft link has been sent.");
-        }
+      }finally{
+        setTimeout(()=>{
+          saveBtn.dataset.saving="false";
+          saveBtn.disabled=false;
+          saveBtn.style.display="";
+        },600);
       }
     }
     function applyDraftData(data){
@@ -1782,8 +1765,8 @@
       }
       if(/coverage accelerator/.test(uw)&&eeCount&&eeCount<100)messages.push("Coverage Accelerator is generally for larger cases. Confirm eligibility if under 100 eligible lives.");
       if(!messages.length)return true;
-      console.error(messages.join(" "));
-      successBox.style.display="none";
+      successBox.style.display="block";
+      successMessage.textContent=messages.join(" ");
       return false;
     }
     function readFileAsBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=reject;reader.readAsDataURL(file);});}
@@ -1983,12 +1966,18 @@
     }
     function restoreSubmitAfterError(message){
       console.error(message||"Backend response was not confirmed.");
+      const pendingType=submissionPending;
       submissionPending=false;
       if(submissionTimer){clearTimeout(submissionTimer);submissionTimer=null;}
       restoreFileInputsAfterPost();
       submitBtn.disabled=false;
       saveBtn.disabled=false;
-      successBox.style.display="none";
+      if(pendingType==="draft"){
+        activateDraftUpdateMode();
+        successBox.style.display="none";
+      }else{
+        showThankYou();
+      }
     }
     function completeVerifiedSubmission(data){
       const pendingType=submissionPending;
@@ -1997,15 +1986,12 @@
       restoreFileInputsAfterPost();
       if(pendingType==="draft"){
         saveBtn.disabled=false;
+        saveBtn.dataset.saving="false";
+        saveBtn.style.display="";
         if(data.draftId)document.getElementById("draft_id").value=data.draftId;
         if(data.draftLink)showDraftLink(data.draftLink);
-        if(data.emailSent){
-          activateDraftUpdateMode();
-          setSubmissionStatus("Thank you","Your email draft link has been sent.");
-        }else{
-          activateDraftUpdateMode();
-          setSubmissionStatus("Progress saved","Your latest changes have replaced the previous saved version.");
-        }
+        activateDraftUpdateMode();
+        successBox.style.display="none";
         return;
       }
       showThankYou();
@@ -2042,7 +2028,9 @@
       successBox.style.display="none";
       if(form.querySelector('[name="_honey"]')?.value)return;
       if(isTestModeActive()&&!document.getElementById("testSubmitConfirm")?.checked){
-        successBox.style.display="none";
+        successBox.style.display="block";
+        if(successTitle)successTitle.textContent="Test confirmation required";
+        successMessage.textContent="Check the test-mode confirmation box at the top before sending sample data to the live workflow.";
         document.getElementById("testBanner")?.scrollIntoView({behavior:"smooth",block:"center"});
         syncTestSubmitGuard();
         return;
@@ -2053,7 +2041,9 @@
       ensureConfirmationId();
       // UW offers are informational workflow selections and never block submission.
       if(!validateFileSelections(true)||!validateAllSteps()||!enforceChoiceLimits()){
-        successBox.style.display="none";
+        successBox.style.display="block";
+        if(successTitle)successTitle.textContent="Review required fields";
+        successMessage.textContent="Please complete the required fields or correct a selection limit. I moved you to the first item that needs attention.";
         return;
       }
       submitBtn.disabled=true;
