@@ -1440,7 +1440,12 @@
       const draftId=getDraftId();
       document.getElementById("draft_id").value=draftId;
       saveBtn.disabled=true;
-      setSubmissionStatus("Saving group draft…",`Saving ${accountName} and emailing the private continuation link to ${openerEmail}.`);
+      setSubmissionStatus(
+        "Saving…",
+        draftLinkAlreadySent
+          ? "Saving your latest progress."
+          : "Saving your progress and emailing the private draft link."
+      );
       try{
         await prepareFilePayloads();
         submissionPending="draft";
@@ -1490,15 +1495,49 @@
       if(!draftId)return;
       document.getElementById("draft_id").value=draftId;
       setSubmissionStatus("Opening saved group draft…","Loading the saved information for this group.");
-      const frame=ensureDraftLoadIframe();
-      const url=`${SUBMISSION_ENDPOINT}${SUBMISSION_ENDPOINT.includes("?")?"&":"?"}action=loadDraft&draft_id=${encodeURIComponent(draftId)}&_=${Date.now()}`;
-      draftLoadPending=true;
-      frame.src=url;
-      if(draftLoadTimer)clearTimeout(draftLoadTimer);
-      draftLoadTimer=setTimeout(()=>{
-        if(!draftLoadPending)return;
-        draftLoadPending=false;
-        setSubmissionStatus("Draft could not be opened","The saved draft did not return from Apps Script. Confirm the HTML and Code.gs use the same current /exec deployment URL.");
+
+      const callbackName=`ursDraftCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script=document.createElement("script");
+      let completed=false;
+
+      const cleanup=()=>{
+        try{delete window[callbackName];}catch(error){window[callbackName]=undefined;}
+        script.remove();
+      };
+
+      window[callbackName]=data=>{
+        completed=true;
+        cleanup();
+        if(!data||!data.ok){
+          setSubmissionStatus("Draft could not be opened",data?.message||"This draft could not be found or has expired.");
+          return;
+        }
+        applyDraftData(data);
+        draftLinkAlreadySent=true;
+        saveBtn.textContent="Save Progress";
+        applyConditionalRules();
+        updateColonialTaxStatusSummaries();
+        updateCoreProductSummaries();
+        updateReviewPanel();
+        showStep(0);
+        setSubmissionStatus("Saved draft opened","Your saved information has been restored.");
+      };
+
+      script.onerror=()=>{
+        if(completed)return;
+        completed=true;
+        cleanup();
+        setSubmissionStatus("Draft could not be opened","The saved draft could not be loaded. Confirm the HTML and Code.gs use the same current /exec deployment URL.");
+      };
+
+      script.src=`${SUBMISSION_ENDPOINT}${SUBMISSION_ENDPOINT.includes("?")?"&":"?"}action=loadDraft&draft_id=${encodeURIComponent(draftId)}&callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+      document.head.appendChild(script);
+
+      setTimeout(()=>{
+        if(completed)return;
+        completed=true;
+        cleanup();
+        setSubmissionStatus("Draft could not be opened","The saved draft timed out while loading. Confirm the Apps Script deployment is current and accessible to anyone.");
       },30000);
     }
     function normalizeDeductionClient(value){
@@ -1888,6 +1927,8 @@
     const SUBMIT_LABEL="Submit Final Intake";
     let submissionPending=false;
     let submissionTimer=null;
+    // A draft URL means the opener already received the permanent continuation link.
+    let draftLinkAlreadySent=Boolean(startupParams.get("draft"));
     let draftLoadPending=false;
     let draftLoadTimer=null;
     function ensureSubmitIframe(){
@@ -1934,7 +1975,15 @@
         saveBtn.disabled=false;
         if(data.draftId)document.getElementById("draft_id").value=data.draftId;
         if(data.draftLink)showDraftLink(data.draftLink);
-        setSubmissionStatus("Draft saved and emailed",data.message||`The private draft link was emailed to ${fieldValue("opener_email")}.`);
+        if(data.emailSent){
+          draftLinkAlreadySent=true;
+          saveBtn.textContent="Save Progress";
+          setSubmissionStatus("Thank you","Your email draft link has been sent.");
+        }else{
+          draftLinkAlreadySent=true;
+          saveBtn.textContent="Save Progress";
+          setSubmissionStatus("Progress saved","Your latest changes have been saved. No additional draft email was sent.");
+        }
         return;
       }
       showThankYou();
