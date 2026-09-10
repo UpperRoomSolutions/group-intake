@@ -103,6 +103,10 @@
     .draft-link-box button{padding:10px 14px}
     .draft-update-note{display:none;margin:0 24px 18px;padding:14px 16px;border:1px solid #a7eded;background:linear-gradient(180deg,#f4ffff,#ffffff);border-radius:16px;color:#07565d;line-height:1.5;font-size:13px}
     .draft-update-note strong{display:block;margin-bottom:4px;color:#183f47;font-size:14px}
+
+    .choice.choice-limit-disabled{opacity:.45;cursor:not-allowed;background:#f3f4f6;border-color:#d1d5db}
+    .choice.choice-limit-disabled:hover{border-color:#d1d5db;background:#f3f4f6}
+
 </style>
 </head>
 <body>
@@ -473,9 +477,8 @@
 <label class="product-subfield-label" for="group_medical_bridge__rate_band">Rate Band *</label>
 <select class="product-control" id="group_medical_bridge__rate_band" name="group_medical_bridge__rate_band">
 <option value="">Select</option>
-<option data-gmb-plan="1">Attained Age</option>
-<option data-gmb-plan="1">Issue Age</option>
-<option data-gmb-plan="2">Age-Banded</option>
+<option>Age-Banded</option>
+<option>Composite</option>
 </select>
 <div class="subfield-error-text" role="alert">Select the appropriate rate band.</div>
 </div>
@@ -586,10 +589,17 @@
 </div>
 </div>
 
-<div class="product-subfield" data-subfield-required="true">
-<label class="product-subfield-label" for="group_term_life__rate_table_number">Rate Table Number *</label>
-<input class="product-control" id="group_term_life__rate_table_number" name="group_term_life__rate_table_number" placeholder="Enter rate table number" type="text"/>
-<div class="subfield-error-text" role="alert">Enter the Rate Table Number.</div>
+<div class="product-subfield">
+<label class="product-subfield-label" for="group_term_life__rate_table_number">Rate Table Number</label>
+<input class="product-control" id="group_term_life__rate_table_number" name="group_term_life__rate_table_number" placeholder="Enter rate table number if available" type="text"/>
+<div class="hint">Optional.</div>
+</div>
+
+<div class="product-subfield">
+<label class="product-subfield-label" for="group_term_life_quote">Attach GTL Quote</label>
+<input accept=".pdf,application/pdf" class="product-control" data-file-key="group_term_life_quote" data-file-rules="true" id="group_term_life_quote" name="group_term_life_quote" type="file"/>
+<div class="hint">Optional. PDF only.</div>
+<div class="subfield-error-text" role="alert">Attach a PDF file only.</div>
 </div>
 
 <div class="section-divider full"><strong>Evidence of Insurability</strong><span>Enter the maximum amounts when applicable.</span></div>
@@ -1400,23 +1410,34 @@
     });
 
 function enforceChoiceLimits(changedControl=null){
-      let allValid=true;
-      form.querySelectorAll("[data-max-checks]").forEach(group=>{
-        const max=Number(group.dataset.maxChecks||0);if(!max)return;
-        const boxes=Array.from(group.querySelectorAll('input[type="checkbox"]'));
-        let checked=boxes.filter(c=>c.checked);
-        const field=group.closest(".field");
-        if(checked.length>max){
-          allValid=false;
-          if(changedControl&&group.contains(changedControl)&&changedControl.checked){changedControl.checked=false;}
-          checked=boxes.filter(c=>c.checked);
-          field?.classList.add("error");
-          const message=group.dataset.limitMessage||`Select up to ${max} options.`;
-          const error=field?.querySelector(".error-text");
-          if(error)error.textContent=message;
-        }else if(field&&!Array.from(field.querySelectorAll("[data-max-checks]")).some(g=>Array.from(g.querySelectorAll('input[type="checkbox"]')).filter(c=>c.checked).length>Number(g.dataset.maxChecks||0))){
-          field.classList.remove("error");
+      document.querySelectorAll("[data-max-checks]").forEach(group=>{
+        const max=Number(group.dataset.maxChecks||0);
+        if(!max)return;
+
+        const boxes=[...group.querySelectorAll('input[type="checkbox"]')].filter(box=>!box.closest(".conditional-hidden"));
+        const checked=boxes.filter(box=>box.checked);
+
+        // If an attempted click pushed the group past its maximum, undo only that click.
+        if(checked.length>max && changedControl && group.contains(changedControl)){
+          changedControl.checked=false;
         }
+
+        const currentChecked=boxes.filter(box=>box.checked);
+        const atLimit=currentChecked.length>=max;
+
+        // Once the limit is reached, visibly disable all remaining unchecked options.
+        // Existing checked choices stay enabled so the user can uncheck one and change selections.
+        boxes.forEach(box=>{
+          if(box.checked){
+            box.disabled=false;
+            box.closest(".choice")?.classList.remove("choice-limit-disabled");
+          }else{
+            box.disabled=atLimit;
+            box.closest(".choice")?.classList.toggle("choice-limit-disabled",atLimit);
+          }
+        });
+      });
+    }
         const atLimit=checked.length>=max;
         boxes.forEach(box=>{
           if(!box.checked)box.disabled=atLimit;
@@ -2118,6 +2139,15 @@ function enforceChoiceLimits(changedControl=null){
       showStep(0);
     }
     startIntakeForm();
-  </script>
+  
+    document.addEventListener("change",function(event){
+      if(event.target && event.target.matches('[data-max-checks] input[type="checkbox"]')){
+        enforceChoiceLimits(event.target);
+      }
+    });
+
+
+    enforceChoiceLimits();
+</script>
 </body>
 </html>
