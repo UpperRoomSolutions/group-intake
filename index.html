@@ -1410,23 +1410,28 @@
     });
 
 function enforceChoiceLimits(changedControl=null){
+      let allValid=true;
+
       document.querySelectorAll("[data-max-checks]").forEach(group=>{
         const max=Number(group.dataset.maxChecks||0);
         if(!max)return;
 
-        const boxes=[...group.querySelectorAll('input[type="checkbox"]')].filter(box=>!box.closest(".conditional-hidden"));
-        const checked=boxes.filter(box=>box.checked);
+        const boxes=[...group.querySelectorAll('input[type="checkbox"]')]
+          .filter(box=>!box.closest(".conditional-hidden"));
 
-        // If an attempted click pushed the group past its maximum, undo only that click.
+        let checked=boxes.filter(box=>box.checked);
+
+        // If a new click exceeds the limit, undo only that attempted selection.
         if(checked.length>max && changedControl && group.contains(changedControl)){
           changedControl.checked=false;
+          checked=boxes.filter(box=>box.checked);
         }
 
-        const currentChecked=boxes.filter(box=>box.checked);
-        const atLimit=currentChecked.length>=max;
+        if(checked.length>max)allValid=false;
 
-        // Once the limit is reached, visibly disable all remaining unchecked options.
-        // Existing checked choices stay enabled so the user can uncheck one and change selections.
+        const atLimit=checked.length>=max;
+
+        // Keep selected items editable. Gray out remaining options only at the limit.
         boxes.forEach(box=>{
           if(box.checked){
             box.disabled=false;
@@ -1437,13 +1442,7 @@ function enforceChoiceLimits(changedControl=null){
           }
         });
       });
-    }
-        const atLimit=checked.length>=max;
-        boxes.forEach(box=>{
-          if(!box.checked)box.disabled=atLimit;
-          else box.disabled=false;
-        });
-      });
+
       return allValid;
     }
     function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
@@ -2146,8 +2145,6 @@ function enforceChoiceLimits(changedControl=null){
       }
     });
 
-
-    enforceChoiceLimits();
 </script>
 </body>
 </html>
