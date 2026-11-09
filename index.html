@@ -175,6 +175,8 @@
 <div class="field quarter" data-required="true"><label class="required" for="ced">CED - Coverage Effective Date</label><input id="ced" name="ced" type="date"/><div class="error-text" id="form_error_30" role="alert">CED is required.</div></div>
 <div class="field quarter" data-required="true"><label class="required" for="ped">PED - Payroll Effective Date</label><input id="ped" name="ped" type="date"/><div class="error-text" id="form_error_31" role="alert">PED is required.</div></div>
 <fieldset class="field full" data-required="true"><legend class="required">Enrollment Type</legend><div class="choice-group"><label class="choice"><input name="enrollment_type" type="checkbox" value="Colonial Life"/> Colonial Life</label><label class="choice"><input name="enrollment_type" type="checkbox" value="UNUM"/> UNUM</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Communication"/> Core Communication</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Core Enrollment"/> Core Enrollment</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Mandatory 1-1"/> Mandatory 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Voluntary 1-1"/> Voluntary 1-1</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Self Enroll"/> Self Enroll</label><label class="choice"><input name="enrollment_type" type="checkbox" value="Other"/> Other</label></div><div class="error-text" id="form_error_32" role="alert">Select at least one enrollment type.</div></fieldset><div class="field full conditional-hidden" data-required="false" id="enrollment_type_other_field"><label class="required" for="enrollment_type_other">Other Enrollment Type</label><input id="enrollment_type_other" name="enrollment_type_other" placeholder="Describe the enrollment type" type="text"/><div class="error-text" id="form_error_33" role="alert">Describe the other enrollment type.</div></div>
+<div class="field" data-required="true" id="new_hire_eligibility_field"><label class="required" for="new_hire_eligibility">New Hire Eligibility / Coverage Start</label><select id="new_hire_eligibility" name="new_hire_eligibility"><option value="">Please Select</option><option>First of the month following date of hire</option><option>First of the month following 30 days</option><option>First of the month following 60 days</option><option>First of the month following 90 days</option><option>Custom</option></select><div class="error-text" role="alert">Select the new hire eligibility rule.</div></div>
+<div class="field full conditional-hidden" data-required="false" id="new_hire_eligibility_details_field"><label class="required" for="new_hire_eligibility_details">Custom New Hire Eligibility</label><textarea id="new_hire_eligibility_details" name="new_hire_eligibility_details" placeholder="Specify the eligibility rule or differences by benefit or class."></textarea><div class="error-text" role="alert">Enter the custom new hire eligibility rule.</div></div>
 <div class="field" data-required="true"><label class="required" for="enrollment_platform">Enrollment Platform</label><select id="enrollment_platform" name="enrollment_platform"><option value="">Please Select</option><option>Gathr</option><option>Harmony only</option><option>Employee Navigator</option><option>Selerix</option><option>Paylocity</option></select><div class="error-text" id="form_error_34" role="alert">Enrollment platform is required.</div></div>
 <div class="quick-note conditional-hidden" data-output-exclude="true" id="self_enroll_contact_reminder"><strong>Self-enroll information needed:</strong> Please provide a phone number and email address for each employee.</div>
 <div class="quick-note conditional-hidden" data-output-exclude="true" id="self_enroll_en_new_group_reminder"><strong>New Employee Navigator group:</strong> Please also provide each employee’s first name, last name, date of birth, and Social Security number.</div>
@@ -557,6 +559,12 @@
 <input id="group_term_life__tax_status" name="group_term_life__tax_status" type="hidden" value="Post-Tax"/>
 
 <div class="product-grid">
+<div aria-labelledby="gtl_funding_label" class="product-subfield full" data-subfield-required="true" role="group">
+<span class="product-subfield-label" id="gtl_funding_label">Funding Type *</span>
+<div class="choice-group tight"><label class="choice"><input class="product-control" name="group_term_life__funding_type" type="radio" value="Voluntary"/> Voluntary</label>
+<label class="choice"><input class="product-control" name="group_term_life__funding_type" type="radio" value="ER Paid"/> ER Paid</label></div>
+<div class="subfield-error-text" role="alert">Select Voluntary or ER Paid.</div>
+</div>
 <div class="quick-note"><strong>Tax Option:</strong> Post-Tax</div>
 
 <div aria-labelledby="gtl_face_basis_label" class="product-subfield full" role="group">
@@ -584,11 +592,17 @@
 <div class="hint">Optional.</div>
 </div>
 
-<div class="product-subfield">
-<label class="product-subfield-label" for="group_term_life_quote">Attach GTL Quote</label>
+<div aria-labelledby="gtl_custom_rates_label" class="product-subfield full" data-subfield-required="true" role="group">
+<span class="product-subfield-label" id="gtl_custom_rates_label">Is this a custom rate plan? *</span>
+<div class="choice-group tight"><label class="choice"><input class="product-control" name="group_term_life__custom_rate_plan" type="radio" value="Yes"/> Yes</label>
+<label class="choice"><input class="product-control" name="group_term_life__custom_rate_plan" type="radio" value="No"/> No</label></div>
+<div class="subfield-error-text" role="alert">Select Yes or No.</div>
+</div>
+<div class="product-subfield full" id="gtl_quick_quote_field" data-subfield-required="false">
+<label class="product-subfield-label" for="group_term_life_quote">Upload Quick Quote <span id="gtl_quick_quote_required_mark"></span></label>
 <input accept=".pdf,application/pdf" class="product-control" data-file-key="group_term_life_quote" data-file-rules="true" id="group_term_life_quote" name="group_term_life_quote" type="file"/>
-<div class="hint">Optional. PDF only.</div>
-<div class="subfield-error-text" role="alert">Attach a PDF file only.</div>
+<div class="hint" id="gtl_quick_quote_hint">Optional. PDF only. Required when the plan does not have custom rates.</div>
+<div class="subfield-error-text" role="alert">Upload a Quick Quote PDF when custom rate plan is No.</div>
 </div>
 
 <div class="section-divider full"><strong>Evidence of Insurability</strong><span>Enter the maximum amounts when applicable.</span></div>
@@ -1116,6 +1130,15 @@
       if(!widget)return;
       const tax=document.getElementById("group_term_life__tax_status");
       if(tax)tax.value="Post-Tax";
+      const customRateChoice=widget.querySelector('input[name="group_term_life__custom_rate_plan"]:checked')?.value||"";
+      const quickQuote=document.getElementById("gtl_quick_quote_field");
+      const needsQuote=customRateChoice==="No";
+      if(quickQuote){
+        quickQuote.dataset.subfieldRequired=needsQuote?"true":"false";
+        document.getElementById("gtl_quick_quote_required_mark").textContent=needsQuote?"*":"";
+        document.getElementById("gtl_quick_quote_hint").textContent=needsQuote?"Required. PDF only.":"Optional. PDF only. Required when the plan does not have custom rates.";
+        if(!needsQuote)quickQuote.classList.remove("subfield-error");
+      }
     }
     function enforceExclusiveCheckboxes(changed){
       if(!changed||changed.type!=="checkbox"||!changed.name||!changed.checked)return;
@@ -1312,6 +1335,7 @@
       setPanelVisibility("en_employee_classes_other_field",isEmployeeNavigatorBuild&&selectedValues("en_employee_classes").includes("Other"),isEmployeeNavigatorBuild&&selectedValues("en_employee_classes").includes("Other"));
       setPanelVisibility("en_benefits_differ_by_class_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
       setPanelVisibility("en_class_rules_field",isEmployeeNavigatorBuild&&document.getElementById("en_benefits_differ_by_class")?.value==="Yes",isEmployeeNavigatorBuild&&document.getElementById("en_benefits_differ_by_class")?.value==="Yes");
+      setPanelVisibility("new_hire_eligibility_details_field",document.getElementById("new_hire_eligibility")?.value==="Custom",document.getElementById("new_hire_eligibility")?.value==="Custom");
       setPanelVisibility("en_waiting_period_type_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
       setPanelVisibility("en_waiting_period_type_other_field",isEmployeeNavigatorBuild&&document.getElementById("en_waiting_period_type")?.value==="Other",isEmployeeNavigatorBuild&&document.getElementById("en_waiting_period_type")?.value==="Other");
       setPanelVisibility("en_waiting_period_varies_field",isEmployeeNavigatorBuild,isEmployeeNavigatorBuild);
@@ -1487,7 +1511,7 @@ function enforceChoiceLimits(changedControl=null){
         ["Value Added Benefits / POPS Programs",[fieldValue("value_added_benefits"),fieldValue("value_added_benefits_other")].filter(Boolean).join(" | ")],
         ["Beneficiaries Required",[fieldValue("beneficiaries_required"),fieldValue("beneficiaries_required_details")].filter(Boolean).join(" | ")],["Tobacco Questions Required",[fieldValue("tobacco_questions_required"),fieldValue("tobacco_questions_required_details")].filter(Boolean).join(" | ")],["EOI / Underwriting Required",fieldValue("eoi_underwriting_required")],["UW Offer",fieldValue("uw_offer")],["Opener",`${fieldValue("opener_first_name")} ${fieldValue("opener_last_name")}`.trim()],["HR Contact",`${fieldValue("hr_contact_name")} | ${fieldValue("hr_contact_email")}`],["Additional HR Contacts",additionalHrContactsSummary()],["Broker",fieldValue("broker_associated")==="Yes" ? `${fieldValue("broker_name")} | ${fieldValue("broker_email")}` : fieldValue("broker_associated")],["Broker Code",fieldValue("broker_code")],["Broker Compensation",[fieldValue("broker_comp"),fieldValue("broker_comp_other")].filter(Boolean).join(" | ")],["Agent Compensation",fieldValue("agent_comp")],["Enrollment Type",[fieldValue("enrollment_type"),fieldValue("enrollment_type_other")].filter(Boolean).join(" | ")],["Platform",fieldValue("enrollment_platform")],["Group Draft ID",fieldValue("draft_id")],
         ["Employee Navigator Details", fieldValue("enrollment_platform")==="Employee Navigator" ? ["Classes: "+[fieldValue("en_employee_classes"),fieldValue("en_employee_classes_other")].filter(Boolean).join(" | "),"Benefits Differ By Class: "+fieldValue("en_benefits_differ_by_class"),fieldValue("en_class_rules")?"Class Rules: "+fieldValue("en_class_rules"):"","Waiting Period: "+[fieldValue("en_waiting_period_type"),fieldValue("en_waiting_period_type_other")].filter(Boolean).join(" | "),"Waiting Period Varies: "+fieldValue("en_waiting_period_varies"),fieldValue("en_waiting_period_details")?"Waiting Details: "+fieldValue("en_waiting_period_details"):"","Contribution Type: "+fieldValue("en_contribution_type"),fieldValue("en_contribution_tier_details")?"Contribution Details: "+fieldValue("en_contribution_tier_details"):"","Plan/Rate Details: "+fieldValue("en_plan_rate_build_details"),"Carrier Feeds: "+fieldValue("en_carrier_feeds_required"),fieldValue("en_carrier_feed_notes")?"Carrier Feed Notes: "+fieldValue("en_carrier_feed_notes"):""].filter(Boolean).join("\n") : "Not applicable"],
-        ["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["Enrollment Period",[fieldValue("enrollment_start_date"),fieldValue("enrollment_end_date")].filter(Boolean).join(" to ")],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],
+        ["BCN / CAN",`${fieldValue("bcn")} | ${fieldValue("can")}`],["Enrollment Period",[fieldValue("enrollment_start_date"),fieldValue("enrollment_end_date")].filter(Boolean).join(" to ")],["CED / PED",`${fieldValue("ced")} | ${fieldValue("ped")}`],["New Hire Eligibility",[fieldValue("new_hire_eligibility"),fieldValue("new_hire_eligibility_details")].filter(Boolean).join(" | ")],
         ["Pre-Enrollment Communications",[fieldValue("pre_enrollment_communication_methods"),fieldValue("pre_enrollment_communication_other")].filter(Boolean).join(" | ")],["Communications Sent By",fieldValue("pre_enrollment_sender")],["TruAgent Information",fieldValue("truagent_information_completed")],["Digital Postcard",[fieldValue("digital_postcard_option"),fieldValue("digital_postcard_notes")].filter(Boolean).join(" | ")],["Locations",[fieldValue("multiple_locations"),fieldValue("location_details")].filter(Boolean).join("\n")],["Onsite Enrollment",[fieldValue("onsite_enrollment"),fieldValue("onsite_days")?"Days: "+fieldValue("onsite_days"):"",fieldValue("onsite_days_notes")].filter(Boolean).join("\n")],
         ["Domestic Partners",fieldValue("domestic_partners")],["Payroll Details",["Pay Periods: "+fieldValue("pay_periods"),fieldValue("payday_day_of_week")?"Payday: "+fieldValue("payday_day_of_week"):"",fieldValue("monthly_payday_day")?"Monthly Payday: "+fieldValue("monthly_payday_day"):"",fieldValue("semi_monthly_payday_1")?"Semi-monthly Payday 1: "+fieldValue("semi_monthly_payday_1"):"",fieldValue("semi_monthly_payday_2")?"Semi-monthly Payday 2: "+fieldValue("semi_monthly_payday_2"):"",fieldValue("semi_monthly_payday_notes")?"Semi-monthly Notes: "+fieldValue("semi_monthly_payday_notes"):""].filter(Boolean).join("\n")],
         ["AIF",fieldValue("aif_file")||"No file uploaded"],["FLEX",fieldValue("flex_file")||"No file uploaded"],["Group Master Application",fieldValue("gmapp_file")||"No file uploaded"],["Colonial Products",[fieldValue("colonial_dental"),fieldValue("colonial_accident"),fieldValue("colonial_disability"),fieldValue("colonial_cancer_critical"),fieldValue("colonial_hospital_med_bridge"),fieldValue("individual_life_offered"),fieldValue("group_term_life_offered")].filter(Boolean).join("\n")],["Colonial Product Details",[fieldValue("individual_dental"),fieldValue("individual_accident"),fieldValue("group_accident"),fieldValue("individual_disability"),fieldValue("group_disability"),fieldValue("cancer_assist"),fieldValue("individual_critical"),fieldValue("group_critical_illness"),fieldValue("individual_med_bridge"),fieldValue("group_medical_bridge"),fieldValue("individual_term_life"),fieldValue("individual_whole_life"),fieldValue("group_term_life")].filter(Boolean).join("\n\n")],["Core Products",fieldValue("enrollable_core_products")],["Core Product Details",fieldValue("core_benefits_overview")],["UNUM Products",[fieldValue("unum_products_included"),fieldValue("enrollable_unum_products"),fieldValue("unum_sbc_rates")].filter(Boolean).join("\n")],["Submission Processing","Answers and uploaded documents will be sent through the connected intake workflow."]
